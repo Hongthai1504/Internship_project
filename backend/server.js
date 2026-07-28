@@ -26,17 +26,24 @@ db.connect((err) => {
 });
 
 // 2. Write an API to display a list of products (GET /api/products)
-app.get("/api/products", (req, res) => {
-  // Query to retrieve all products
-  const sql = "SELECT * FROM Products";
+app.get('/api/products', (req, res) => {
+    const { brand } = req.query; 
+    
+    let sql = 'SELECT * FROM Products';
+    let queryParams = [];
 
-  db.query(sql, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Server error!" });
+    if (brand) {
+        sql += ' WHERE brand = ?';
+        queryParams.push(brand);
     }
-    // Returns a list of products in JSON format
-    res.json(results);
-  });
+
+    db.query(sql, queryParams, (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Lỗi máy chủ' });
+        }
+        res.json(results);
+    });
 });
 
 // 3. Start the server on port 3000
