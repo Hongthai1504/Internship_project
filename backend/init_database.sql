@@ -51,3 +51,18 @@ CREATE TABLE Order_Details (
     Foreign Key (product_id) REFERENCES Products(id)
 );;
 
+USE internship_project;
+
+-- add 3 column into Products table
+ALTER TABLE Products 
+ADD COLUMN sku VARCHAR(50) UNIQUE AFTER name,
+ADD COLUMN brand VARCHAR(100) AFTER sku,
+ADD COLUMN description TEXT AFTER image_url;
+
+-- update Information (Brand, SKU)
+UPDATE Products SET brand = 'Apple', sku = 'MAC-14-M3', description = 'Ultra-powerful M3 chip, Liquid Retina XDR display.' WHERE name LIKE '%MacBook%';
+UPDATE Products SET brand = 'Dell', sku = 'DELL-XPS-15', description = '3.5k OLDED display, premium unibody aluminum design.' WHERE name LIKE '%XPS%';
+UPDATE Products SET brand = 'Samsung', sku = 'SAM-S24-ULTRA', description = '200MP camera with integrated, intelligent Galaxy AI.' WHERE name LIKE '%S24%';
+UPDATE Products SET brand = 'Apple', sku = 'IPHONE-15-PM', description = 'Ultralight titanium frame, A17 Pro chip.' WHERE name LIKE '%iPhone 15%';
+UPDATE Products SET brand = 'Sony', sku = 'SONY-WH1000XM5', description = 'The best active noise cancellation, 30-hour battery life.' WHERE name LIKE '%Sony WH%';
+UPDATE Products SET brand = 'Bose', sku = 'BOSE-QC-EAR2', description = 'Spatial audio, personalized noise cancellation.' WHERE name LIKE '%Bose%';
