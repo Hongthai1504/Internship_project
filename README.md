@@ -127,4 +127,12 @@ app.post("/api/login", (req, res) => {
 #### 2. API Đăng nhập và lấy JWT
 <img width="1365" height="723" alt="API_Login" src="https://github.com/user-attachments/assets/9215c2e1-9155-45d3-a7ea-d69981600d80" />
 
+## III. Xây dựng Frontend
+#### 1. Xây dựng giap diện hệ thống cơ bản đầu tiên cho Hệ thống Website bán hàng Online
+<img width="1365" height="602" alt="Style css" src="https://github.com/user-attachments/assets/6f5723f5-f73c-4c4d-a36c-89cfee543250" />
+
+- Nâng cấp lên dạng chi tiết hơn, hiện đại hơn 1 chút
+<img width="1365" height="616" alt="Style css-2" src="https://github.com/user-attachments/assets/7459e11f-d26f-42db-8ed4-67d40cd15f6b" />
+
+
 
