@@ -38,45 +38,52 @@ if (closeCartBtn)
     cartDrawer.classList.remove("open"),
   );
 
-async function fetchProducts() {
-  try {
-    const response = await fetch(API_URL);
-    const products = await response.json();
+// renderProducts 
+function renderProducts(productsToDisplay) {
+    const productList = document.getElementById("product-list");
+    productList.innerHTML = "";
 
-    allProducts = products;
-
-    if (products.length === 0) {
-      productList.innerHTML = "<p>No products available in the store yet.</p>";
-      return;
+    // If no products are found
+    if (productsToDisplay.length === 0) {
+        productList.innerHTML = "<p style='grid-column: 1/-1; text-align: center; font-size: 1.2rem;'>We couldn't find any matches. Try checking your spelling or using less specific terms.</p>";
+        return;
     }
 
-    productList.innerHTML = "";
-    products.forEach((product) => {
-      const card = document.createElement("div");
-      card.className = "product-card";
-
-      card.innerHTML = `
-                <div class="img-wrapper">
-                    <img src="${product.image_url || "https://via.placeholder.com/300"}" 
-                         alt="${product.name}" 
-                         onclick="showProductDetail(${product.id})" 
-                         style="cursor: pointer;">
-                         
-                    <div class="quick-add" onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
-                        Quick Add to Cart
-                    </div>
+    productsToDisplay.forEach((product) => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        
+        card.innerHTML = `
+            <div class="img-wrapper">
+                <img src="${product.image_url || 'https://via.placeholder.com/300'}" 
+                     alt="${product.name}" 
+                     onclick="showProductDetail(${product.id})" 
+                     style="cursor: pointer;">
+                <div class="quick-add" onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
+                    Add to Cart
                 </div>
-                <div class="product-info" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
-                    <h3 class="product-name">${product.brand ? product.brand + " " : ""}${product.name}</h3>
-                    <p class="product-price">$${product.price}</p>
-                </div>
-            `;
-      productList.appendChild(card);
+            </div>
+            <div class="product-info" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
+                <h3 class="product-name">${product.brand ? product.brand + " " : ""}${product.name}</h3>
+                <p class="product-price">$${product.price}</p>
+            </div>
+        `;
+        productList.appendChild(card);
     });
-  } catch (error) {
-    productList.innerHTML =
-      "<p>Connection error. Please check if your Backend server is running at :3000</p>";
-  }
+}
+
+// The Fetch Function
+async function fetchProducts() {
+    try {
+        const response = await fetch(API_URL);
+        const products = await response.json();
+
+        allProducts = products; // Lưu vào biến toàn cục
+        renderProducts(allProducts); // Gọi hàm vẽ toàn bộ sản phẩm
+    } catch (error) {
+        document.getElementById("product-list").innerHTML =
+            "<p>Connection error. Please check if your Backend server is running at :3000</p>";
+    }
 }
 
 function addToCart(id, name, price) {
