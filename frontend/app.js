@@ -28,6 +28,31 @@ const brandCheckboxes = document.querySelectorAll(
   '#brand-filters input[type="checkbox"]',
 );
 
+// AUTH MODAL & LOGIN
+const authModal = document.getElementById("auth-modal");
+const loginTrigger = document.getElementById("login-trigger");
+const closeModal = document.getElementById("close-modal");
+const loginForm = document.getElementById("login-form");
+
+// function to open the modal
+if (loginTrigger) {
+  loginTrigger.addEventListener("click", () => {
+      authModal.style.display = ",flex";
+  });
+}
+
+// function to close the modal
+if (closeModal) {
+  closeModal.addEventListener("click", () => {
+    authModal.style.display = "none";
+  });
+}
+
+// Check if the customer is already logged in
+if (localStorage.getItem("token") && loginTrigger) {
+  loginTrigger.querySelector("span").innerText = "My Account";
+}
+
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let allProducts = [];
 
