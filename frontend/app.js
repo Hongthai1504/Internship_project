@@ -234,6 +234,7 @@ if (searchInput) {
   });
 }
 
+// security update: checkout button
 orderForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
@@ -242,8 +243,14 @@ orderForm.addEventListener("submit", async function (event) {
     return;
   }
 
-  const address = document.getElementById("shipping-address").value;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Security Alert: Please sign in to complete your purchase.");
+    authModal.style.display = "flex";
+    return;
+  }
 
+  const address = document.getElementById("shipping-address").value;
   const orderData = {
     shipping_address: address,
     total_amount: parseFloat(cartTotal.innerText),
@@ -253,26 +260,34 @@ orderForm.addEventListener("submit", async function (event) {
   try {
     const response = await fetch(ORDER_API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(orderData),
     });
 
+    const data = await response.json();
+
     if (response.ok) {
-      alert("Order placed successfully!");
+      alert("Order placed successfully! Order ID: " + data.order_id);
       cart = [];
       updateCart();
       orderForm.reset();
       cartDrawer.classList.remove("open");
     } else {
-      alert("Failed to place order. Check backend.");
+      if (response.status === 401 || response.status === 403) {
+        alert("Your session has expired. Please log in again.");
+        localStorage.removeItem("token");
+        loginTrigger.querySelector("span").innerText = "Account";
+        authModal.style.display = "flex";
+      } else {
+        alert("Failed to place order: " + data.error);
+      }
     }
   } catch (err) {
     console.error(err);
-    alert("Success! (Simulated - Check console for JSON)");
-    console.log("Payload:", orderData);
-    // Clean up anyway for demo purposes
-    cart = [];
-    updateCart();
+    alert("Server error. Please try again later.");
   }
 });
 
