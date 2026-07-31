@@ -23,6 +23,11 @@ const closeCartBtn = document.getElementById("close-cart");
 const searchInput = document.getElementById("search-input");
 const searchBtn = document.querySelector(".search-btn");
 
+// BRAND FILTER
+const brandCheckboxes = document.querySelectorAll(
+  '#brand-filters input[type="checkbox"]',
+);
+
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let allProducts = [];
 
@@ -42,24 +47,25 @@ if (closeCartBtn)
     cartDrawer.classList.remove("open"),
   );
 
-// renderProducts 
+// renderProducts
 function renderProducts(productsToDisplay) {
-    const productList = document.getElementById("product-list");
-    productList.innerHTML = "";
+  const productList = document.getElementById("product-list");
+  productList.innerHTML = "";
 
-    // If no products are found
-    if (productsToDisplay.length === 0) {
-        productList.innerHTML = "<p style='grid-column: 1/-1; text-align: center; font-size: 1.2rem;'>We couldn't find any matches. Try checking your spelling or using less specific terms.</p>";
-        return;
-    }
+  // If no products are found
+  if (productsToDisplay.length === 0) {
+    productList.innerHTML =
+      "<p style='grid-column: 1/-1; text-align: center; font-size: 1.2rem;'>We couldn't find any matches. Try checking your spelling or using less specific terms.</p>";
+    return;
+  }
 
-    productsToDisplay.forEach((product) => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        
-        card.innerHTML = `
+  productsToDisplay.forEach((product) => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    card.innerHTML = `
             <div class="img-wrapper">
-                <img src="${product.image_url || 'https://via.placeholder.com/300'}" 
+                <img src="${product.image_url || "https://via.placeholder.com/300"}" 
                      alt="${product.name}" 
                      onclick="showProductDetail(${product.id})" 
                      style="cursor: pointer;">
@@ -72,22 +78,22 @@ function renderProducts(productsToDisplay) {
                 <p class="product-price">$${product.price}</p>
             </div>
         `;
-        productList.appendChild(card);
-    });
+    productList.appendChild(card);
+  });
 }
 
 // The Fetch Function
 async function fetchProducts() {
-    try {
-        const response = await fetch(API_URL);
-        const products = await response.json();
+  try {
+    const response = await fetch(API_URL);
+    const products = await response.json();
 
-        allProducts = products; // Lưu vào biến toàn cục
-        renderProducts(allProducts); // Gọi hàm vẽ toàn bộ sản phẩm
-    } catch (error) {
-        document.getElementById("product-list").innerHTML =
-            "<p>Connection error. Please check if your Backend server is running at :3000</p>";
-    }
+    allProducts = products; // Lưu vào biến toàn cục
+    renderProducts(allProducts); // Gọi hàm vẽ toàn bộ sản phẩm
+  } catch (error) {
+    document.getElementById("product-list").innerHTML =
+      "<p>Connection error. Please check if your Backend server is running at :3000</p>";
+  }
 }
 
 function addToCart(id, name, price) {
@@ -140,11 +146,13 @@ function renderCartUI() {
 function handleSearch() {
   const searchTerm = searchInput.value.toLowerCase().trim();
 
-  const filteredProducts = allProducts.filter(product => {
+  const filteredProducts = allProducts.filter((product) => {
     const productName = product.name.toLowerCase();
-    const productBrand = (product.brand || '').toLowerCase();
+    const productBrand = (product.brand || "").toLowerCase();
 
-    return productName.includes(searchTerm) || productBrand.includes(searchTerm);
+    return (
+      productName.includes(searchTerm) || productBrand.includes(searchTerm)
+    );
   });
 
   if (detailsView.style.display === "block") {
@@ -160,7 +168,7 @@ if (searchBtn) {
 }
 
 if (searchInput) {
-  searchInput.addEventListener("keypress", function(event) {
+  searchInput.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
       handleSearch();
     }
@@ -280,6 +288,33 @@ function showProductDetail(product_id) {
   // Smoothle auto-scroll to the top of the page
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
+// BRAND FILTER
+function handleBrandFilter() {
+  const selectedBrands = Array.from(brandCheckboxes)
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) => checkbox.value.toLowerCase());
+
+  let filteredProducts = allProducts;
+
+  if (selectedBrands.length > 0) {
+    filteredProducts = allProducts.filter((product) => {
+      const productBrand = (product.brand || "").toLowerCase();
+      return selectedBrands.includes(productBrand);
+    });
+  }
+
+  if (detailView.style.display === "block") {
+    detailView.style.display = "none";
+    shopLayout.style.display = "flex";
+  }
+
+  renderProducts(filteredProducts);
+}
+
+brandCheckboxes.forEach((checkbox) => {
+  checkbox.addEventListener("change", handleBrandFilter);
+});
 
 fetchProducts();
 renderCartUI();
