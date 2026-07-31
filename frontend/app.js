@@ -53,6 +53,40 @@ if (localStorage.getItem("token") && loginTrigger) {
   loginTrigger.querySelector("span").innerText = "My Account";
 }
 
+// Login Form
+if (loginForm) {
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault(); // Block reset Website
+
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+
+    try {
+      const response = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        
+        alert("Login successful!");
+        authModal.style.display = "none";
+        loginTrigger.querySelector("span").innerText = "My Account";
+        loginForm.reset();
+      } else {
+        alert(data.error || "Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server connection error. Is your Node.js running?");
+    }
+  });
+}
+
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let allProducts = [];
 
