@@ -9,6 +9,8 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // To read JSON data
 
+app.use('/images', express.static('images'));
+
 // 1. Connect to internship_project Database
 const db = mysql.createConnection({
   host: "127.0.0.1",
