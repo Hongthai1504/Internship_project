@@ -59,10 +59,30 @@ ADD COLUMN sku VARCHAR(50) UNIQUE AFTER name,
 ADD COLUMN brand VARCHAR(100) AFTER sku,
 ADD COLUMN description TEXT AFTER image_url;
 
--- update Information (Brand, SKU)
-UPDATE Products SET brand = 'Apple', sku = 'MAC-14-M3', description = 'Ultra-powerful M3 chip, Liquid Retina XDR display.' WHERE name LIKE '%MacBook%';
-UPDATE Products SET brand = 'Dell', sku = 'DELL-XPS-15', description = '3.5k OLDED display, premium unibody aluminum design.' WHERE name LIKE '%XPS%';
-UPDATE Products SET brand = 'Samsung', sku = 'SAM-S24-ULTRA', description = '200MP camera with integrated, intelligent Galaxy AI.' WHERE name LIKE '%S24%';
-UPDATE Products SET brand = 'Apple', sku = 'IPHONE-15-PM', description = 'Ultralight titanium frame, A17 Pro chip.' WHERE name LIKE '%iPhone 15%';
-UPDATE Products SET brand = 'Sony', sku = 'SONY-WH1000XM5', description = 'The best active noise cancellation, 30-hour battery life.' WHERE name LIKE '%Sony WH%';
-UPDATE Products SET brand = 'Bose', sku = 'BOSE-QC-EAR2', description = 'Spatial audio, personalized noise cancellation.' WHERE name LIKE '%Bose%';
+USE internship_project;
+
+-- 1. Tạm tắt trạm kiểm soát khóa ngoại để không bị lỗi khi dọn dẹp
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 2. Xóa sạch dữ liệu cũ trong bảng Categories và reset lại ID
+TRUNCATE TABLE Categories;
+
+-- 3. Bơm dữ liệu danh mục, ÉP CỨNG ID là 1, 2, 3
+INSERT INTO Categories (id, name) VALUES 
+(1, 'Computers & Tablets'), 
+(2, 'Cell Phones'), 
+(3, 'Audio');
+
+-- 4. Bật lại trạm kiểm soát bảo mật
+SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, description) VALUES
+(1, 'Apple iPad Pro 13-inch M4', 'IPAD-PRO-M4-13', 'Apple', 1299.00, 20, 'http://localhost:3000/images/apple-ipad-pro-3-inch-m4.png', 'Experience the ultimate iPad with the lightning-fast M4 chip and a stunning OLED display.');
+
+USE internship_project;
+
+INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, description) VALUES
+(1, 'Dell Alienware m16 R2 Gaming', 'AW-M16-R2', 'Dell', 1899.99, 15, 'http://localhost:3000/images/dell-alienwarem16-r2-gaming.png', 'High-performance gaming laptop with Intel Core Ultra chip and NVIDIA RTX 4070 graphics card.'),
+(2, 'Samsung Galaxy Z Fold 6 512GB', 'SAM-ZFOLD6-512', 'Samsung', 1899.00, 12, 'http://localhost:3000/images/samsung-galaxy-z-fold-6-512gb.png', 'Unlock an expansive screen for work and features powered by Galaxy AI.'),
+(3, 'Sony WF-1000XM5 Earbuds', 'SONY-WF1000XM5', 'Sony', 298.00, 35, 'http://localhost:3000/images/sony-wf-1000xm5-earbuds.png', 'Sony is ultimate noise-canceling True Wireless earbuds, featuring a compact design that fits snugly in the ear.'),
+(3, 'Apple AirPods Pro (2nd Gen)', 'AIRPODS-PRO-2', 'Apple', 249.00, 50, 'http://localhost:3000/images/apple-airpods-pro-(2nd-gen).png', 'Rich, high-quality spatial audio and next-generation active noise cancellation.');
