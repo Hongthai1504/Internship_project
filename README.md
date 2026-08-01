@@ -134,5 +134,28 @@ app.post("/api/login", (req, res) => {
 - Nâng cấp lên dạng chi tiết hơn, hiện đại hơn 1 chút
 <img width="1365" height="616" alt="Style css-2" src="https://github.com/user-attachments/assets/7459e11f-d26f-42db-8ed4-67d40cd15f6b" />
 
+## Cập nhật chuyển hướng dự án
+- Thay đổi về kiến trúc, chức năng và giao diện của dự án khi thu hẹp phạm vi từ một Hệ thống website bán hàng online với sản phẩm chung, chuyển về thành một Hệ thống website chuyên về bán hàng công nghệ.
+#### 1. Thay đổi về phân tích yêu cầu
+- Thay đổi về đối tượng dữ liệu từ chỉ là sản phẩm với kích thước, size, màu sắc
+  => Thành sản phẩm yêu cầu các thông số kĩ thuật, thông số phức tạp và chi tiết hơn để phù hợp với các sản phẩm công nghệ.
+- Thêm các yêu cầu chức năng mới
+  - Tính năng so sánh sản phẩm để người mua có thể có cẩn nhắc tốt nhất
+  - Bộ lọc nâng cao nhằm tìm kiếm sản phẩm dễ đàng hơn.
+#### 2. Cập nhật đặc tả và thiết kế hệ thống.
+- Cập nhật thêm những chi tiết thông số trong bảng Products:
+  - sku: mã lưu kho của các đồ công nghệ.
+  - brand: thương hiệu.
+  - description: mô tả chi tiết sản phẩm.
+- Thiết kế luồng nghiệp vụ của hệ thống một cách chi tiết trong từng phần. Đảm bảo hệ thống có nghiệp vụ chuyên nghiệp, rõ ràng.
+#### 3. Backend
+- Cập nhật cấu trúc của bảng Products
+- Bổ sung api truy cứu dữ liệu tốt hơn nhằm cơ chế so sánh sản phẩm.
+#### 4. Frontend
+- Cập nhật giao diện hệ thống mới, phù hợp với mặt hàng công nghệ.
+- Thay đổi lại cấu trúc của index.html và style.css
+<img width="1360" height="626" alt="Screenshot 2026-08-01 082720" src="https://github.com/user-attachments/assets/f3d3d294-85ea-48aa-8b27-bc48855477f6" />
 
-
+- Giữ nguyên các chức năng trong app.js,
+  - Cập nhật thêm các tính năng tìm kiếm sản phẩm trong app.js
+## 
