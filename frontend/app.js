@@ -1,5 +1,3 @@
-const { parse } = require("node:path");
-
 const API_URL = "http://localhost:3000/api/products";
 const ORDER_API = "http://localhost:3000/api/orders";
 
@@ -214,7 +212,7 @@ function handleSearch() {
     );
   });
 
-  if (detailsView.style.display === "block") {
+  if (detailView.style.display === "block") {
     detailView.style.display = "none";
     shopLayout.style.display = "flex";
   }
