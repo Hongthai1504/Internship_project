@@ -123,6 +123,47 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Only Admin can pass
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    return res.status(403).json({ error: "Access Denied. You do not have administrator rights."});
+  }
+};
+
+// API: Admin add new Products
+app.post("/api/products", authenticateToken,isAdmin, (req, res) => {
+  const { category_id, name, sku, brand, price, stock, image_url, description } = req.body;
+
+  if (!category_id || !name || !price) {
+    return res.status(400).json({ error: "Category, Name, and Price are required!" });
+  }
+
+  const sql = `INSERT INTO Products 
+    (category_id, name, sku, brand, price, stock, image_url, description) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.query(
+      sql,
+      [category_id, name, sku, brand, price, stock, image_url, description],
+      (err, result) => {
+        if (err) {
+         console.error("Insert Product Error:", err);
+         if (err.code === 'ER_DUP_ENTRY') {
+           return res.status(400).json({ error: "SKU already exists!" });
+          }
+          return res.status(500).json({ error: "Server error while adding product." });
+       }
+
+        res.status(201).json({ 
+          message: "Product added successfully!", 
+         product_id: result.insertId 
+       });
+      }
+    );
+})
+
 // 7. Ordering API (Requires going through the authenticateToken station)
 app.post("/api/orders", authenticateToken, (req, res) => {
   const user_id = req.user.id; // Get the secure ID from the token, not from the client's submission
