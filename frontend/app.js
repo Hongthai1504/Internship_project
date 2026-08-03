@@ -32,6 +32,68 @@ const loginTrigger = document.getElementById("login-trigger");
 const closeModal = document.getElementById("close-modal");
 const loginForm = document.getElementById("login-form");
 
+// login/Register Tab Switching Logic
+const tabLogin = document.getElementById("tab-login");
+const tabRegister = document.getElementById("tab-register");
+const registerForm = document.getElementById("register-form");
+
+if (tabLogin && tabRegister) {
+  // CLick tab Sign In
+  tabLogin.addEventListener("click", () => {
+    loginForm.style.display = "block";
+    registerForm.style.display = "none";
+    
+    tabLogin.style.color = "#0046be";
+    tabLogin.style.borderBottom = "3px solid #0046be";
+    tabRegister.style.color = "#999";
+    tabRegister.style.borderBottom = "none";
+  });
+
+  // Click tab Register
+  tabRegister.addEventListener("click", () => {
+    loginForm.style.display = "none";
+    registerForm.style.display = "block";
+    
+    tabRegister.style.color = "#0046be";
+    tabRegister.style.borderBottom = "3px solid #0046be";
+    tabLogin.style.color = "#999";
+    tabLogin.style.borderBottom = "none";
+  });
+}
+
+// Processing Account Registration Form Submission
+if (registerForm) {
+  registerForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const full_name = document.getElementById("reg-name").value;
+    const phone = document.getElementById("reg-phone").value;
+    const email = document.getElementById("reg-email").value;
+    const password = document.getElementById("reg-password").value;
+
+    try {
+      const response = await fetch("http://localhost:3000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, full_name, phone }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Account created successfully! You can now sign in.");
+        registerForm.reset();
+        tabLogin.click(); // Đăng ký xong tự động gạt sang tab Đăng nhập
+      } else {
+        alert(data.error || "Registration failed. Email might already exist.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server connection error. Is your Backend running?");
+    }
+  });
+}
+
 // function to open the modal
 if (loginTrigger) {
   loginTrigger.addEventListener("click", () => {
