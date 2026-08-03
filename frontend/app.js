@@ -97,7 +97,7 @@ if (registerForm) {
 // function to open the modal
 if (loginTrigger) {
   loginTrigger.addEventListener("click", () => {
-      authModal.style.display = ",flex";
+      authModal.style.display = "flex";
   });
 }
 
