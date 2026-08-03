@@ -81,8 +81,5 @@ INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, de
 
 USE internship_project;
 
-INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, description) VALUES
-(1, 'Dell Alienware m16 R2 Gaming', 'AW-M16-R2', 'Dell', 1899.99, 15, 'http://localhost:3000/images/dell-alienwarem16-r2-gaming.png', 'High-performance gaming laptop with Intel Core Ultra chip and NVIDIA RTX 4070 graphics card.'),
-(2, 'Samsung Galaxy Z Fold 6 512GB', 'SAM-ZFOLD6-512', 'Samsung', 1899.00, 12, 'http://localhost:3000/images/samsung-galaxy-z-fold-6-512gb.png', 'Unlock an expansive screen for work and features powered by Galaxy AI.'),
-(3, 'Sony WF-1000XM5 Earbuds', 'SONY-WF1000XM5', 'Sony', 298.00, 35, 'http://localhost:3000/images/sony-wf-1000xm5-earbuds.png', 'Sony is ultimate noise-canceling True Wireless earbuds, featuring a compact design that fits snugly in the ear.'),
-(3, 'Apple AirPods Pro (2nd Gen)', 'AIRPODS-PRO-2', 'Apple', 249.00, 50, 'http://localhost:3000/images/apple-airpods-pro-(2nd-gen).png', 'Rich, high-quality spatial audio and next-generation active noise cancellation.');
+INSERT INTO Users (email, password, full_name, phone, role) 
+VALUES ('admin@besttech.com', '$2b$10$y58fA.q6Q905L.k59W2N3eOqf5v5q45678901234567890123456', 'System Admin', '0123456789', 'admin');
