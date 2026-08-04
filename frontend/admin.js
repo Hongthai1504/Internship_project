@@ -16,30 +16,32 @@ if (addProductionForm) {
     addProductionForm.addEventListener("submit", async function(e) {
         e.preventDefault();
 
-        const productData = {
-            category_id: parseInt(document.getElementById("category_id").value),
-            name: document.getElementById("name").value.trim(),
-            brand: document.getElementById("brand").value.trim(),
-            sku: document.getElementById("sku").value.trim(),
-            price: parseFloat(document.getElementById("price").value),
-            stock: parseInt(document.getElementById("stock").value) || 0,
-            image_url: document.getElementById("image_url").value.trim(),
-            description: document.getElementById("description").value.trim()
-        };
+        const formData = new FormData();
+        formData.append("category_id", document.getElementById("category_id").value);
+        formData.append("name", document.getElementById("name").value.trim());
+        formData.append("brand", document.getElementById("brand").value.trim());
+        formData.append("sku", document.getElementById("sku").value.trim());
+        formData.append("price", document.getElementById("price").value);
+        formData.append("stock", document.getElementById("stock").value || 0);
+        formData.append("description", document.getElementById("description").value.trim());
+
+        const imageFile = document.getElementById("image_file").files[0];
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
 
         try {
             const response = await fetch("http://localhost:3000/api/products", {
                 method: "POST",
-                hearder: {
-                    "Content-Type": "application/json",
+                headers: {
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(productData)
+                body: formData 
             });
 
             const data = await response.json();
 
-            if (respons.ok) {
+            if (response.ok) {
                 alert("Product added successfully! Check your main store.");
                 addProductionForm.reset();
             } else {
