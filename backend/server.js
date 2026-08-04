@@ -11,6 +11,21 @@ const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit"); // Add Rate Limit
 const { body, validationResult } = require("express-validator");
 
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'images/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
 
@@ -163,6 +178,7 @@ const isAdmin = (req, res, next) => {
 app.post("/api/products", 
   authenticateToken, 
   isAdmin, 
+  upload.single('image'),
   [
     body('name').notEmpty().withMessage('The product name cannot be left blank!'),
     body('category_id').isInt({ min: 1 }).withMessage('The Category ID must be a positive integer!'),
@@ -177,8 +193,9 @@ app.post("/api/products",
     }
 
     const { category_id, name, sku, brand, price, stock, image_url, description } = req.body;
-
     const finalStock = stock || 0; 
+
+    const image_url = req.file ? `http://localhost:3000/images/${req.file.filename}` : null;
 
     const sql = `INSERT INTO Products 
       (category_id, name, sku, brand, price, stock, image_url, description) 
