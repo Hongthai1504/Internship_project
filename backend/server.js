@@ -1,11 +1,19 @@
+require("dotenv").config(); // Active read file .env
+const express = require("express");
+const mysql = require("mysql2");
+
 const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = "secret_key_internship_project";
+const rateLimit = require("express-rate-limit"); // Add Rate Limit
+const { body, validationResult } = require("express-validator");
+
+const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
+
 app.use(cors());
 app.use(express.json()); // To read JSON data
 
@@ -13,10 +21,10 @@ app.use('/images', express.static('images'));
 
 // 1. Connect to internship_project Database
 const db = mysql.createConnection({
-  host: "127.0.0.1",
-  user: "root",
-  password: "", // Default Xampp has no password
-  database: "internship_project",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
 });
 
 db.connect((err) => {
@@ -57,7 +65,19 @@ app.listen(PORT, () => {
 });
 
 // 4. APT for registering a new account
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", 
+  [
+    body('email').isEmail().withMessage('Email không hợp lệ'),
+    body('password').isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+    body('full_name').notEmpty().withMessage('Họ tên không được để trống'),
+    body('phone').isMobilePhone('vi-VN').withMessage('Số điện thoại không đúng định dạng VN')
+  ], 
+  async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+  
   const { email, password, full_name, phone } = req.body;
 
   try {
@@ -78,8 +98,15 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 5,
+  message: { error: ""}
+});
+
+
 // 5. Login API
-app.post("/api/login", (req, res) => {
+app.post("/api/login", loginLimiter, (req, res) => {
   const { email, password } = req.body;
   const sql = "SELECT * FROM Users WHERE email = ?";
 
