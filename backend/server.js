@@ -77,7 +77,7 @@ app.post("/api/register",
   if (!errors.isEmpty()) {
     return res.status(400).json({ error: errors.array()[0].msg });
   }
-  
+
   const { email, password, full_name, phone } = req.body;
 
   try {
@@ -159,37 +159,50 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-// API: Admin add new Products
-app.post("/api/products", authenticateToken,isAdmin, (req, res) => {
-  const { category_id, name, sku, brand, price, stock, image_url, description } = req.body;
+// API: Admin add new Products (have Validation)
+app.post("/api/products", 
+  authenticateToken, 
+  isAdmin, 
+  [
+    body('name').notEmpty().withMessage('The product name cannot be left blank!'),
+    body('category_id').isInt({ min: 1 }).withMessage('The Category ID must be a positive integer!'),
+    body('sku').notEmpty().withMessage('The SKU code cannot be left blank!'),
+    body('price').isFloat({ gt: 0 }).withMessage('The product price must be a number greater than 0!'),
+    body('stock').optional({ nullable: true }).isInt({ min: 0 }).withMessage('Inventory cannot be negative!')
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+    }
 
-  if (!category_id || !name || !price) {
-    return res.status(400).json({ error: "Category, Name, and Price are required!" });
-  }
+    const { category_id, name, sku, brand, price, stock, image_url, description } = req.body;
 
-  const sql = `INSERT INTO Products 
-    (category_id, name, sku, brand, price, stock, image_url, description) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const finalStock = stock || 0; 
+
+    const sql = `INSERT INTO Products 
+      (category_id, name, sku, brand, price, stock, image_url, description) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
     db.query(
       sql,
-      [category_id, name, sku, brand, price, stock, image_url, description],
+      [category_id, name, sku, brand, price, finalStock, image_url, description],
       (err, result) => {
         if (err) {
-         console.error("Insert Product Error:", err);
-         if (err.code === 'ER_DUP_ENTRY') {
-           return res.status(400).json({ error: "SKU already exists!" });
+          console.error("Insert Product Error:", err);
+          if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: "This SKU already exists in the system!" });
           }
-          return res.status(500).json({ error: "Server error while adding product." });
-       }
+          return res.status(500).json({ error: "Server error when saving the product." });
+        }
 
         res.status(201).json({ 
           message: "Product added successfully!", 
-         product_id: result.insertId 
-       });
+          product_id: result.insertId 
+        });
       }
     );
-})
+});
 
 // 7. Ordering API (Requires going through the authenticateToken station)
 app.post("/api/orders", authenticateToken, (req, res) => {
