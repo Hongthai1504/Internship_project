@@ -37,6 +37,12 @@ const tabLogin = document.getElementById("tab-login");
 const tabRegister = document.getElementById("tab-register");
 const registerForm = document.getElementById("register-form");
 
+// Logic Order History
+const historyTrigger = document.getElementById("order-history-trigger");
+const historyModal = document.getElementById("order-history-modal");
+const closeHistoryModal = document.getElementById("close-history-modal");
+const historyList = document.getElementById("order-history-list");
+
 if (tabLogin && tabRegister) {
   // CLick tab Sign In
   tabLogin.addEventListener("click", () => {
@@ -449,6 +455,69 @@ function handleBrandFilter() {
 brandCheckboxes.forEach((checkbox) => {
   checkbox.addEventListener("change", handleBrandFilter);
 });
+
+if (localStorage.getItem("token") && historyTrigger) {
+    historyTrigger.style.display = "flex";
+}
+
+// Display the "Orders" button if a token is already present when the page loads
+if (historyTrigger) {
+    historyTrigger.addEventListener("click", async () => {
+        historyModal.style.display = "flex";
+        historyList.innerHTML = "<p style='text-align:center; font-size: 1.1rem;'>Loading your orders...</p>";
+
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch("http://localhost:3000/api/orders/history", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error("Fetch failed");
+            const orders = await response.json();
+
+            if (orders.length === 0) {
+                historyList.innerHTML = "<p style='text-align:center;'>You haven't placed any orders yet.</p>";
+                return;
+            }
+
+            historyList.innerHTML = orders.map(order => `
+                <div style="border: 1px solid #c8c8c8; border-radius: 8px; margin-bottom: 25px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                        <strong style="font-size: 1.2rem;">Order #${order.order_id}</strong>
+                        <span style="color: ${order.status === 'completed' ? '#059669' : '#d97706'}; font-weight: 900; text-transform: uppercase;">
+                            ${order.status}
+                        </span>
+                        <span style="color: #666; font-weight: 500;">
+                            ${new Date(order.create_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </span>
+                    </div>
+                    
+                    ${order.items.map(item => `
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+                            <img src="${item.image_url || 'https://via.placeholder.com/60'}" style="width: 70px; height: 70px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; padding: 5px;">
+                            <div style="flex: 1; font-weight: 500; font-size: 1.1rem;">${item.product_name} <span style="color: #666;">(x${item.quantity})</span></div>
+                            <div style="font-weight: 900; color: #040c13; font-size: 1.1rem;">$${item.price}</div>
+                        </div>
+                    `).join('')}
+                    
+                    <div style="text-align: right; font-size: 1.3rem; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                        Total Amount: <strong style="color: #0046be;">$${order.total_amount}</strong>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error(error);
+            historyList.innerHTML = "<p style='color: red; text-align: center;'>Connection error while fetching orders.</p>";
+        }
+    });
+}
+
+if (closeHistoryModal) {
+    closeHistoryModal.addEventListener("click", () => {
+        historyModal.style.display = "none";
+    });
+}
 
 fetchProducts();
 renderCartUI();
