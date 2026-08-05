@@ -22,9 +22,8 @@ const searchInput = document.getElementById("search-input");
 const searchBtn = document.querySelector(".search-btn");
 
 // BRAND FILTER
-const brandCheckboxes = document.querySelectorAll(
-  '#brand-filters input[type="checkbox"]',
-);
+const brandCheckboxes = document.querySelectorAll('#brand-filters input[type="checkbox"]');
+const priceRadios = document.querySelectorAll('input[name="price"]');
 
 // AUTH MODAL & LOGIN
 const authModal = document.getElementById("auth-modal");
@@ -430,21 +429,33 @@ function showProductDetail(product_id) {
 }
 
 // BRAND FILTER
-function handleBrandFilter() {
+const brandCheckboxes = document.querySelectorAll('#brand-filters input[type="checkbox"]');
+const priceRadios = document.querySelectorAll('input[name="price"]');
+
+function handleFilters() {
   const selectedBrands = Array.from(brandCheckboxes)
     .filter((checkbox) => checkbox.checked)
     .map((checkbox) => checkbox.value.toLowerCase());
 
-  let filteredProducts = allProducts;
+  const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || 'all';
 
-  if (selectedBrands.length > 0) {
-    filteredProducts = allProducts.filter((product) => {
-      const productBrand = (product.brand || "").toLowerCase();
-      return selectedBrands.includes(productBrand);
-    });
-  }
+  let filteredProducts = allProducts.filter((product) => {
+    const productBrand = (product.brand || "").toLowerCase();
+    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(productBrand);
 
-  if (detailView.style.display === "block") {
+    let matchesPrice = true;
+    if (selectedPrice === 'under500') {
+      matchesPrice = product.price < 500;
+    } else if (selectedPrice === '500to999') {
+      matchesPrice = product.price >= 500 && product.price <= 999;
+    } else if (selectedPrice === 'over1000') {
+      matchesPrice = product.price > 999;
+    }
+
+    return matchesBrand && matchesPrice;
+  });
+
+  if (detailView && detailView.style.display === "block") {
     detailView.style.display = "none";
     shopLayout.style.display = "flex";
   }
@@ -453,7 +464,11 @@ function handleBrandFilter() {
 }
 
 brandCheckboxes.forEach((checkbox) => {
-  checkbox.addEventListener("change", handleBrandFilter);
+  checkbox.addEventListener("change", handleFilters);
+});
+
+priceRadios.forEach((radio) => {
+  radio.addEventListener("change", handleFilters);
 });
 
 if (localStorage.getItem("token") && historyTrigger) {
