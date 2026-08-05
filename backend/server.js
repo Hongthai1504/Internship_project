@@ -2,8 +2,6 @@ require("dotenv").config(); // Active read file .env
 const express = require("express");
 const mysql = require("mysql2");
 
-const express = require("express");
-const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -75,7 +73,7 @@ app.get('/api/products', (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(
-    "The server backend is currently running at http://localhost:${PORT}",
+    `The server backend is currently running at http://localhost:${PORT}`,
   );
 });
 
@@ -192,7 +190,7 @@ app.post("/api/products",
       return res.status(400).json({ error: errors.array()[0].msg });
     }
 
-    const { category_id, name, sku, brand, price, stock, image_url, description } = req.body;
+    const { category_id, name, sku, brand, price, stock, description } = req.body;
     const finalStock = stock || 0; 
 
     const image_url = req.file ? `http://localhost:3000/images/${req.file.filename}` : null;
@@ -263,4 +261,48 @@ app.post("/api/orders", authenticateToken, (req, res) => {
       });
     },
   );
+});
+
+// API: Get orders history
+app.get("/api/orders/history", authenticateToken, (req, res) => {
+  const user_id = req.user.id; 
+
+  const sql = `
+    SELECT o.id as order_id, o.total_amount, o.status, o.create_at,
+           od.quantity, od.price_at_purchase,
+           p.name as product_name, p.image_url
+    FROM Orders o
+    JOIN Order_Details od ON o.id = od.order_id
+    JOIN Products p ON od.product_id = p.id
+    WHERE o.user_id = ?
+    ORDER BY o.create_at DESC
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) {
+      console.error("Error retrieving order history:", err);
+      return res.status(500).json({ error: "Server error!" });
+    }
+
+    const ordersMap = {};
+    results.forEach(row => {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          order_id: row.order_id,
+          total_amount: row.total_amount,
+          status: row.status,
+          create_at: row.create_at,
+          items: []
+        };
+      }
+      ordersMap[row.order_id].items.push({
+        product_name: row.product_name,
+        quantity: row.quantity,
+        price: row.price_at_purchase,
+        image_url: row.image_url
+      });
+    });
+
+    res.json(Object.values(ordersMap));
+  });
 });
