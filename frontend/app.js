@@ -429,9 +429,6 @@ function showProductDetail(product_id) {
 }
 
 // BRAND FILTER
-const brandCheckboxes = document.querySelectorAll('#brand-filters input[type="checkbox"]');
-const priceRadios = document.querySelectorAll('input[name="price"]');
-
 function handleFilters() {
   const selectedBrands = Array.from(brandCheckboxes)
     .filter((checkbox) => checkbox.checked)
@@ -533,6 +530,40 @@ if (closeHistoryModal) {
         historyModal.style.display = "none";
     });
 }
+
+// --- LOGIC MEGA MENU (DEPARTMENTS) ---
+const deptCategories = document.querySelectorAll('.dept-category');
+const deptSubs = document.querySelectorAll('.dept-sub');
+
+deptCategories.forEach(cat => {
+  cat.addEventListener('click', (e) => {
+    const catId = parseInt(e.target.getAttribute('data-id'));
+    
+   brandCheckboxes.forEach(cb => cb.checked = false);
+    const allPriceRadio = document.querySelector('input[name="price"][value="all"]');
+    if (allPriceRadio) allPriceRadio.checked = true;
+
+    const filtered = allProducts.filter(p => p.category_id === catId);
+    
+    if (detailView && detailView.style.display === "block") {
+      detailView.style.display = "none";
+      shopLayout.style.display = "flex";
+    }
+    
+    renderProducts(filtered);
+  });
+});
+
+deptSubs.forEach(sub => {
+  sub.addEventListener('click', (e) => {
+    const keyword = e.target.getAttribute('data-keyword');
+    
+    if (searchInput) {
+      searchInput.value = keyword;
+      handleSearch(); 
+    }
+  });
+});
 
 fetchProducts();
 renderCartUI();
