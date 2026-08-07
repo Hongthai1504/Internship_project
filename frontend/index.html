@@ -57,42 +57,434 @@
         </div>
       </div>
 
+      <div id="menu-overlay" class="menu-overlay"></div>
+
       <nav class="header-bottom">
-        <ul class="bottom-menu">
-          <li class="menu-item category-nav">
-            ☰ Departments
-            <div class="mega-menu">
-              <div class="mega-col">
-                <h4 class="dept-category" data-id="1" style="cursor: pointer;">Computers & Tablets</h4>
-                <ul>
-                  <li class="dept-sub" data-keyword="laptop">Laptops</li>
-                  <li class="dept-sub" data-keyword="desktop">Desktops</li>
-                  <li class="dept-sub" data-keyword="monitor">Monitors</li>
-                </ul>
-              </div>
-              <div class="mega-col">
-                <h4 class="dept-category" data-id="2" style="cursor: pointer;">Cell Phones</h4>
-                <ul>
-                  <li class="dept-sub" data-keyword="iphone">iPhone</li>
-                  <li class="dept-sub" data-keyword="samsung">Samsung Galaxy</li>
-                  <li class="dept-sub" data-keyword="accessories">Accessories</li>
-                </ul>
-              </div>
-              <div class="mega-col">
-                <h4 class="dept-category" data-id="3" style="cursor: pointer;">Audio</h4>
-                <ul>
-                  <li class="dept-sub" data-keyword="headphone">Headphones</li>
-                  <li class="dept-sub" data-keyword="speaker">Speakers</li>
-                </ul>
-              </div>
-            </div>
-          </li>
-          <li class="menu-item">Top Deals</li>
-          <li class="menu-item">Deal of the Day</li>
-          <li class="menu-item">BestTech Outlet</li>
-        </ul>
+        <div class="menu-pill-container">
+          <button class="menu-pill-btn" data-target="dropdown-shop">Shop <span class="arrow">▼</span></button>
+          <button class="menu-pill-btn" data-target="dropdown-deals">Deals <span class="arrow">▼</span></button>
+          <button class="menu-pill-btn" data-target="dropdown-support">Support & Services <span class="arrow">▼</span></button>
+          <button class="menu-pill-btn" data-target="dropdown-discover">Discover <span class="arrow">▼</span></button>
+        </div>
       </nav>
     </header>
+
+   <!-- 1. SHOP DROPDOWN -->
+    <div id="dropdown-shop" class="dropdown-menu-box">
+      <div class="dropdown-header">
+        <h3>Shop</h3>
+        <button class="close-dropdown">✕</button>
+      </div>
+      <ul class="dropdown-list">
+        
+        <li class="has-submenu">
+          <a href="shop-by-brand.html">Shop by Brand</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="Shop/Brand/brand-apple.html">Apple</a></li>
+            <li><a href="Shop/Brand/brand-asus.html">ASUS</a></li>
+            <li><a href="Shop/Brand/rand-beats.html">Beats</a></li>
+            <li><a href="Shop/Brand/brand-dell.html">Dell</a></li>
+            <li><a href="Shop/Brand/brand-ge.html">GE</a></li>
+            <li><a href="Shop/Brand/brand-hp.html">HP</a></li>
+            <li><a href="Shop/Brand/brand-lenovo.html">Lenovo</a></li>
+            <li><a href="Shop/Brand/brand-lg.html">LG</a></li>
+            <li><a href="Shop/Brand/brand-meta.html">Meta</a></li>
+            <li><a href="Shop/Brand/brand-nintendo.html">Nintendo</a></li>
+            <li><a href="Shop/Brand/brand-samsung.html">Samsung</a></li>
+            <li><a href="Shop/Brand/brand-sony.html">Sony</a></li>
+            <li><a href="Shop/Brand/brand-all.html">All Brands</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="tv-home-theater.html">TV & Home Theater</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="Shop/TV & Home Theater/tv-explore.html">Explore TV & Home Theater</a></li>
+            <li><a href="Shop/TV & Home Theater/tv-rgb-led.html">Learn About RGB LED TVs</a></li>
+            <li><a href="Shop/TV & Home Theater/tv-by-size.html">TVs by Size</a></li>
+            <li><a href="Shop/TV & Home Theater/tv-by-brand.html">TVs by Brand</a></li>
+            <li><a href="Shop/TV & Home Theater/tv-by-type.html">TVs by Type</a></li>
+            <li><a href="Shop/TV & Home Theater/soundbars.html">All Sound Bars & Home Audio</a></li>
+            <li><a href="Shop/TV & Home Theater/projectors.html">Projectors & Screens</a></li>
+            <li><a href="Shop/TV & Home Theater/blu-ray.html">Blu-ray & DVD Players</a></li>
+            <li><a href="Shop/TV & Home Theater/streaming-devices.html">Streaming Devices</a></li>
+            <li><a href="Shop/TV & Home Theater/home-theater-accessories.html">Home Theater Accessories</a></li>
+            <li><a href="Shop/TV & Home Theater/premium-tv.html">Premium TV & Home Theater</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="computers-tablets.html">Computers & Tablets</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="Shop/Computers & Tablets/explore-computers.html">Explore Computers & Tablets</a></li>
+            <li><a href="Shop/Computers & Tablets/laptops-desktops.html">Laptops & Desktops</a></li>
+            <li><a href="Shop/Computers & Tablets/tablets.html">Tablets</a></li>
+            <li><a href="Shop/Computers & Tablets/monitors.html">Monitors</a></li>
+            <li><a href="Shop/Computers & Tablets/pc-gaming.html">PC Gaming & Virtual Reality</a></li>
+            <li><a href="Shop/Computers & Tablets/computer-components.html">Computer Components</a></li>
+            <li><a href="Shop/Computers & Tablets/storage.html">Hard Drives, SSD & Storage</a></li>
+            <li><a href="Shop/Computers & Tablets/computer-accessories.html">Computer Accessories</a></li>
+            <li><a href="Shop/Computers & Tablets/software.html">Software</a></li>
+            <li><a href="Shop/Computers & Tablets/printers.html">Printers & Ink & Toner</a></li>
+            <li><a href="Shop/Computers & Tablets/networking.html">Wifi & Networking</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="appliances.html">Appliances</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-appliances.html">Explore Appliances</a></li>
+            <li><a href="major-appliances.html">Major Kitchen Appliances</a></li>
+            <li><a href="small-appliances.html">Small Kitchen Appliances</a></li>
+            <li><a href="luxury-appliances.html">Luxury Kitchen Appliances</a></li>
+            <li><a href="washers-dryers.html">Washers & Dryers</a></li>
+            <li><a href="vacuums.html">Vacuums & Floor Care</a></li>
+            <li><a href="hvac.html">Heating, Cooling & Air Quality</a></li>
+            <li><a href="appliance-packages.html">Appliance Packages</a></li>
+            <li><a href="appliance-brands.html">Shop by Brand</a></li>
+            <li><a href="small-space.html">Small Space Appliances</a></li>
+            <li><a href="appliance-parts.html">Appliance Parts & Accessories</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="small-kitchen.html">Small Kitchen Appliances</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-small-kitchen.html">Explore Small Kitchen Appliances</a></li>
+            <li><a href="small-kitchen-deals.html">Small Kitchen Appliance Deals</a></li>
+            <li><a href="air-fryers.html">Air Fryers & Deep Fryers</a></li>
+            <li><a href="bar-wine.html">Bar & Wine</a></li>
+            <li><a href="blenders.html">Blenders & Juicers</a></li>
+            <li><a href="coffee.html">Coffee, Tea & Espresso</a></li>
+            <li><a href="microwaves.html">Microwaves</a></li>
+            <li><a href="mini-fridges.html">Mini Fridges</a></li>
+            <li><a href="mixers.html">Mixers</a></li>
+            <li><a href="pressure-cookers.html">Pressure Cookers</a></li>
+            <li><a href="toasters.html">Toasters & Toaster Ovens</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="video-games.html">Video Games</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-gaming.html">Explore Video Games</a></li>
+            <li><a href="nintendo.html">Nintendo</a></li>
+            <li><a href="xbox.html">Xbox</a></li>
+            <li><a href="playstation.html">PlayStation</a></li>
+            <li><a href="pc-gaming-2.html">PC Gaming</a></li>
+            <li><a href="vr.html">Virtual Reality</a></li>
+            <li><a href="gaming-accessories.html">Gaming Accessories</a></li>
+            <li><a href="digital-gaming.html">Digital Gaming</a></li>
+            <li><a href="handheld-gaming.html">Handheld Gaming</a></li>
+            <li><a href="retro-gaming.html">Retro Gaming & Arcade</a></li>
+            <li><a href="simulation.html">Simulation Racing</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="cell-phones.html">Cell Phones</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-phones.html">Explore Cell Phones</a></li>
+            <li><a href="phone-accessories.html">Cell Phone Accessories</a></li>
+            <li><a href="unlocked-phones.html">Unlocked Phones</a></li>
+            <li><a href="iphone.html">iPhone</a></li>
+            <li><a href="galaxy.html">Samsung Galaxy</a></li>
+            <li><a href="pixel.html">Google Pixel</a></li>
+            <li><a href="motorola.html">Motorola</a></li>
+            <li><a href="verizon.html">Verizon</a></li>
+            <li><a href="att.html">AT&T</a></li>
+            <li><a href="prepaid.html">Prepaid Phones & Carriers</a></li>
+            <li><a href="sim-cards.html">SIM Cards</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="headphones.html">Headphones</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-headphones.html">Explore Headphones</a></li>
+            <li><a href="airpods.html">AirPods</a></li>
+            <li><a href="wireless-headphones.html">Wireless Headphones</a></li>
+            <li><a href="true-wireless.html">True Wireless Earbuds</a></li>
+            <li><a href="open-ear.html">Open-Ear Headphones</a></li>
+            <li><a href="over-ear.html">Over-Ear & On-Ear</a></li>
+            <li><a href="earbuds.html">Earbud & In-Ear</a></li>
+            <li><a href="noise-cancelling.html">Noise-Cancelling</a></li>
+            <li><a href="wired-headphones.html">Wired Headphones</a></li>
+            <li><a href="sports-headphones.html">Sports Headphones</a></li>
+            <li><a href="headphone-accessories.html">Headphone Accessories</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="home-audio.html">Home Audio & Speakers</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-home-audio.html">Explore Home Audio & Speakers</a></li>
+            <li><a href="audio.html">Home Audio</a></li>
+            <li><a href="portable-audio.html">Portable Audio</a></li>
+            <li><a href="premium-audio.html">Premium Home Audio</a></li>
+            <li><a href="audio-accessories.html">Home Audio Accessories</a></li>
+            <li><a href="audio-packages.html">Audio Packages</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="entertainment.html">Music, Movies & TV Shows</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-entertainment.html">Explore Music, Movies & TV Shows</a></li>
+            <li><a href="music.html">Music</a></li>
+            <li><a href="movies.html">Movies</a></li>
+            <li><a href="tv-shows.html">TV Shows</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="cameras.html">Cameras, Camcorders & Drones</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-cameras.html">Explore Cameras, Camcorders & Drones</a></li>
+            <li><a href="lenses.html">Cameras & Lenses</a></li>
+            <li><a href="action-cameras.html">Action Cameras & Camcorders</a></li>
+            <li><a href="creator-gear.html">Content Creator Gear</a></li>
+            <li><a href="camera-accessories.html">Camera Accessories</a></li>
+            <li><a href="drones.html">Drones</a></li>
+            <li><a href="optics.html">Binoculars, Telescopes & Optics</a></li>
+            <li><a href="camera-brands.html">Shop by Brand</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="wearables.html">Wearable Technology</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-wearables.html">Explore Wearable Technology</a></li>
+            <li><a href="apple-watch.html">Apple Watch</a></li>
+            <li><a href="galaxy-watch.html">Samsung Galaxy Smartwatches</a></li>
+            <li><a href="smartwatches.html">Smartwatches</a></li>
+            <li><a href="fitness-trackers.html">Fitness Trackers & Accessories</a></li>
+            <li><a href="smart-rings.html">Smart Rings</a></li>
+            <li><a href="smart-glasses.html">Smart & AI Glasses</a></li>
+            <li><a href="vr-wearables.html">Virtual Reality</a></li>
+            <li><a href="wearable-brands.html">Shop by Brand</a></li>
+            <li><a href="wearable-accessories.html">Wearable Technology Accessories</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="fitness.html">Fitness, Sports & Outdoors</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-fitness.html">Explore Fitness, Sports & Outdoors</a></li>
+            <li><a href="exercise-equipment.html">Exercise & Fitness Equipment</a></li>
+            <li><a href="water-sports.html">Water Sports Equipment</a></li>
+            <li><a href="sports-gear.html">Sports Gear & Equipment</a></li>
+            <li><a href="kids-sports.html">Kid's Sports & Outdoor Play</a></li>
+            <li><a href="camping.html">Camping Gear</a></li>
+            <li><a href="electric-transport.html">Electric Transportation</a></li>
+            <li><a href="biking.html">Biking</a></li>
+            <li><a href="game-room.html">Game Room</a></li>
+            <li><a href="yard-games.html">Yard Games</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="fan-shop.html">Sports Fan Shop</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-fan-shop.html">Explore Sports Fan Shop</a></li>
+            <li><a href="college.html">College</a></li>
+            <li><a href="nfl.html">NFL</a></li>
+            <li><a href="nba.html">NBA</a></li>
+            <li><a href="mlb.html">MLB</a></li>
+            <li><a href="nhl.html">NHL</a></li>
+            <li><a href="soccer.html">Soccer</a></li>
+            <li><a href="golf.html">Golf</a></li>
+            <li><a href="wnba.html">WNBA</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="health.html">Health, Wellness & Personal Care</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-health.html">Explore Health, Wellness & Personal Care</a></li>
+            <li><a href="home-health.html">Home Health Care</a></li>
+            <li><a href="personal-care.html">Personal Care & Beauty</a></li>
+            <li><a href="recovery.html">Workout Recovery</a></li>
+            <li><a href="eyewear.html">Eyewear</a></li>
+            <li><a href="baby.html">Baby</a></li>
+            <li><a href="contrast-therapy.html">Contrast Therapy: Hot & Cold</a></li>
+            <li><a href="pain-relief.html">Muscle Pain Relief</a></li>
+            <li><a href="ear-care.html">Ear Care</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="home-office.html">Home, Furniture & Office</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-home.html">Explore Home, Furniture & Office</a></li>
+            <li><a href="furniture.html">Home, Furniture & Decor</a></li>
+            <li><a href="kitchen.html">Kitchen & Dining</a></li>
+            <li><a href="office.html">Office</a></li>
+            <li><a href="bathroom.html">Bathroom</a></li>
+            <li><a href="household.html">Household Essentials</a></li>
+            <li><a href="luggage.html">Luggage & Travel</a></li>
+            <li><a href="tools.html">Tools & Garage</a></li>
+            <li><a href="storage.html">Storage & Organization</a></li>
+            <li><a href="holiday.html">Holiday Decorations</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="smart-home.html">Smart Home, Security & Wifi</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-smart-home.html">Explore Smart Home, Security & Wifi</a></li>
+            <li><a href="networking-2.html">Wifi & Networking</a></li>
+            <li><a href="security-cameras.html">Security Cameras & Surveillance</a></li>
+            <li><a href="doorbells.html">Smart Doorbells</a></li>
+            <li><a href="door-locks.html">Smart Door Locks</a></li>
+            <li><a href="security-systems.html">Home Security Systems</a></li>
+            <li><a href="smart-speakers.html">Smart Speakers & Displays</a></li>
+            <li><a href="smart-lighting.html">Smart Lighting</a></li>
+            <li><a href="thermostats.html">Smart Thermostats</a></li>
+            <li><a href="smart-plugs.html">Smart Plugs & Outlets</a></li>
+            <li><a href="smart-devices.html">Smart Devices</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="outdoor-living.html">Outdoor Living</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-outdoor.html">Explore Outdoor Living</a></li>
+            <li><a href="grills.html">Grills & Outdoor Cooking</a></li>
+            <li><a href="outdoor-kitchens.html">Outdoor Kitchens</a></li>
+            <li><a href="outdoor-heating.html">Outdoor Heating</a></li>
+            <li><a href="power-equipment.html">Outdoor Power Equipment</a></li>
+            <li><a href="outdoor-theater.html">Outdoor Home Theater</a></li>
+            <li><a href="outdoor-lighting.html">Outdoor Lighting</a></li>
+            <li><a href="patio.html">Patio Furniture</a></li>
+            <li><a href="lawn-garden.html">Lawn & Garden</a></li>
+            <li><a href="generators.html">Generators & Backup Power</a></li>
+            <li><a href="sheds.html">Sheds & Outdoor Storage</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="electric-transportation.html">Electric Transportation</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-electric.html">Explore Electric Transportation</a></li>
+            <li><a href="ebikes.html">Electric Bikes</a></li>
+            <li><a href="escooters.html">Electric Scooters</a></li>
+            <li><a href="hoverboards.html">Hoverboards</a></li>
+            <li><a href="car-chargers.html">Electric Car Chargers</a></li>
+            <li><a href="kids-rideons.html">Kid's Scooters & Ride-ons</a></li>
+            <li><a href="safety-gear.html">Safety Gear & Accessories</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="car-electronics.html">Car Electronics & GPS</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-car.html">Explore Car Electronics & GPS</a></li>
+            <li><a href="car-audio.html">Car Audio</a></li>
+            <li><a href="auto-care.html">Auto Care & Cleaning</a></li>
+            <li><a href="auto-tools.html">Auto Tools & Equipment</a></li>
+            <li><a href="car-security.html">Car Security & Convenience</a></li>
+            <li><a href="dash-cams.html">Back-up & Dash Cameras</a></li>
+            <li><a href="gps.html">GPS Navigation</a></li>
+            <li><a href="marine.html">Marine & Powersports</a></li>
+            <li><a href="installation-parts.html">Installation Parts & Accessories</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="toys-games.html">Toys, Games & Crafts</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="explore-toys.html">Explore Toys, Games & Crafts</a></li>
+            <li><a href="toys-type.html">Toys by Type</a></li>
+            <li><a href="toys-age.html">Toys by Age</a></li>
+            <li><a href="puzzles.html">Games, Puzzles & Cards</a></li>
+            <li><a href="crafts.html">Arts & Crafts</a></li>
+            <li><a href="crafting-tech.html">Crafting Technology</a></li>
+            <li><a href="collectibles-toys.html">Collectibles</a></li>
+            <li><a href="shop-character.html">Shop by Character</a></li>
+            <li><a href="toy-brands.html">Shop by Brand</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="collectibles.html">Collectibles & Memorabilia</a> <span class="right-arrow">▾</span>
+          <ul class="submenu">
+            <li><a href="all-collectibles.html">All Collectibles & Memorabilia</a></li>
+            <li><a href="trading-cards.html">Trading Cards</a></li>
+            <li><a href="bobbleheads.html">Bobbleheads & Figurines</a></li>
+            <li><a href="diecast.html">Diecast</a></li>
+          </ul>
+        </li>
+
+      </ul>
+    </div>
+  
+
+    <!-- 2. DEALS DROPDOWN -->
+    <div id="dropdown-deals" class="dropdown-menu-box">
+      <div class="dropdown-header">
+        <h3>Deals</h3>
+        <button class="close-dropdown">✕</button>
+      </div>
+      <ul class="dropdown-list">
+        <li>Top Deals</li>
+        <li>Deal of the Day</li>
+        <li>Exclusive Member Deals</li>
+        <li>Outlet Deals</li>
+        <li style="border-bottom: none;">Clearance Deals</li>
+        
+        <li class="category-title">Deals by Category</li>
+        
+        <li>TV & Home Theater</li>
+        <li>Computers & Tablets</li>
+        <li>Video Games</li>
+        <li>Home Audio & Speakers</li>
+        <li>Headphones</li>
+        <li>Cell Phones</li>
+        <li>Smart Home, Security & Wifi</li>
+        <li>Toys, Games & Crafts</li>
+        <li>Cameras, Camcorders & Drones</li>
+        <li>Wearable Technology</li>
+        <li>Appliances</li>
+        <li>Home, Furniture & Office</li>
+        <li>Outdoor Living</li>
+        <li>Car Electronics</li>
+        <li>Electric Transportation</li>
+        <li>Health, Wellness & Personal Care</li>
+      </ul>
+    </div>
+
+    <!-- 3. SUPPORT & SERVICES DROPDOWN -->
+    <div id="dropdown-support" class="dropdown-menu-box">
+      <div class="dropdown-header">
+        <h3>Support & Services</h3>
+        <button class="close-dropdown">✕</button>
+      </div>
+      <ul class="dropdown-list">
+        <li style="color: #666; cursor: default; background: white;">(Content coming soon)</li>
+      </ul>
+    </div>
+
+    <!-- 4. DISCOVER DROPDOWN -->
+    <div id="dropdown-discover" class="dropdown-menu-box">
+      <div class="dropdown-header">
+        <h3>Discover</h3>
+        <button class="close-dropdown">✕</button>
+      </div>
+      <ul class="dropdown-list">
+        <li>All Discover</li>
+        <li>Back to School</li>
+        <li>Summer Shop</li>
+        <li>Fall Football</li>
+        <li>Road Trip</li>
+        <li>Best Buy Drops</li>
+        <li>Featured Gift Ideas</li>
+        <li>News Releases</li>
+        <li>Top-Rated Tech</li>
+        <li>Best Selling</li>
+        <li>Discover & Learn Blog</li>
+      </ul>
+    </div>
 
     <!-- MAIN SHOP LAYOUT -->
     <div class="shop-layout">
@@ -370,3 +762,4 @@
     <script src="app.js"></script>
   </body>
 </html>
+
