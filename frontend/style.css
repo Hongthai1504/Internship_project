@@ -100,7 +100,9 @@ body {
 /* Header Bottom (Menu) */
 .header-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--bb-blue);
 }
+
 .bottom-menu {
   display: flex;
   list-style: none;
@@ -120,41 +122,128 @@ body {
 }
 
 /* Mega Menu */
-.mega-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: #fff;
-  color: var(--text-main);
-  width: 600px;
-  display: none;
-  grid-template-columns: repeat(3, 1fr);
-  padding: 30px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  border-top: 4px solid var(--bb-yellow);
+.menu-pill-container {
+  display: flex;
+  gap: 15px;
+  padding: 12px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
 }
+
+.menu-pill-btn {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  border-radius: 20px; /* Tạo hình viên thuốc (Pill) */
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.menu-pill-btn:hover, .menu-pill-btn.active {
+  background: white;
+  color: var(--bb-blue);
+}
+
+.menu-pill-btn .arrow {
+  font-size: 0.7rem;
+}
+
 .category-nav:hover .mega-menu {
   display: grid;
 }
-.mega-col h4 {
-  border-bottom: 2px solid var(--bg-system);
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  color: var(--bb-blue);
+
+.dropdown-menu-box {
+  position: absolute;
+  top: 135px; /* Tọa độ thả xuống (tùy chỉnh theo chiều cao header) */
+  left: 40px;
+  width: 380px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 1001;
+  display: none; /* Mặc định ẩn */
+  flex-direction: column;
+  max-height: 75vh;
+  overflow-y: auto; /* Hiển thị thanh cuộn nếu menu quá dài */
 }
-.mega-col ul {
-  list-style: none;
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e6ef;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
 }
-.mega-col li {
-  padding: 8px 0;
-  color: var(--text-muted);
+
+.dropdown-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #040c13;
+}
+
+.close-dropdown {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
   cursor: pointer;
+  color: #555;
+  line-height: 1;
 }
-.mega-col li:hover {
+
+.dropdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-list li {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f2f4;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #040c13;
+}
+
+.dropdown-list li:hover {
+  background: #f4f6f9;
   color: var(--bb-blue);
-  font-weight: 500;
   text-decoration: underline;
+}
+
+.dropdown-list .right-arrow {
+  font-size: 1.2rem;
+  color: #888;
+}
+
+/* Tiêu đề phụ bên trong Dropdown (VD: Deals by Category) */
+.dropdown-list .category-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 25px 20px 10px;
+  background: #fff;
+  cursor: default;
+  border-bottom: none;
+  border-top: 1px solid #e0e6ef;
+}
+
+.dropdown-list .category-title:hover {
+  background: #fff;
+  color: #040c13;
+  text-decoration: none;
 }
 
 /* --- MAIN LAYOUT --- */
@@ -378,4 +467,63 @@ body {
   text-decoration: underline;
   cursor: pointer;
   margin-top: 10px;
+}
+
+/* --- SUBMENU --- */
+.dropdown-list .has-submenu {
+  display: block;
+  padding: 0;
+}
+
+.dropdown-list .has-submenu > a {
+  display: block;
+  padding: 15px 20px;
+  color: #040c13;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dropdown-list .has-submenu > .right-arrow {
+  position: absolute;
+  right: 20px;
+  margin-top: 15px;
+  pointer-events: none;
+}
+
+.dropdown-list .has-submenu:hover > a {
+  background: #f4f6f9;
+  color: var(--bb-blue);
+  text-decoration: underline;
+}
+
+.dropdown-list .submenu {
+  display: none; 
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #f8f9fa;
+  border-left: 4px solid var(--bb-blue);
+}
+
+.dropdown-list .has-submenu:hover .submenu {
+  display: block;
+}
+
+.dropdown-list .submenu li {
+  padding: 0;
+  border-bottom: none;
+}
+
+.dropdown-list .submenu li a {
+  display: block;
+  padding: 10px 20px 10px 30px;
+  font-size: 0.95rem;
+  color: #555;
+  text-decoration: none;
+}
+
+.dropdown-list .submenu li a:hover {
+  color: var(--bb-blue);
+  background: #eef2f7;
+  text-decoration: underline;
 }
