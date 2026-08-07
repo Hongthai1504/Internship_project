@@ -212,11 +212,33 @@ async function fetchProducts() {
     const response = await fetch(API_URL);
     const products = await response.json();
 
-    allProducts = products; // Lưu vào biến toàn cục
-    renderProducts(allProducts); // Gọi hàm vẽ toàn bộ sản phẩm
+    allProducts = products; 
+
+    if (typeof PAGE_KEYWORD !== 'undefined') {
+      
+      const titleEl = document.getElementById("page-title");
+      if (titleEl) titleEl.innerText = PAGE_TITLE;
+      document.title = PAGE_TITLE + " | Best Tech";
+
+      const filteredProducts = allProducts.filter(product => {
+        const name = product.name.toLowerCase();
+        const brand = (product.brand || "").toLowerCase();
+        const keyword = PAGE_KEYWORD.toLowerCase();
+        
+        return name.includes(keyword) || brand.includes(keyword);
+      });
+
+      renderProducts(filteredProducts);
+
+    } else {
+      renderProducts(allProducts); 
+    }
+
   } catch (error) {
-    document.getElementById("product-list").innerHTML =
-      "<p>Connection error. Please check if your Backend server is running at :3000</p>";
+    const listEl = document.getElementById("product-list");
+    if (listEl) {
+      listEl.innerHTML = "Connection error. Please check if your Backend server is running at :3000";
+    }
   }
 }
 
@@ -532,38 +554,42 @@ if (closeHistoryModal) {
 }
 
 // --- LOGIC MEGA MENU (DEPARTMENTS) ---
-const deptCategories = document.querySelectorAll('.dept-category');
-const deptSubs = document.querySelectorAll('.dept-sub');
+const menuBtns = document.querySelectorAll('.menu-pill-btn');
+const dropdownBoxes = document.querySelectorAll('.dropdown-menu-box');
+const menuOverlay = document.getElementById('menu-overlay');
+const closeDropdownBtns = document.querySelectorAll('.close-dropdown');
 
-deptCategories.forEach(cat => {
-  cat.addEventListener('click', (e) => {
-    const catId = parseInt(e.target.getAttribute('data-id'));
-    
-   brandCheckboxes.forEach(cb => cb.checked = false);
-    const allPriceRadio = document.querySelector('input[name="price"][value="all"]');
-    if (allPriceRadio) allPriceRadio.checked = true;
+function closeAllMenus() {
+  dropdownBoxes.forEach(box => box.style.display = 'none');
+  menuBtns.forEach(btn => btn.classList.remove('active'));
+  if (menuOverlay) menuOverlay.style.display = 'none';
+}
 
-    const filtered = allProducts.filter(p => p.category_id === catId);
-    
-    if (detailView && detailView.style.display === "block") {
-      detailView.style.display = "none";
-      shopLayout.style.display = "flex";
+menuBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const targetId = btn.getAttribute('data-target');
+    const targetBox = document.getElementById(targetId);
+
+    if (targetBox.style.display === 'flex') {
+      closeAllMenus();
+      return;
     }
-    
-    renderProducts(filtered);
+
+    closeAllMenus();
+    targetBox.style.display = 'flex';
+    btn.classList.add('active');
+    if (menuOverlay) menuOverlay.style.display = 'block';
   });
 });
 
-deptSubs.forEach(sub => {
-  sub.addEventListener('click', (e) => {
-    const keyword = e.target.getAttribute('data-keyword');
-    
-    if (searchInput) {
-      searchInput.value = keyword;
-      handleSearch(); 
-    }
-  });
+closeDropdownBtns.forEach(btn => {
+  btn.addEventListener('click', closeAllMenus);
 });
+
+if (menuOverlay) {
+  menuOverlay.addEventListener('click', closeAllMenus);
+}
 
 fetchProducts();
-renderCartUI();
+renderCartUI(); 
