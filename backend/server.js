@@ -69,14 +69,6 @@ app.get('/api/products', (req, res) => {
     });
 });
 
-// 3. Start the server on port 3000
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(
-    `The server backend is currently running at http://localhost:${PORT}`,
-  );
-});
-
 // 4. APT for registering a new account
 app.post("/api/register", 
   [
@@ -117,7 +109,6 @@ const loginLimiter = rateLimit({
   message: { error: ""}
 });
 
-
 // 5. Login API
 app.post("/api/login", loginLimiter, (req, res) => {
   const { email, password } = req.body;
@@ -146,20 +137,17 @@ app.post("/api/login", loginLimiter, (req, res) => {
 // 6. Middleware protection (Check JWT tag)
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  // Tokens are usually sent with the word "Bearer" attched, cut it onpen to get the actual code
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token)
-    return res
-      .status(401)
-      .json({ error: "You need to log in to use this funtion." });
+    return res.status(401).json({ error: "You need to log in to use this funtion." });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err)
       return res.status(403).json({ error: "Invalid or expired token!" });
 
-    req.user = user; // Save the customer ID information in the request for continued use.
-    next(); // Allow passage through the checkpoint.
+    req.user = user; 
+    next(); 
   });
 };
 
@@ -219,38 +207,26 @@ app.post("/api/products",
     );
 });
 
-// 7. Ordering API (Requires going through the authenticateToken station)
+// 7. Ordering API
 app.post("/api/orders", authenticateToken, (req, res) => {
-  const user_id = req.user.id; // Get the secure ID from the token, not from the client's submission
+  const user_id = req.user.id; 
   const { shipping_address, total_amount, cartItems } = req.body;
 
-  // A. Save the overview information to the Orders table
-  const inserOrderSql =
-    "INSERT INTO Orders (user_id, total_amount, shipping_address) VALUES (?, ?, ?)";
+  const inserOrderSql = "INSERT INTO Orders (user_id, total_amount, shipping_address) VALUES (?, ?, ?)";
 
-  db.query(
-    inserOrderSql,
-    [user_id, total_amount, shipping_address],
-    (err, result) => {
+  db.query(inserOrderSql, [user_id, total_amount, shipping_address], (err, result) => {
       if (err) return res.status(500).json({ error: "Order creation error!" });
 
-      const order_id = result.insertId; // Get the ID of the order just created
+      const order_id = result.insertId; 
 
-      // B & C. Save details for each item and deduct from inventory
       cartItems.forEach((item) => {
-        const insertDetailSql =
-          "INSERT INTO Order_Details (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)";
-        db.query(
-          insertDetailSql,
-          [order_id, item.product_id, item.quantity, item.price],
-          (err) => {
+        const insertDetailSql = "INSERT INTO Order_Details (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)";
+        db.query(insertDetailSql, [order_id, item.product_id, item.quantity, item.price], (err) => {
             if (!err) {
-              // Excluding stock in the Products table
-              const updateStockSql =
-                "UPDATE Products SET stock = stock - ? WHERE id = ?";
+              const updateStockSql = "UPDATE Products SET stock = stock - ? WHERE id = ?";
               db.query(updateStockSql, [item.quantity, item.product_id]);
             }
-          },
+          }
         );
       });
 
@@ -259,7 +235,7 @@ app.post("/api/orders", authenticateToken, (req, res) => {
         order_id: order_id,
         status: "pending",
       });
-    },
+    }
   );
 });
 
@@ -305,4 +281,44 @@ app.get("/api/orders/history", authenticateToken, (req, res) => {
 
     res.json(Object.values(ordersMap));
   });
+});
+
+// API for Admin: Get Orders
+app.get("/api/admin/orders", authenticateToken, isAdmin, (req, res) => {
+  const sql = `
+    SELECT o.id, o.total_amount, o.status, o.shipping_address, o.create_at,
+           u.full_name, u.email, u.phone
+    FROM Orders o
+    JOIN Users u ON o.user_id = u.id
+    ORDER BY o.create_at DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error retrieving admin order:", err);
+      return res.status(500).json({ error: "Server error when retrieving order data." });
+    }
+    res.json(results);
+  });
+});
+
+// API for Admin: Get Customers
+app.get("/api/admin/customers", authenticateToken, isAdmin, (req, res) => {
+  const sql = `SELECT id, full_name, email, phone, role FROM Users ORDER BY id DESC`;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error retrieving customer list:", err);
+      return res.status(500).json({ error: "Server error when retrieving the customer list." });
+    }
+    res.json(results);
+  });
+});
+
+// 3. Start the server on port 3000
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(
+    `The server backend is currently running at http://localhost:${PORT}`,
+  );
 });
