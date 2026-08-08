@@ -11,11 +11,19 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2>BestTech Admin</h2>
+    <h2 style="margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+      <a href="index.html" style="color: #ffe000; text-decoration: none;">BestTech Admin</a>
+    </h2>
     <ul class="menu">
-      <li style="color: #ffe000; font-weight: bold;">+ Add New Product</li>
-      <li>Order Management</li>
-      <li>Customer List</li>
+      <li style="color: #ffe000; font-weight: bold;">
+        <a href="admin.html" style="color: inherit; text-decoration: none; display: block;">+ Add New Product</a>
+      </li>
+      <li>
+        <a href="admin-orders.html" style="color: inherit; text-decoration: none; display: block;">Order Management</a>
+      </li>
+      <li>
+        <a href="admin-customers.html" style="color: inherit; text-decoration: none; display: block;">Customer List</a>
+      </li>
     </ul>
   </aside>
 
@@ -28,40 +36,52 @@
 
     <div class="card">
       <form id="add-product-form">
+
+        <div class="form-group">
+          <label>Product name (including product type) *</label>
+          <input type="text" id="name" required placeholder="E.g.: Apple iPhone 15 Pro Max 256GB">
+          <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+            Tip: Include the product type in the name. (E.g: <b>iPhone</b>, <b>Laptop</b>, <b>TV</b>) to allow the system to automatically place the product on the correct category page.
+          </small>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label>Product name (including product type) *</label>
-            <input type="text" id="name" required placeholder="E.g.: Apple iPhone 15 Pro Max">
-            <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
-              Tip: Include the product type in the name. (E.g: <b>iPhone</b>, <b>Laptop</b>, <b>TV</b>) to allow the system to automatically place the product on the correct category page.
-            </small>
-          </div>
-          <div class="form-group">
             <label>Main Category *</label>
-            <select id="category_id" required style="height: 40px;">
-              <option value="">-- Chọn danh mục sản phẩm --</option>
-              <option value="1">TV & Home Theater</option>
-              <option value="2">Computers & Tablets</option>
-              <option value="3">Appliances (Gia dụng lớn)</option>
-              <option value="4">Small Kitchen Appliances (Gia dụng nhỏ)</option>
-              <option value="5">Video Games</option>
-              <option value="6">Cell Phones</option>
-              <option value="7">Headphones</option>
-              <option value="8">Home Audio & Speakers</option>
-              <option value="9">Music, Movies & TV Shows</option>
-              <option value="10">Cameras, Camcorders & Drones</option>
-              <option value="11">Wearable Technology</option>
-              <option value="12">Fitness, Sports & Outdoors</option>
-              <option value="13">Sports Fan Shop</option>
-              <option value="14">Health, Wellness & Personal Care</option>
-              <option value="15">Home, Furniture & Office</option>
-              <option value="16">Smart Home, Security & Wifi</option>
-              <option value="17">Outdoor Living</option>
-              <option value="18">Electric Transportation</option>
-              <option value="19">Car Electronics & GPS</option>
-              <option value="20">Toys, Games & Crafts</option>
+            <select id="main_category" required style="height: 40px;">
+              <option value="">-- Select main category --</option>
+              <option value="1">Shop by Brand</option>
+              <option value="2">TV & Home Theater</option>
+              <option value="3">Computers & Tablets</option>
+              <option value="4">Appliances</option>
+              <option value="5">Small Kitchen Appliances</option>
+              <option value="6">Video Games</option>
+              <option value="7">Cell Phones</option>
+              <option value="8">Headphones</option>
+              <option value="9">Home Audio & Speakers</option>
+              <option value="10">Music, Movies & TV Shows</option>
+              <option value="11">Cameras, Camcorders & Drones</option>
+              <option value="12">Wearable Technology</option>
+              <option value="13">Fitness, Sports & Outdoors</option>
+              <option value="14">Sports Fan Shop</option>
+              <option value="15">Health, Wellness & Personal Care</option>
+              <option value="16">Home, Furniture & Office</option>
+              <option value="17">Smart Home, Security & Wifi</option>
+              <option value="18">Outdoor Living</option>
+              <option value="19">Electric Transportation</option>
+              <option value="20">Car Electronics & GPS</option>
               <option value="21">Collectibles & Memorabilia</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label>Sub Category *</label>
+            <select id="category_id" required style="height: 40px;" disabled>
+              <option value="">-- Please select the main category first. --</option>
+            </select>
+            <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+              The product will be saved directly into this subcategory.
+            </small>
           </div>
         </div>
 
@@ -100,7 +120,7 @@
           <textarea id="description" rows="4" placeholder="Enter product specifications, key features..."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" style="width: 100%;">+ <Thêm Sản Phẩm Lên Cửa Hàng></button>
+        <button type="submit" class="btn-submit" style="width: 100%;">+ Add Products to the Store</button>
       </form>
     </div>
   </main>
