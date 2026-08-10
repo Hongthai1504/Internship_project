@@ -248,32 +248,94 @@ const adminProductList = document.getElementById("admin-product-list");
 async function fetchAdminProducts() {
     if (!adminProductList) return;
     try {
-        const res = await fetch("http://localhost:3000/api/products");
-        const products = await res.json();
+        const [resProducts, resCategories] = await Promise.all([
+            fetch("http://localhost:3000/api/products"),
+            fetch("http://localhost:3000/api/categories")
+        ]);
+
+        const products = await resProducts.json();
+        const categories = await resCategories.json();
         
-        let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                        <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                            <th style="padding: 15px;">Image</th>
-                            <th style="padding: 15px;">Product</th>
-                            <th style="padding: 15px;">Price / Stock</th>
-                            <th style="padding: 15px;">Act</th>
-                        </tr>`;
-                        
-        products.forEach(p => {
-            html += `<tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 15px;"><img src="${p.image_url}" style="width: 50px; height: 50px; object-fit: contain;"></td>
-                        <td style="padding: 15px; font-weight: bold;">${p.brand ? p.brand + ' ' : ''}${p.name}<br><small style="color: #888;">SKU: ${p.sku}</small></td>
-                        <td style="padding: 15px; color: #0046be; font-weight: bold;">$${p.price}<br><small style="color: #059669;">Kho: ${p.stock}</small></td>
-                        <td style="padding: 15px;">
-                            <button onclick="deleteProduct(${p.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Xóa</button>
-                        </td>
-                     </tr>`;
+        const categoryDict = {};
+        categories.forEach(c => {
+            categoryDict[c.id] = c.name;
         });
-        html += `</table>`;
+
+        const groupedProducts = {};
+        products.forEach(p => {
+            const catName = categoryDict[p.category_id] || "Other";
+            
+            if (!groupedProducts[catName]) {
+                groupedProducts[catName] = [];
+            }
+            groupedProducts[catName].push(p);
+        });
+
+        const sortedCategoryNames = Object.keys(groupedProducts).sort((a, b) => {
+            if (a === "Other") return 1;
+            if (b === "Other") return -1;
+            return a.localeCompare(b);
+        });
+
+        let html = '';
+
+        if (products.length === 0) {
+            html = '<p style="color: #666;">There are no products in the system yet.</p>';
+        } else {
+            sortedCategoryNames.forEach(catName => {
+                html += `
+                <div style="margin-top: 35px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <h3 style="margin: 0; color: #0046be; font-size: 1.3rem;">${catName}</h3>
+                    <span style="background: #e0e6ef; color: #555; padding: 3px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
+                        ${groupedProducts[catName].length} items
+                    </span>
+                </div>`;
+                
+                html += `
+                <table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 10px;">
+                    <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
+                        <th style="padding: 15px; width: 80px;">Image</th>
+                        <th style="padding: 15px;">Product</th>
+                        <th style="padding: 15px; width: 150px;">Price / Stock</th>
+                        <th style="padding: 15px; width: 100px;">Act</th>
+                    </tr>`;
+                                
+                groupedProducts[catName].forEach(p => {
+                    const imgSrc = p.image_url || "https://via.placeholder.com/50";
+                    
+                    html += `
+                    <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                        <td style="padding: 15px;">
+                            <img src="${imgSrc}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px; border: 1px solid #eee; padding: 2px;">
+                        </td>
+                        <td style="padding: 15px; font-weight: 500; color: #040c13;">
+                            ${p.brand ? '<strong style="color: #0046be;">' + p.brand + '</strong> ' : ''}${p.name}
+                            <br>
+                            <small style="color: #666; font-weight: normal;">SKU: ${p.sku || 'N/A'}</small>
+                        </td>
+                        <td style="padding: 15px; color: #0046be; font-weight: 900;">
+                            $${p.price}
+                            <br>
+                            <small style="color: ${p.stock > 0 ? '#059669' : '#ef4444'}; font-weight: bold;">
+                                Stock: ${p.stock}
+                            </small>
+                        </td>
+                        <td style="padding: 15px;">
+                            <button onclick="deleteProduct(${p.id})" style="background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                
+                html += `</table>`;
+            });
+        }
+
         adminProductList.innerHTML = html;
         
     } catch (error) {
-        adminProductList.innerHTML = `<p style="color: red;">Error loading products.</p>`;
+        adminProductList.innerHTML = `<p style="color: red;">Error loading products: ${error.message}</p>`;
     }
 }
 
