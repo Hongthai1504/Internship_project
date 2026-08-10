@@ -31,6 +31,10 @@ const loginTrigger = document.getElementById("login-trigger");
 const closeModal = document.getElementById("close-modal");
 const loginForm = document.getElementById("login-form");
 
+const userDropdown = document.getElementById("user-dropdown");
+const accountText = document.getElementById("account-text");
+const accountWrapper = document.getElementById("account-wrapper");
+
 // login/Register Tab Switching Logic
 const tabLogin = document.getElementById("tab-login");
 const tabRegister = document.getElementById("tab-register");
@@ -88,7 +92,7 @@ if (registerForm) {
       if (response.ok) {
         alert("Account created successfully! You can now sign in.");
         registerForm.reset();
-        tabLogin.click(); // Đăng ký xong tự động gạt sang tab Đăng nhập
+        tabLogin.click();
       } else {
         alert(data.error || "Registration failed. Email might already exist.");
       }
@@ -101,9 +105,52 @@ if (registerForm) {
 
 // function to open the modal
 if (loginTrigger) {
-  loginTrigger.addEventListener("click", () => {
+  loginTrigger.addEventListener("click", (e) => {
+    e.stopPropagation(); 
+    const token = localStorage.getItem("token");
+    
+    if (token) {
+      userDropdown.style.display = userDropdown.style.display === "block" ? "none" : "block";
+    } else {
       authModal.style.display = "flex";
+    }
   });
+}
+
+document.addEventListener("click", (e) => {
+  if (userDropdown && accountWrapper && !accountWrapper.contains(e.target)) {
+     userDropdown.style.display = "none";
+  }
+});
+
+// Log Out
+const btnLogout = document.getElementById("menu-logout");
+if (btnLogout) {
+  btnLogout.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    alert("You have been logged out successfully.");
+    window.location.reload(); 
+  });
+}
+
+const btnMyOrders = document.getElementById("menu-orders");
+if (btnMyOrders) {
+  btnMyOrders.addEventListener("click", () => {
+    userDropdown.style.display = "none"; 
+    if(historyTrigger) historyTrigger.click();
+  });
+}
+
+const btnProfile = document.getElementById("menu-profile");
+if (btnProfile) {
+  btnProfile.addEventListener("click", () => {
+    userDropdown.style.display = "none";
+    alert("User Profile feature is coming soon!");
+  });
+}
+
+if (localStorage.getItem("token") && accountText) {
+  accountText.innerText = "My Account";
 }
 
 // function to close the modal
