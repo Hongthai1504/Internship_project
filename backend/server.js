@@ -282,6 +282,38 @@ app.get("/api/orders/history", authenticateToken, (req, res) => {
   });
 });
 
+// ==========================================
+// API: USER PROFILE
+// ==========================================
+app.get("/api/profile", authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const sql = "SELECT email, full_name, phone FROM Users WHERE id = ?";
+  
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error("Error retrieving profile:", err);
+      return res.status(500).json({ error: "Server error while retrieving data." });
+    }
+    if (results.length === 0) return res.status(404).json({ error: "Account not found." });
+    
+    res.json(results[0]);
+  });
+});
+
+app.put("/api/profile", authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { full_name, phone } = req.body;
+
+  const sql = "UPDATE Users SET full_name = ?, phone = ? WHERE id = ?";
+  db.query(sql, [full_name, phone, userId], (err, result) => {
+    if (err) {
+      console.error("Profile update error:", err);
+      return res.status(500).json({ error: "Server error while saving information." });
+    }
+    res.json({ message: "Your profile has been successfully updated!" });
+  });
+});
+
 // API for Admin: Get Orders
 app.get("/api/admin/orders", authenticateToken, isAdmin, (req, res) => {
   const sql = `
