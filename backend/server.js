@@ -72,10 +72,10 @@ app.get('/api/products', (req, res) => {
 // 4. APT for registering a new account
 app.post("/api/register", 
   [
-    body('email').isEmail().withMessage('Email không hợp lệ'),
-    body('password').isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
-    body('full_name').notEmpty().withMessage('Họ tên không được để trống'),
-    body('phone').isMobilePhone('vi-VN').withMessage('Số điện thoại không đúng định dạng VN')
+    body('email').isEmail().withMessage('Email invalid'),
+    body('password').isLength({ min: 6 }).withMessage('The password must be at least 6 characters long'),
+    body('full_name').notEmpty().withMessage('Full name cannot be left blank'),
+    body('phone').isMobilePhone('vi-VN').withMessage('The phone number is not in the correct Vietnamese format')
   ], 
   async (req, res) => {
   const errors = validationResult(req);
@@ -86,7 +86,6 @@ app.post("/api/register",
   const { email, password, full_name, phone } = req.body;
 
   try {
-    // Hash the password into a long string of characters for security
     const hashedPassword = await bcrypt.hash(password, 10);
     const sql =
       "INSERT INTO Users (email, password, full_name, phone) VALUE (?, ?, ?, ?)";
@@ -315,7 +314,48 @@ app.get("/api/admin/customers", authenticateToken, isAdmin, (req, res) => {
   });
 });
 
-// 3. Start the server on port 3000
+// API to retrieve the complete category list automatically (No login required, allowing frontend usage).
+app.get("/api/categories", (req, res) => {
+  db.query("SELECT * FROM Categories", (err, results) => {
+    if (err) {
+      console.error("Error loading category:", err);
+      return res.status(500).json({ error: "Server error when loading the category." });
+    }
+    res.json(results);
+  });
+});
+
+// Order Status Update API
+app.put("/api/admin/orders/:id/status", authenticateToken, isAdmin, (req, res) => {
+  const { status } = req.body;
+  const orderId = req.params.id;
+
+  db.query("UPDATE Orders SET status = ? WHERE id = ?", [status, orderId], (err, result) => {
+    if (err) {
+      console.error("Error updating order status:", err);
+      return res.status(500).json({ error: "Server error during update." });
+    }
+    res.json({ message: "Status updated successfully!" });
+  });
+});
+
+// Delete Product API
+app.delete("/api/admin/products/:id", authenticateToken, isAdmin, (req, res) => {
+  const productId = req.params.id;
+  
+  db.query("DELETE FROM Products WHERE id = ?", [productId], (err, result) => {
+    if (err) {
+      console.error("Lỗi xóa sản phẩm:", err);
+      if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+        return res.status(400).json({ error: "Cannot be deleted because this product has already been ordered by a customer." });
+      }
+      return res.status(500).json({ error: "Server error when deleting the product." });
+    }
+    res.json({ message: "Product deleted successfully!" });
+  });
+});
+
+// Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(
