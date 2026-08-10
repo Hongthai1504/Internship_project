@@ -10,39 +10,27 @@ function logout() {
     window.location.href = "index.html";
 }
 
-const subCategoryList = {
-    "1": ["Apple", "ASUS", "Beats", "Dell", "GE", "HP", "Lenovo", "LG", "Meta", "Nintendo", "Samsung", "Sony", "All Brands"],
-    "2": ["Explore TV & Home Theater", "Learn About RGB LED TVs", "TVs by Size", "TVs by Brand", "TVs by Type", "All Sound Bars & Home Audio", "Projectors & Screens", "Blu-ray & DVD Players", "Streaming Devices", "Home Theater Accessories", "Premium TV & Home Theater"],
-    "3": ["Explore Computers & Tablets", "Laptops & Desktops", "Tablets", "Monitors", "PC Gaming & Virtual Reality", "Computer Components", "Hard Drives, SSD & Storage", "Computer Accessories", "Software", "Printers, Ink & Toner", "Wifi & Networking"],
-    "4": ["Explore Appliances", "Major Kitchen Appliances", "Small Kitchen Appliances", "Luxury Kitchen Appliances", "Washers & Dryers", "Vacuums & Floor Care", "Heating, Cooling & Air Quality", "Appliance Packages", "Shop by Brand", "Small Space Appliances", "Appliance Parts & Accessories"],
-    "5": ["Explore Small Kitchen Appliances", "Small Kitchen Appliance Deals", "Air Fryers & Deep Fryers", "Bar & Wine", "Blenders & Juicers", "Coffee, Tea & Espresso", "Microwaves", "Mini Fridges", "Mixers", "Pressure Cookers", "Toasters & Toaster Ovens"],
-    "6": ["Explore Video Games", "Nintendo", "Xbox", "PlayStation", "PC Gaming", "Virtual Reality", "Gaming Accessories", "Digital Gaming", "Handheld Gaming", "Retro Gaming & Arcade", "Simulation Racing"],
-    "7": ["Explore Cell Phones", "Cell Phone Accessories", "Unlocked Phones", "iPhone", "Samsung Galaxy", "Google Pixel", "Motorola", "Verizon", "AT&T", "Prepaid Phones & Carriers", "SIM Cards"],
-    "8": ["Explore Headphones", "AirPods", "Wireless Headphones", "True Wireless Earbuds", "Open-Ear Headphones", "Over-Ear & On-Ear Headphones", "Earbud & In-Ear Headphones", "Noise-Cancelling Headphones", "Wired Headphones", "Sports Headphones", "Headphone Accessories"],
-    "9": ["Explore Home Audio & Speakers", "Home Audio", "Portable Audio", "Premium Home Audio & Speakers", "Home Audio Accessories", "Audio Packages"],
-    "10": ["Explore Music, Movies & TV Shows", "Music", "Movies", "TV Shows"],
-    "11": ["Explore Cameras, Camcorders & Drones", "Cameras & Lenses", "Action Cameras & Camcorders", "Content Creator Gear", "Camera Accessories", "Drones", "Binoculars, Telescopes & Optics", "Shop by Brand"],
-    "12": ["Explore Wearable Technology", "Apple Watch", "Samsung Galaxy Smartwatches", "Smartwatches", "Fitness Trackers & Accessories", "Smart Rings", "Smart & AI Glasses", "Virtual Reality", "Shop by Brand", "Wearable Technology Accessories"],
-    "13": ["Explore Fitness, Sports & Outdoors", "Exercise & Fitness Equipment", "Water Sports Equipment", "Sports Gear & Equipment", "Kid's Sports & Outdoor Play", "Camping Gear", "Electric Transportation", "Biking", "Game Room", "Yard Games"],
-    "14": ["Explore Sports Fan Shop", "College", "NFL", "NBA", "MLB", "NHL", "Soccer", "Golf", "WNBA"],
-    "15": ["Explore Health, Wellness & Personal Care", "Home Health Care", "Personal Care & Beauty", "Workout Recovery", "Eyewear", "Baby", "Contrast Therapy: Hot & Cold Therapy", "Muscle Pain Relief", "Ear Care"],
-    "16": ["Explore Home, Furniture & Office", "Home, Furniture & Decor", "Kitchen & Dining", "Office", "Bathroom", "Household Essentials", "Luggage & Travel", "Tools & Garage", "Storage & Organization", "Holiday Decorations"],
-    "17": ["Explore Smart Home, Security & Wifi", "Wifi & Networking", "Security Cameras & Surveillance", "Smart Doorbells", "Smart Door Locks", "Home Security Systems", "Smart Speakers & Displays", "Smart Lighting", "Smart Thermostats", "Smart Plugs & Outlets", "Smart Devices"],
-    "18": ["Explore Outdoor Living", "Grills & Outdoor Cooking", "Outdoor Kitchens", "Outdoor Heating", "Outdoor Power Equipment", "Outdoor Home Theater", "Outdoor Lighting", "Patio Furniture", "Lawn & Garden", "Generators & Backup Power", "Sheds & Outdoor Storage"],
-    "19": ["Explore Electric Transportation", "Electric Bikes", "Electric Scooters", "Hoverboards", "Electric Car Chargers", "Kid's Scooters & Ride-ons", "Safety Gear & Accessories"],
-    "20": ["Explore Car Electronics & GPS", "Car Audio", "Auto Care & Cleaning", "Auto Tools & Equipment", "Car Security & Convenience", "Back-up & Dash Cameras", "GPS Navigation", "Marine & Powersports", "Installation Parts & Accessories"],
-    "21": ["Explore Toys, Games & Crafts", "Toys by Type", "Toys by Age", "Games, Puzzles & Cards", "Arts & Crafts", "Crafting Technology", "Collectibles", "Shop by Character"]
-};
+let categoryMap = {};
 
-let currentDbId = 22; 
-const categoryMap = {};
-
-for (let i = 1; i <= 21; i++) {
-    const parentId = i.toString();
-    categoryMap[parentId] = subCategoryList[parentId].map(name => {
-        return { id: currentDbId++, name: name };
-    });
+async function fetchCategoriesForAdmin() {
+    try {
+        const res = await fetch("http://localhost:3000/api/categories");
+        const categories = await res.json();
+        
+        categories.forEach(cat => {
+            if (cat.parent_id !== null) {
+                const parentId = cat.parent_id.toString();
+                if (!categoryMap[parentId]) {
+                    categoryMap[parentId] = [];
+                }
+                categoryMap[parentId].push({ id: cat.id, name: cat.name });
+            }
+        });
+    } catch (error) {
+        console.error("Error loading category:", error);
+    }
 }
+fetchCategoriesForAdmin();
 
 const mainCategorySelect = document.getElementById("main_category");
 const subCategorySelect = document.getElementById("category_id");
@@ -119,4 +107,135 @@ if (addProductionForm) {
             alert("Server error: " + error.message);
         }
     });
+}
+
+const adminOrderList = document.getElementById("admin-order-list");
+
+if (adminOrderList) {
+    async function fetchAdminOrders() {
+        try {
+            const res = await fetch("http://localhost:3000/api/admin/orders", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            
+            if (!res.ok) throw new Error("Unable to load order data.");
+            const orders = await res.json();
+            
+            if (orders.length === 0) {
+                adminOrderList.innerHTML = "<p>There are no orders in the system yet.</p>";
+                return;
+            }
+
+            let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
+                                <th style="padding: 15px;">Order ID</th>
+                                <th style="padding: 15px;">Customer</th>
+                                <th style="padding: 15px;">Contact</th>
+                                <th style="padding: 15px;">Total payment</th>
+                                <th style="padding: 15px;">Status</th>
+                                <th style="padding: 15px;">Booking date</th>
+                            </tr>`;
+                            
+            orders.forEach(o => {
+                const date = new Date(o.create_at).toLocaleDateString('en-US');
+                const statuses = ['pending', 'shipping', 'completed'];
+                let statusSelect = `<select onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 5px; border-radius: 4px; font-weight: bold; cursor: pointer; background: #fef08a;">`;
+                statuses.forEach(s => {
+                    const isSelected = o.status === s ? 'selected' : '';
+                    statusSelect += `<option value="${s}" ${isSelected}>${s.toUpperCase()}</option>`;
+                });
+                statusSelect += `</select>`;
+                
+                html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                            <td style="padding: 15px; font-weight: bold;">#${o.id}</td>
+                            <td style="padding: 15px;">${o.full_name}</td>
+                            <td style="padding: 15px;">${o.phone}<br><small style="color: #666;">${o.email}</small></td>
+                            <td style="padding: 15px; font-weight: 900; color: #0046be;">$${o.total_amount}</td>
+                            <td style="padding: 15px;">${statusSelect}</td>
+                            <td style="padding: 15px; color: #555;">${date}</td>
+                         </tr>`;
+            });
+            html += `</table>`;
+            adminOrderList.innerHTML = html;
+            
+        } catch (error) {
+            adminOrderList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
+        }
+    }
+    fetchAdminOrders();
+}
+
+const adminCustomerList = document.getElementById("admin-customer-list");
+
+if (adminCustomerList) {
+    async function fetchAdminCustomers() {
+        try {
+            const res = await fetch("http://localhost:3000/api/admin/customers", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            
+            if (!res.ok) throw new Error("Unable to load the customer list.");
+            const customers = await res.json();
+            
+            let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
+                                <th style="padding: 15px;">ID</th>
+                                <th style="padding: 15px;">Full Name</th>
+                                <th style="padding: 15px;">Email</th>
+                                <th style="padding: 15px;">Phone Number</th>
+                                <th style="padding: 15px;">Role</th>
+                            </tr>`;
+                            
+            customers.forEach(c => {
+                const roleColor = c.role === 'admin' ? '#bfdbfe' : '#e5e7eb';
+                
+                html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                            <td style="padding: 15px; font-weight: bold;">${c.id}</td>
+                            <td style="padding: 15px; font-weight: bold; color: #040c13;">${c.full_name}</td>
+                            <td style="padding: 15px; color: #555;">${c.email}</td>
+                            <td style="padding: 15px;">${c.phone || 'Not yet updated'}</td>
+                            <td style="padding: 15px;">
+                                <span style="padding: 5px 10px; border-radius: 4px; background: ${roleColor}; color: #000; font-size: 0.85rem; font-weight: bold;">
+                                    ${c.role.toUpperCase()}
+                                </span>
+                            </td>
+                         </tr>`;
+            });
+            html += `</table>`;
+            adminCustomerList.innerHTML = html;
+            
+        } catch (error) {
+            adminCustomerList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
+        }
+    }
+    fetchAdminCustomers();
+}
+
+// Function to send API request to update order status
+async function updateOrderStatus(orderId, newStatus) {
+    if (!confirm(`Are you sure you want to change the status of order #${orderId} to ${newStatus.toUpperCase()}?`)) {
+        fetchAdminOrders();
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message);
+            fetchAdminOrders();
+        } else {
+            alert("Error: " + data.error);
+        }
+    } catch (error) {
+        alert("Server connection error.");
+    }
 }
