@@ -239,3 +239,63 @@ async function updateOrderStatus(orderId, newStatus) {
         alert("Server connection error.");
     }
 }
+
+// ==========================================
+// FEATURE: MANAGE & DELETE PRODUCTS
+// ==========================================
+const adminProductList = document.getElementById("admin-product-list");
+
+async function fetchAdminProducts() {
+    if (!adminProductList) return;
+    try {
+        const res = await fetch("http://localhost:3000/api/products");
+        const products = await res.json();
+        
+        let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
+                            <th style="padding: 15px;">Image</th>
+                            <th style="padding: 15px;">Product</th>
+                            <th style="padding: 15px;">Price / Stock</th>
+                            <th style="padding: 15px;">Act</th>
+                        </tr>`;
+                        
+        products.forEach(p => {
+            html += `<tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 15px;"><img src="${p.image_url}" style="width: 50px; height: 50px; object-fit: contain;"></td>
+                        <td style="padding: 15px; font-weight: bold;">${p.brand ? p.brand + ' ' : ''}${p.name}<br><small style="color: #888;">SKU: ${p.sku}</small></td>
+                        <td style="padding: 15px; color: #0046be; font-weight: bold;">$${p.price}<br><small style="color: #059669;">Kho: ${p.stock}</small></td>
+                        <td style="padding: 15px;">
+                            <button onclick="deleteProduct(${p.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Xóa</button>
+                        </td>
+                     </tr>`;
+        });
+        html += `</table>`;
+        adminProductList.innerHTML = html;
+        
+    } catch (error) {
+        adminProductList.innerHTML = `<p style="color: red;">Error loading products.</p>`;
+    }
+}
+
+async function deleteProduct(productId) {
+    if (!confirm("This action cannot be undone! Are you sure you want to delete this product?")) return;
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/products/${productId}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+            alert(data.message);
+            fetchAdminProducts(); 
+        } else {
+            alert("Error: " + data.error);
+        }
+    } catch (error) {
+        alert("System error during deletion.");
+    }
+}
+
+fetchAdminProducts();
