@@ -142,11 +142,82 @@ if (btnMyOrders) {
 }
 
 const btnProfile = document.getElementById("menu-profile");
+const profileModal = document.getElementById("profile-modal");
+const closeProfileModal = document.getElementById("close-profile-modal");
+const profileForm = document.getElementById("profile-form");
+
 if (btnProfile) {
-  btnProfile.addEventListener("click", () => {
+  btnProfile.addEventListener("click", async () => {
     userDropdown.style.display = "none";
-    alert("User Profile feature is coming soon!");
+    
+    if (profileModal) {
+        profileModal.style.display = "flex"; 
+        
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch("http://localhost:3000/api/profile", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                document.getElementById("profile-email").value = data.email;
+                document.getElementById("profile-name").value = data.full_name;
+                document.getElementById("profile-phone").value = data.phone || "";
+            } else {
+                alert("Your login session has expired.");
+                logout();
+            }
+        } catch(err) {
+            console.error("Error loading profile information:", err);
+            document.getElementById("profile-name").value = "Server Error!";
+        }
+    }
   });
+}
+
+if (closeProfileModal) {
+    closeProfileModal.addEventListener("click", () => {
+        profileModal.style.display = "none";
+    });
+}
+
+if (profileForm) {
+    profileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const token = localStorage.getItem("token");
+        const full_name = document.getElementById("profile-name").value.trim();
+        const phone = document.getElementById("profile-phone").value.trim();
+
+        const submitBtn = profileForm.querySelector("button[type='submit']");
+        submitBtn.innerText = "Saving...";
+        submitBtn.disabled = true;
+
+        try {
+            const res = await fetch("http://localhost:3000/api/profile", {
+                method: "PUT",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` 
+                },
+                body: JSON.stringify({ full_name, phone })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                alert(data.message);
+                profileModal.style.display = "none";
+            } else {
+                alert("Lỗi: " + data.error);
+            }
+        } catch(err) {
+            alert("System error while saving information.");
+        } finally {
+            submitBtn.innerText = "Save Changes";
+            submitBtn.disabled = false;
+        }
+    });
 }
 
 if (localStorage.getItem("token") && accountText) {
