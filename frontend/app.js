@@ -725,5 +725,31 @@ if (menuOverlay) {
   menuOverlay.addEventListener('click', closeAllMenus);
 }
 
+const timerDisplay = document.getElementById("flash-timer");
+
+if (timerDisplay) {
+    let timeLeft = (12 * 3600) + (45 * 60) + 30; 
+
+    const countdownInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            timerDisplay.innerText = "EXPIRED";
+            return;
+        }
+
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+
+        const formatTime = 
+            String(hours).padStart(2, '0') + ":" + 
+            String(minutes).padStart(2, '0') + ":" + 
+            String(seconds).padStart(2, '0');
+
+        timerDisplay.innerText = formatTime;
+        timeLeft--; 
+    }, 1000);
+}
+
 fetchProducts();
 renderCartUI(); 
