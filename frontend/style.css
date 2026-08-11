@@ -575,3 +575,105 @@ body {
   background: #f0f2f4;
   color: var(--bb-blue);
 }
+
+.modern-hero {
+  background: linear-gradient(135deg, #001e50 0%, #0046be 100%);
+  padding: 60px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 70, 190, 0.2);
+  display: flex;
+  align-items: center;
+}
+.badge-alert {
+  background: #e11d48;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  display: inline-block;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+.btn-shop-now {
+  background: var(--bb-yellow);
+  color: #000;
+  border: none;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-shop-now:hover { background: var(--bb-yellow-hover); }
+
+/* Top Categories */
+.top-categories-section {
+  margin: 40px 0;
+}
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #040c13;
+}
+.top-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+}
+.cat-circle-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #040c13;
+  font-weight: 500;
+  transition: transform 0.2s;
+}
+.cat-circle-card:hover {
+  transform: translateY(-5px);
+  color: var(--bb-blue);
+}
+.cat-icon {
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid #e0e6ef;
+}
+
+/* Deal of the Day */
+.deal-of-the-day-section {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #e0e6ef;
+  margin-bottom: 40px;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.countdown-timer {
+  background: #fef08a;
+  color: #854d0e;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+.view-all-link {
+  color: var(--bb-blue);
+  text-decoration: none;
+  font-weight: bold;
+}
+.view-all-link:hover { text-decoration: underline; }
