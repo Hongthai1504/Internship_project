@@ -332,24 +332,37 @@ async function fetchProducts() {
 
     allProducts = products; 
 
-    if (typeof PAGE_KEYWORD !== 'undefined') {
-      
-      const titleEl = document.getElementById("page-title");
-      if (titleEl) titleEl.innerText = PAGE_TITLE;
-      document.title = PAGE_TITLE + " | Best Tech";
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('q');
 
-      const filteredProducts = allProducts.filter(product => {
-        const name = product.name.toLowerCase();
-        const brand = (product.brand || "").toLowerCase();
-        const keyword = PAGE_KEYWORD.toLowerCase();
+    if (searchQuery) {
+        const titleEl = document.getElementById("page-title");
+        if (titleEl) titleEl.innerText = `Search results for: "${searchQuery}"`;
+        document.title = `Search: ${searchQuery} | Best Tech`;
+
+        const filteredProducts = allProducts.filter(product => {
+            const name = product.name.toLowerCase();
+            const brand = (product.brand || "").toLowerCase();
+            const keyword = searchQuery.toLowerCase();
+            return name.includes(keyword) || brand.includes(keyword);
+        });
+        renderProducts(filteredProducts);
+
+    } else if (typeof PAGE_KEYWORD !== 'undefined') {
+        const titleEl = document.getElementById("page-title");
+        if (titleEl) titleEl.innerText = PAGE_TITLE;
+        document.title = PAGE_TITLE + " | Best Tech";
+
+        const filteredProducts = allProducts.filter(product => {
+            const name = product.name.toLowerCase();
+            const brand = (product.brand || "").toLowerCase();
+            const keyword = PAGE_KEYWORD.toLowerCase();
+            return name.includes(keyword) || brand.includes(keyword);
+        });
+        renderProducts(filteredProducts);
         
-        return name.includes(keyword) || brand.includes(keyword);
-      });
-
-      renderProducts(filteredProducts);
-
     } else {
-      renderProducts(allProducts); 
+        renderProducts(allProducts); 
     }
 
   } catch (error) {
@@ -408,41 +421,19 @@ function renderCartUI() {
 }
 
 function handleSearch() {
-  const searchTerm = searchInput.value.toLowerCase().trim();
+  const searchTerm = searchInput.value.trim();
+  if (!searchTerm) return;
 
-  const filteredProducts = allProducts.filter((product) => {
-    const productName = product.name.toLowerCase();
-    const productBrand = (product.brand || "").toLowerCase();
+  const currentUrl = window.location.href;
+  const frontendIndex = currentUrl.indexOf('/frontend/');
 
-    return (
-      productName.includes(searchTerm) || productBrand.includes(searchTerm)
-    );
-  });
-
-  if (detailView.style.display === "block") {
-    detailView.style.display = "none";
-    shopLayout.style.display = "flex";
+  if (frontendIndex !== -1) {
+      const basePath = currentUrl.substring(0, frontendIndex + 10); 
+      window.location.href = `${basePath}search.html?q=${encodeURIComponent(searchTerm)}`;
+  } else {
+      window.location.href = `/search.html?q=${encodeURIComponent(searchTerm)}`;
   }
-
-  const sectionHeader = document.querySelector(".deal-of-the-day-section h2");
-  const countdownTimer = document.querySelector(".countdown-timer");
-  const viewAllLink = document.querySelector(".view-all-link");
-
-  if (sectionHeader) {
-      if (searchTerm !== "") {
-          sectionHeader.innerText = `Search results for: "${searchTerm}"`;
-          if (countdownTimer) countdownTimer.style.display = "none";
-          if (viewAllLink) viewAllLink.style.display = "none";
-      } else {
-          sectionHeader.innerText = "⚡ Deal of the Day";
-          if (countdownTimer) countdownTimer.style.display = "block";
-          if (viewAllLink) viewAllLink.style.display = "block";
-      }
-  }
-
-  renderProducts(filteredProducts);
 }
-
 if (searchBtn) {
   searchBtn.addEventListener("click", handleSearch);
 }
@@ -456,61 +447,63 @@ if (searchInput) {
 }
 
 // security update: checkout button
-orderForm.addEventListener("submit", async function (event) {
-  event.preventDefault();
+if (orderForm) {
+  orderForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  if (cart.length === 0) {
-    alert("Your cart is empty!");
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Security Alert: Please sign in to complete your purchase.");
-    authModal.style.display = "flex";
-    return;
-  }
-
-  const address = document.getElementById("shipping-address").value;
-  const orderData = {
-    shipping_address: address,
-    total_amount: parseFloat(cartTotal.innerText),
-    cartItems: cart,
-  };
-
-  try {
-    const response = await fetch(ORDER_API, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(orderData),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      alert("Order placed successfully! Order ID: " + data.order_id);
-      cart = [];
-      updateCart();
-      orderForm.reset();
-      cartDrawer.classList.remove("open");
-    } else {
-      if (response.status === 401 || response.status === 403) {
-        alert("Your session has expired. Please log in again.");
-        localStorage.removeItem("token");
-        loginTrigger.querySelector("span").innerText = "Account";
-        authModal.style.display = "flex";
-      } else {
-        alert("Failed to place order: " + data.error);
-      }
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert("Server error. Please try again later.");
-  }
-});
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Security Alert: Please sign in to complete your purchase.");
+      authModal.style.display = "flex";
+      return;
+    }
+
+    const address = document.getElementById("shipping-address").value;
+    const orderData = {
+      shipping_address: address,
+      total_amount: parseFloat(cartTotal.innerText),
+      cartItems: cart,
+    };
+
+    try {
+      const response = await fetch(ORDER_API, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Order placed successfully! Order ID: " + data.order_id);
+        cart = [];
+        updateCart();
+        orderForm.reset();
+        cartDrawer.classList.remove("open");
+      } else {
+        if (response.status === 401 || response.status === 403) {
+          alert("Your session has expired. Please log in again.");
+          localStorage.removeItem("token");
+          loginTrigger.querySelector("span").innerText = "Account";
+          authModal.style.display = "flex";
+        } else {
+          alert("Failed to place order: " + data.error);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error. Please try again later.");
+    }
+  });
+}
 
 // View Products Detail
 function showProductDetail(product_id) {
