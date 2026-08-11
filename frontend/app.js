@@ -424,6 +424,22 @@ function handleSearch() {
     shopLayout.style.display = "flex";
   }
 
+  const sectionHeader = document.querySelector(".deal-of-the-day-section h2");
+  const countdownTimer = document.querySelector(".countdown-timer");
+  const viewAllLink = document.querySelector(".view-all-link");
+
+  if (sectionHeader) {
+      if (searchTerm !== "") {
+          sectionHeader.innerText = `Search results for: "${searchTerm}"`;
+          if (countdownTimer) countdownTimer.style.display = "none";
+          if (viewAllLink) viewAllLink.style.display = "none";
+      } else {
+          sectionHeader.innerText = "⚡ Deal of the Day";
+          if (countdownTimer) countdownTimer.style.display = "block";
+          if (viewAllLink) viewAllLink.style.display = "block";
+      }
+  }
+
   renderProducts(filteredProducts);
 }
 
