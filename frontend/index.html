@@ -544,28 +544,63 @@
 
       <!-- CONTENT AREA -->
       <main class="content-area">
-        <!-- PROMO BANNER -->
-        <div class="promo-banner">
+        
+        <!-- 1. HERO PROMO BANNER -->
+        <div class="promo-banner modern-hero">
           <div class="banner-content">
+            <span class="badge-alert">Weekend Sale</span>
             <h2>The ultimate tech upgrade.</h2>
             <p>Save up to $300 on select premium laptops and smartphones.</p>
+            <button class="btn-shop-now">Shop the Sale</button>
           </div>
         </div>
 
-        <div class="section-header">
-          <h1>Featured Tech</h1>
-          <div class="sort-options">
-            <select>
-              <option>Best Selling</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-            </select>
+        <!-- 2. TOP CATEGORIES -->
+        <div class="top-categories-section">
+          <h2 class="section-title">Shop Top Categories</h2>
+          <div class="top-categories-grid">
+            <a href="shop/cell-phones" class="cat-circle-card">
+              <div class="cat-icon">📱</div>
+              <span>Cell Phones</span>
+            </a>
+            <a href="shop/computers-tablets" class="cat-circle-card">
+              <div class="cat-icon">💻</div>
+              <span>Computers</span>
+            </a>
+            <a href="shop/tv-home-theater" class="cat-circle-card">
+              <div class="cat-icon">📺</div>
+              <span>TV & Theater</span>
+            </a>
+            <a href="shop/audio" class="cat-circle-card">
+              <div class="cat-icon">🎧</div>
+              <span>Audio</span>
+            </a>
+            <a href="shop/video-games" class="cat-circle-card">
+              <div class="cat-icon">🎮</div>
+              <span>Gaming</span>
+            </a>
+            <a href="shop/appliances" class="cat-circle-card">
+              <div class="cat-icon">🏠</div>
+              <span>Appliances</span>
+            </a>
           </div>
         </div>
 
-        <div id="product-list" class="product-grid">
-          <p class="loading-text">Loading top tier technology...</p>
+        <!-- 3. DEAL OF THE DAY -->
+        <div class="deal-of-the-day-section">
+          <div class="section-header">
+            <div class="header-left">
+              <h2>⚡ Deal of the Day</h2>
+              <div class="countdown-timer">Ends in: <span id="flash-timer">12:45:30</span></div>
+            </div>
+            <a href="/deals" class="view-all-link">View all deals →</a>
+          </div>
+          
+          <div id="product-list" class="product-grid">
+            <p class="loading-text">Loading top tier technology...</p>
+          </div>
         </div>
+
       </main>
     </div>
 
