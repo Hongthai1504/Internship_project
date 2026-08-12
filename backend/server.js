@@ -387,6 +387,61 @@ app.delete("/api/admin/products/:id", authenticateToken, isAdmin, (req, res) => 
   });
 });
 
+// Update Product API
+app.put("/api/admin/products/:id", 
+  authenticateToken, 
+  isAdmin, 
+  upload.single('image'),
+  [
+    body('name').notEmpty().withMessage('The product name cannot be empty.'),
+    body('category_id').isInt({ min: 1 }).withMessage('The Category ID must be a positive integer.'),
+    body('sku').notEmpty().withMessage('The SKU code cannot be empty.'),
+    body('price').isFloat({ gt: 0 }).withMessage('The product price must be greater than 0.'),
+    body('stock').optional({ nullable: true }).isInt({ min: 0 }).withMessage('Inventory cannot be negative.')
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+    }
+
+    const productId = req.params.id;
+    const { category_id, name, sku, brand, price, stock, description } = req.body;
+    const finalStock = stock || 0; 
+
+    let sql;
+    let values;
+
+    if (req.file) {
+      const image_url = `http://localhost:3000/images/${req.file.filename}`;
+      sql = `UPDATE Products 
+             SET category_id = ?, name = ?, sku = ?, brand = ?, price = ?, stock = ?, image_url = ?, description = ? 
+             WHERE id = ?`;
+      values = [category_id, name, sku, brand, price, finalStock, image_url, description, productId];
+    } else {
+      sql = `UPDATE Products 
+             SET category_id = ?, name = ?, sku = ?, brand = ?, price = ?, stock = ?, description = ? 
+             WHERE id = ?`;
+      values = [category_id, name, sku, brand, price, finalStock, description, productId];
+    }
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Update Product Error:", err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ error: "This SKU already exists in the system." });
+        }
+        return res.status(500).json({ error: "Server error when updating the product." });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Product not found." });
+      }
+
+      res.json({ message: "Product updated successfully!" });
+    });
+});
+
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => {
