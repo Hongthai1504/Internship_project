@@ -34,14 +34,15 @@
       <button class="logout-btn" onclick="logout()">Log Out</button>
     </div>
 
+    <!-- ADD PRODUCT FORM -->
     <div class="card">
       <form id="add-product-form">
 
         <div class="form-group">
-          <label>Product name (including product type) *</label>
-          <input type="text" id="name" required placeholder="E.g.: Apple iPhone 15 Pro Max 256GB">
+          <label>Product Name (including product type) *</label>
+          <input type="text" id="name" required placeholder="Ex: Apple iPhone 15 Pro Max 256GB">
           <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
-            Tip: Include the product type in the name. (E.g: <b>iPhone</b>, <b>Laptop</b>, <b>TV</b>) to allow the system to automatically place the product on the correct category page.
+            Tip: Include the product type in the name (Ex: <b>iPhone</b>, <b>Laptop</b>, <b>TV</b>) to allow the system to automatically place the product on the correct category page.
           </small>
         </div>
 
@@ -77,7 +78,7 @@
           <div class="form-group">
             <label>Sub Category *</label>
             <select id="category_id" required style="height: 40px;" disabled>
-              <option value="">-- Please select the main category first. --</option>
+              <option value="">-- Please select the main category first --</option>
             </select>
             <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
               The product will be saved directly into this subcategory.
@@ -88,24 +89,24 @@
         <div class="form-row">
           <div class="form-group">
             <label>Brand *</label>
-            <input type="text" id="brand" required placeholder="VD: Apple, Samsung, Sony...">
+            <input type="text" id="brand" required placeholder="Ex: Apple, Samsung, Sony...">
             <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
               Enter the brand name accurately so the product appears in the "Shop by Brand" menu.
             </small>
           </div>
           <div class="form-group">
-            <label>SKU (Unique)*</label>
-            <input type="text" id="sku" required placeholder="VD: APP-IPH15-256">
+            <label>SKU (Unique) *</label>
+            <input type="text" id="sku" required placeholder="Ex: APP-IPH15-256">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Selling price ($) *</label>
+            <label>Selling Price ($) *</label>
             <input type="number" id="price" step="0.01" required placeholder="999.99">
           </div>
           <div class="form-group">
-            <label>Stock quantity</label>
+            <label>Stock Quantity</label>
             <input type="number" id="stock" value="10" min="0">
           </div>
         </div>
@@ -116,19 +117,79 @@
         </div>
 
         <div class="form-group">
-          <label>Detailed description</label>
+          <label>Detailed Description</label>
           <textarea id="description" rows="4" placeholder="Enter product specifications, key features..."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit" style="width: 100%;">+ Add Products to the Store</button>
+        <button type="submit" class="btn-submit" style="width: 100%;">+ Add Product to Store</button>
       </form>
-      <div style="margin-top: 50px; border-top: 2px solid #eee; padding-top: 30px;">
-        <h2>Product Management</h2>
-        <p style="color: #666; margin-bottom: 20px;">List of products currently available on the system.</p>
-        <div id="admin-product-list"></div>
-      </div>
     </div>
+
+    <!-- PRODUCT MANAGEMENT LIST -->
+    <div style="margin-top: 50px; border-top: 2px solid #eee; padding-top: 30px;">
+      <h2>Product Management</h2>
+      <p style="color: #666; margin-bottom: 20px;">List of products currently available on the system.</p>
+      <div id="admin-product-list"></div>
+    </div>
+
   </main>
+
+  <!-- EDIT PRODUCT MODAL -->
+  <div id="edit-product-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center;">
+    <div class="card" style="position: relative; max-height: 90vh; overflow-y: auto; width: 800px; margin: 0;">
+      <button onclick="closeEditModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #555;">&times;</button>
+      
+      <h2 style="margin-top: 0; color: #0046be; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px;">Edit Product</h2>
+      
+      <form id="edit-product-form">
+        <input type="hidden" id="edit-product-id">
+
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" id="edit-name" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Brand *</label>
+            <input type="text" id="edit-brand" required>
+          </div>
+          <div class="form-group">
+            <label>SKU (Unique) *</label>
+            <input type="text" id="edit-sku" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price ($) *</label>
+            <input type="number" id="edit-price" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input type="number" id="edit-stock" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Sub Category ID (Read-only for quick edits)</label>
+          <input type="number" id="edit-category-id" readonly style="background: #f4f6f9; color: #666;">
+        </div>
+
+        <div class="form-group">
+          <label>Update Product Image (Leave empty to keep current image)</label>
+          <input type="file" id="edit-image-file" accept="image/*">
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="edit-description" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" style="width: 100%; background: #eab308; color: #000;">Save Changes</button>
+      </form>
+    </div>
+  </div>
 
   <!-- logic JS -->
   <script src="admin.js"></script>
