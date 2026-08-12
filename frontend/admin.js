@@ -360,4 +360,89 @@ async function deleteProduct(productId) {
     }
 }
 
+// PRODUCT EDITING LOGIC
+const editModal = document.getElementById("edit-product-modal");
+const editForm = document.getElementById("edit-product-form");
+
+function openEditModal(productId) {
+    // Find the product data from the globally stored array
+    const product = globalAdminProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    // Populate the form fields with existing data
+    document.getElementById("edit-product-id").value = product.id;
+    document.getElementById("edit-name").value = product.name;
+    document.getElementById("edit-brand").value = product.brand || "";
+    document.getElementById("edit-sku").value = product.sku || "";
+    document.getElementById("edit-price").value = product.price;
+    document.getElementById("edit-stock").value = product.stock || 0;
+    document.getElementById("edit-category-id").value = product.category_id;
+    document.getElementById("edit-description").value = product.description || "";
+    
+    // Clear the file input in case it was used previously
+    document.getElementById("edit-image-file").value = "";
+
+    // Display the modal
+    if (editModal) editModal.style.display = "flex";
+}
+
+function closeEditModal() {
+    if (editModal) editModal.style.display = "none";
+}
+
+if (editForm) {
+    editForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const productId = document.getElementById("edit-product-id").value;
+        const formData = new FormData();
+        
+        formData.append("name", document.getElementById("edit-name").value.trim());
+        formData.append("brand", document.getElementById("edit-brand").value.trim());
+        formData.append("sku", document.getElementById("edit-sku").value.trim());
+        formData.append("price", document.getElementById("edit-price").value);
+        formData.append("stock", document.getElementById("edit-stock").value || 0);
+        formData.append("category_id", document.getElementById("edit-category-id").value);
+        formData.append("description", document.getElementById("edit-description").value.trim());
+
+        const imageFile = document.getElementById("edit-image-file").files[0];
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
+
+        const submitBtn = editForm.querySelector("button[type='submit']");
+        submitBtn.innerText = "Saving...";
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/products/${productId}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: formData 
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                closeEditModal();
+                fetchAdminProducts();
+            } else {
+                alert("Failed to update product: " + data.error);
+                if (response.status === 403 || response.status === 401) {
+                    logout();
+                }
+            }
+        } catch (error) {
+            console.error("Update Error: ", error);
+            alert("Server connection error.");
+        } finally {
+            submitBtn.innerText = "Save Changes";
+            submitBtn.disabled = false;
+        }
+    });
+}
+
 fetchAdminProducts();
