@@ -461,9 +461,26 @@ if (orderForm) {
 function showProductDetail(product_id) {
   const product = allProducts.find((p) => p.id === product_id);
   if (!product) return;
-
+  
   const imgElement = document.getElementById("detail-img");
-  if (imgElement) imgElement.src = product.image_url || "https://via.placeholder.com/500";
+  if (imgElement) {
+      imgElement.src = product.image_url || "https://via.placeholder.com/500";
+      imgElement.style.opacity = 1; 
+  }
+
+  const thumbContainer = document.getElementById("detail-thumbnails");
+  if (thumbContainer) {
+      const images = [
+          product.image_url || "https://via.placeholder.com/500",
+          "https://via.placeholder.com/500?text=Side+View",
+          "https://via.placeholder.com/500?text=Back+View",
+          "https://via.placeholder.com/500?text=Box+View"
+      ];
+
+      thumbContainer.innerHTML = images.map((img, index) => `
+          <img src="${img}" class="thumbnail-img ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
+      `).join('');
+  }
 
   if(document.getElementById("detail-name")) document.getElementById("detail-name").innerText = product.brand ? `${product.brand} ${product.name}` : product.name;
   if(document.getElementById("detail-price")) document.getElementById("detail-price").innerText = `$${product.price}`;
@@ -483,10 +500,23 @@ function showProductDetail(product_id) {
 
   const detailAddBtn = document.getElementById("detail-add-btn");
   const qtyInput = document.getElementById("qty-input");
+  
   if (detailAddBtn) {
     detailAddBtn.onclick = () => {
-      const quantity = parseInt(qtyInput ? qtyInput.value : 1) || 1;
-      for (let i = 0; i < quantity; i++) addToCart(product_id, product.name, product.price);
+      const quantityToAdd = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+      
+      const existingItem = cart.find((item) => item.product_id === product_id);
+      if (existingItem) {
+        existingItem.quantity += quantityToAdd;
+      } else {
+        cart.push({ product_id: product_id, name: product.name, price: product.price, quantity: quantityToAdd });
+      }
+      
+      updateCart();
+      
+      const drawer = document.getElementById("cart-drawer");
+      if (drawer) drawer.classList.add("open");
+      if (qtyInput) qtyInput.value = 1;
     };
   }
 
@@ -495,6 +525,23 @@ function showProductDetail(product_id) {
       detailView.style.display = "block";
       window.scrollTo({ top: 0, behavior: "smooth" });
   }
+}
+
+// HELPER: CHANGE MAIN IMAGE WHEN CLICKING THUMBNAIL
+function changeMainImage(element, newSrc) {
+    const imgElement = document.getElementById("detail-img");
+    if (imgElement) {
+        // Quick fade effect for better UX
+        imgElement.style.opacity = 0.5;
+        setTimeout(() => {
+            imgElement.src = newSrc;
+            imgElement.style.opacity = 1;
+        }, 150);
+    }
+    
+    const allThumbs = document.querySelectorAll(".thumbnail-img");
+    allThumbs.forEach(th => th.classList.remove("active"));
+    element.classList.add("active");
 }
 
 function handleFilters() {
