@@ -637,18 +637,13 @@
             border: 1px solid #c8c8c8;
           "
         >
-          <div class="detail-media" style="flex: 1">
-            <img
-              id="detail-img"
-              src=""
-              alt="Product"
-              style="
-                width: 100%;
-                max-width: 500px;
-                display: block;
-                margin: 0 auto;
-              "
-            />
+          <div class="detail-media" style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+            <div style="border: 1px solid #c8c8c8; border-radius: 8px; padding: 30px; text-align: center; background: #fff; position: relative;">
+              <img id="detail-img" src="" alt="Product" style="width: 100%; max-width: 400px; height: 400px; object-fit: contain; display: block; margin: 0 auto; transition: opacity 0.2s ease-in-out;" />
+            </div>
+
+            <div id="detail-thumbnails" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            </div>
           </div>
           <div class="detail-info" style="flex: 1">
             <p
