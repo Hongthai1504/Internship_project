@@ -214,3 +214,10 @@ INSERT INTO Categories (name, parent_id) VALUES
 
 -- Bật lại kiểm tra khóa ngoại
 SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE IF NOT EXISTS Product_Images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT,
+    image_url VARCHAR(255),
+    FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE CASCADE
+);
