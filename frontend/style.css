@@ -57,8 +57,8 @@ body {
   display: flex;
   background: #fff;
   border-radius: 4px;
-  overflow: hidden;
   height: 48px;
+  position: relative; 
 }
 .search-container input {
   flex: 1;
@@ -134,7 +134,7 @@ body {
   background: transparent;
   color: white;
   border: 1px solid white;
-  border-radius: 20px; /* Tạo hình viên thuốc (Pill) */
+  border-radius: 20px; 
   padding: 8px 18px;
   font-size: 1rem;
   font-weight: 500;
@@ -160,17 +160,17 @@ body {
 
 .dropdown-menu-box {
   position: absolute;
-  top: 135px; /* Tọa độ thả xuống (tùy chỉnh theo chiều cao header) */
+  top: 135px; 
   left: 40px;
   width: 380px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   z-index: 1001;
-  display: none; /* Mặc định ẩn */
+  display: none; 
   flex-direction: column;
   max-height: 75vh;
-  overflow-y: auto; /* Hiển thị thanh cuộn nếu menu quá dài */
+  overflow-y: auto; 
 }
 
 .dropdown-header {
@@ -229,7 +229,7 @@ body {
   color: #888;
 }
 
-/* Tiêu đề phụ bên trong Dropdown (VD: Deals by Category) */
+/* Category Title inside Dropdown */
 .dropdown-list .category-title {
   font-weight: 700;
   font-size: 1.1rem;
@@ -576,6 +576,11 @@ body {
   color: var(--bb-blue);
 }
 
+/* =========================================
+   HOMEPAGE UPGRADES (TIER 1)
+========================================= */
+
+/* Modern Hero Banner */
 .modern-hero {
   background: linear-gradient(135deg, #001e50 0%, #0046be 100%);
   padding: 60px 40px;
@@ -677,3 +682,82 @@ body {
   font-weight: bold;
 }
 .view-all-link:hover { text-decoration: underline; }
+
+/* =========================================
+   LIVE SEARCH DROPDOWN
+========================================= */
+.search-suggestions-box {
+  position: absolute;
+  top: 55px;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 2000;
+  display: none;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e0e6ef;
+}
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f2f4;
+  cursor: pointer;
+  color: #040c13;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+.suggestion-item:hover {
+  background: #f4f6f9;
+}
+.suggestion-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 2px;
+  background: #fff;
+}
+.suggestion-info {
+  flex: 1;
+}
+.suggestion-name {
+  font-weight: 500;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+  color: #040c13;
+}
+.suggestion-price {
+  color: var(--bb-blue);
+  font-weight: 900;
+}
+
+/* PRODUCT GALLERY THUMBNAILS */
+.thumbnail-img {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+  border: 2px solid #e0e6ef;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 5px;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.thumbnail-img:hover {
+  border-color: var(--bb-blue);
+}
+
+.thumbnail-img.active {
+  border-color: var(--bb-blue);
+  box-shadow: 0 0 0 1px var(--bb-blue);
+}
