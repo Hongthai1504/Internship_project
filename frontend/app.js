@@ -633,5 +633,56 @@ if (timerDisplay) {
     }, 1000); 
 }
 
+const searchSuggestions = document.getElementById("search-suggestions");
+
+if (searchInput && searchSuggestions) {
+    searchInput.addEventListener("input", function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        
+        if (searchTerm.length < 2) {
+            searchSuggestions.style.display = "none";
+            return;
+        }
+
+        const filtered = allProducts.filter(product => {
+            const name = product.name.toLowerCase();
+            const brand = (product.brand || "").toLowerCase();
+            return name.includes(searchTerm) || brand.includes(searchTerm);
+        }).slice(0, 5); 
+
+        if (filtered.length === 0) {
+            searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #666; font-style: italic;">No products found for "${searchTerm}"</div>`;
+            searchSuggestions.style.display = "block";
+            return;
+        }
+
+        searchSuggestions.innerHTML = filtered.map(p => {
+            const safeName = p.name.replace(/'/g, "\\'"); // Prevent errors with names containing single quotes
+            return `
+            <div class="suggestion-item" onclick="goToSearch('${safeName}')">
+                <img src="${p.image_url || 'https://via.placeholder.com/50'}" class="suggestion-img">
+                <div class="suggestion-info">
+                    <div class="suggestion-name">${p.brand ? p.brand + ' ' : ''}${p.name}</div>
+                    <div class="suggestion-price">$${p.price}</div>
+                </div>
+            </div>
+            `;
+        }).join("");
+        
+        searchSuggestions.style.display = "block";
+    });
+
+    document.addEventListener("click", function(e) {
+        if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+            searchSuggestions.style.display = "none";
+        }
+    });
+}
+
+function goToSearch(keyword) {
+    searchInput.value = keyword;
+    handleSearch();
+}
+
 fetchProducts();
 renderCartUI();
