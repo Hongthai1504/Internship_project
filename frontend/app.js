@@ -21,20 +21,18 @@ const closeCartBtn = document.getElementById("close-cart");
 const searchInput = document.getElementById("search-input");
 const searchBtn = document.querySelector(".search-btn");
 
-// AUTH MODAL & LOGIN
-const authModal = document.getElementById("auth-modal");
 const loginTrigger = document.getElementById("login-trigger");
-const closeModal = document.getElementById("close-modal");
 const loginForm = document.getElementById("login-form");
+const registerForm = document.getElementById("register-form");
+
+const loginView = document.getElementById("login-view");
+const registerView = document.getElementById("register-view");
+const goToRegisterBtn = document.getElementById("go-to-register");
+const goToLoginBtn = document.getElementById("go-to-login");
 
 const userDropdown = document.getElementById("user-dropdown");
 const accountText = document.getElementById("account-text");
 const accountWrapper = document.getElementById("account-wrapper");
-
-// login/Register Tab Switching Logic
-const tabLogin = document.getElementById("tab-login");
-const tabRegister = document.getElementById("tab-register");
-const registerForm = document.getElementById("register-form");
 
 // Logic Order History
 const historyTrigger = document.getElementById("order-history-trigger");
@@ -48,23 +46,70 @@ const profileModal = document.getElementById("profile-modal");
 const closeProfileModal = document.getElementById("close-profile-modal");
 const profileForm = document.getElementById("profile-form");
 
-if (tabLogin && tabRegister) {
-  tabLogin.addEventListener("click", () => {
-    loginForm.style.display = "block";
-    registerForm.style.display = "none";
-    tabLogin.style.color = "#0046be";
-    tabLogin.style.borderBottom = "3px solid #0046be";
-    tabRegister.style.color = "#999";
-    tabRegister.style.borderBottom = "none";
+if (loginTrigger) {
+  loginTrigger.addEventListener("click", (e) => {
+    e.stopPropagation(); 
+    const token = localStorage.getItem("token");
+    if (token) {
+      if(userDropdown) userDropdown.style.display = userDropdown.style.display === "block" ? "none" : "block";
+    } else {
+      window.location.href = "/frontend/login.html";
+    }
   });
+}
 
-  tabRegister.addEventListener("click", () => {
-    loginForm.style.display = "none";
-    registerForm.style.display = "block";
-    tabRegister.style.color = "#0046be";
-    tabRegister.style.borderBottom = "3px solid #0046be";
-    tabLogin.style.color = "#999";
-    tabLogin.style.borderBottom = "none";
+if (goToRegisterBtn && goToLoginBtn) {
+    goToRegisterBtn.addEventListener("click", () => {
+        loginView.style.display = "none";
+        registerView.style.display = "block";
+    });
+
+    goToLoginBtn.addEventListener("click", () => {
+        registerView.style.display = "none";
+        loginView.style.display = "block";
+    });
+}
+
+if (loginForm) {
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault(); 
+    
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    submitBtn.innerText = "Authenticating...";
+    submitBtn.disabled = true;
+
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+
+    try {
+      const response = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }), 
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        
+        if (data.role === 'admin') {
+            alert("Login successful! Welcome to the Admin Dashboard.");
+            window.location.href = "/frontend/admin.html";
+        } else {
+            alert("Login successful! Welcome back to BestTech.");
+            window.location.href = "/frontend/index.html"; 
+        }
+      } else {
+        alert(data.error || "Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server connection error. Please try again later.");
+    } finally {
+      submitBtn.innerText = originalText;
+      submitBtn.disabled = false;
+    }
   });
 }
 
@@ -83,10 +128,11 @@ if (registerForm) {
         body: JSON.stringify({ email, password, full_name, phone }),
       });
       const data = await response.json();
+      
       if (response.ok) {
         alert("Account created successfully! You can now sign in.");
         registerForm.reset();
-        tabLogin.click();
+        goToLoginBtn.click(); 
       } else {
         alert(data.error || "Registration failed. Email might already exist.");
       }
@@ -97,17 +143,11 @@ if (registerForm) {
   });
 }
 
-if (loginTrigger) {
-  loginTrigger.addEventListener("click", (e) => {
-    e.stopPropagation(); 
-    const token = localStorage.getItem("token");
-    if (token) {
-      userDropdown.style.display = userDropdown.style.display === "block" ? "none" : "block";
-    } else {
-      authModal.style.display = "flex";
-    }
-  });
-}
+document.addEventListener("click", (e) => {
+  if (userDropdown && accountWrapper && !accountWrapper.contains(e.target)) {
+     userDropdown.style.display = "none";
+  }
+});
 
 document.addEventListener("click", (e) => {
   if (userDropdown && accountWrapper && !accountWrapper.contains(e.target)) {
