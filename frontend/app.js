@@ -493,16 +493,27 @@ function showProductDetail(product_id) {
 
   const thumbContainer = document.getElementById("detail-thumbnails");
   if (thumbContainer) {
-      const images = [
-          product.image_url || "https://via.placeholder.com/500",
-          "https://via.placeholder.com/500?text=Side+View",
-          "https://via.placeholder.com/500?text=Back+View",
-          "https://via.placeholder.com/500?text=Box+View"
-      ];
+      let images = [];
+      
+      if (product.all_images && product.all_images.length > 0) {
+          images = product.all_images;
+      } 
+      else if (product.image_url) {
+          images = [product.image_url];
+      } 
+      else {
+          images = ["https://via.placeholder.com/500"];
+      }
 
       thumbContainer.innerHTML = images.map((img, index) => `
           <img src="${img}" class="thumbnail-img ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
       `).join('');
+
+      if (images.length <= 1) {
+          thumbContainer.style.display = "none";
+      } else {
+          thumbContainer.style.display = "flex";
+      }
   }
 
   if(document.getElementById("detail-name")) document.getElementById("detail-name").innerText = product.brand ? `${product.brand} ${product.name}` : product.name;
