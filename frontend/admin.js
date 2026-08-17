@@ -1,496 +1,789 @@
-const token = localStorage.getItem("token");
+const API_URL = "http://localhost:3000/api/products";
+const ORDER_API = "http://localhost:3000/api/orders";
 
-if (!token) {
-  alert("Access Denied! Please log in firs.t");
-  window.location.href = "index.html"; // redirect to the homepage if the JWT token is missing
-}
+const productList = document.getElementById("product-list");
+const cartItemList = document.getElementById("cart-items");
+const cartCount = document.getElementById("cart-count");
+const cartTotal = document.getElementById("cart-total");
+const orderForm = document.getElementById("order-form");
 
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "index.html";
-}
+// VIEWS
+const shopLayout = document.querySelector(".shop-layout");
+const detailView = document.getElementById("product-detail-view");
+const backToShopBtn = document.getElementById("back-to-shop");
 
-let categoryMap = {};
+// Cart Drawer Elements
+const cartDrawer = document.getElementById("cart-drawer");
+const openCartBtn = document.getElementById("open-cart");
+const closeCartBtn = document.getElementById("close-cart");
 
-async function fetchCategoriesForAdmin() {
-  try {
-    const res = await fetch("http://localhost:3000/api/categories");
-    const categories = await res.json();
+// SEARCH
+const searchInput = document.getElementById("search-input");
+const searchBtn = document.querySelector(".search-btn");
 
-    categories.forEach((cat) => {
-      if (cat.parent_id !== null) {
-        const parentId = cat.parent_id.toString();
-        if (!categoryMap[parentId]) {
-          categoryMap[parentId] = [];
-        }
-        categoryMap[parentId].push({ id: cat.id, name: cat.name });
-      }
-    });
-  } catch (error) {
-    console.error("Error loading category:", error);
-  }
-}
-fetchCategoriesForAdmin();
+const authModal = document.getElementById("auth-modal");
+const closeModal = document.getElementById("close-modal");
 
-const mainCategorySelect = document.getElementById("main_category");
-const subCategorySelect = document.getElementById("category_id");
+//  AUTHENTICATION
 
-if (mainCategorySelect && subCategorySelect) {
-  mainCategorySelect.addEventListener("change", function () {
-    const selectedParent = this.value;
+const loginTrigger = document.getElementById("login-trigger");
+const loginForm = document.getElementById("login-form");
+const registerForm = document.getElementById("register-form");
 
-    subCategorySelect.innerHTML =
-      '<option value="">-- Chọn danh mục con --</option>';
+const loginView = document.getElementById("login-view");
+const registerView = document.getElementById("register-view");
+const goToRegisterBtn = document.getElementById("go-to-register");
+const goToLoginBtn = document.getElementById("go-to-login");
 
-    if (selectedParent && categoryMap[selectedParent]) {
-      subCategorySelect.disabled = false;
+const userDropdown = document.getElementById("user-dropdown");
+const accountText = document.getElementById("account-text");
+const accountWrapper = document.getElementById("account-wrapper");
 
-      categoryMap[selectedParent].forEach((subCat) => {
-        const option = document.createElement("option");
-        option.value = subCat.id;
-        option.textContent = subCat.name;
-        subCategorySelect.appendChild(option);
-      });
+// Logic Order History
+const historyTrigger = document.getElementById("order-history-trigger");
+const historyModal = document.getElementById("order-history-modal");
+const closeHistoryModal = document.getElementById("close-history-modal");
+const historyList = document.getElementById("order-history-list");
+
+// Profile Modal
+const btnProfile = document.getElementById("menu-profile");
+const profileModal = document.getElementById("profile-modal");
+const closeProfileModal = document.getElementById("close-profile-modal");
+const profileForm = document.getElementById("profile-form");
+
+if (loginTrigger) {
+  loginTrigger.addEventListener("click", (e) => {
+    e.stopPropagation(); 
+    const token = localStorage.getItem("token");
+    if (token) {
+      if(userDropdown) userDropdown.style.display = userDropdown.style.display === "block" ? "none" : "block";
     } else {
-      subCategorySelect.disabled = true;
+      window.location.href = "/frontend/login.html";
     }
   });
 }
 
-const addProductionForm = document.getElementById("add-product-form");
-
-if (addProductionForm) {
-  addProductionForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const formData = new FormData();
-    formData.append(
-      "category_id",
-      document.getElementById("category_id").value,
-    );
-    formData.append("name", document.getElementById("name").value.trim());
-    formData.append("brand", document.getElementById("brand").value.trim());
-    formData.append("sku", document.getElementById("sku").value.trim());
-    formData.append("price", document.getElementById("price").value);
-    formData.append("stock", document.getElementById("stock").value || 0);
-    formData.append(
-      "description",
-      document.getElementById("description").value.trim(),
-    );
-
-    const imageFile = document.getElementById("image_file").files[0];
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-
-    try {
-      const response = await fetch("http://localhost:3000/api/products", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("text/html")) {
-        throw new Error(
-          "The backend has crashed. Please check the backend terminal for detailed error information (often caused by a missing 'images' directory).",
-        );
-      }
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Product added successfully! Check your main store.");
-        addProductionForm.reset();
-      } else {
-        alert("Failed to add product: " + data.error);
-
-        if (response.status === 403 || response.status === 401) {
-          logout();
-        }
-      }
-    } catch (error) {
-      console.error("Error Detail: ", error);
-      alert("Server error: " + error.message);
-    }
-  });
-}
-
-const adminOrderList = document.getElementById("admin-order-list");
-
-if (adminOrderList) {
-  async function fetchAdminOrders() {
-    try {
-      const res = await fetch("http://localhost:3000/api/admin/orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) throw new Error("Unable to load order data.");
-      const orders = await res.json();
-
-      if (orders.length === 0) {
-        adminOrderList.innerHTML =
-          "<p>There are no orders in the system yet.</p>";
-        return;
-      }
-
-      let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                                <th style="padding: 15px;">Order ID</th>
-                                <th style="padding: 15px;">Customer</th>
-                                <th style="padding: 15px;">Contact</th>
-                                <th style="padding: 15px;">Total payment</th>
-                                <th style="padding: 15px;">Status</th>
-                                <th style="padding: 15px;">Booking date</th>
-                            </tr>`;
-
-      orders.forEach((o) => {
-        const date = new Date(o.create_at).toLocaleDateString("en-US");
-        const statuses = ["pending", "shipping", "completed"];
-        let statusSelect = `<select onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 5px; border-radius: 4px; font-weight: bold; cursor: pointer; background: #fef08a;">`;
-        statuses.forEach((s) => {
-          const isSelected = o.status === s ? "selected" : "";
-          statusSelect += `<option value="${s}" ${isSelected}>${s.toUpperCase()}</option>`;
-        });
-        statusSelect += `</select>`;
-
-        html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                            <td style="padding: 15px; font-weight: bold;">#${o.id}</td>
-                            <td style="padding: 15px;">${o.full_name}</td>
-                            <td style="padding: 15px;">${o.phone}<br><small style="color: #666;">${o.email}</small></td>
-                            <td style="padding: 15px; font-weight: 900; color: #0046be;">$${o.total_amount}</td>
-                            <td style="padding: 15px;">${statusSelect}</td>
-                            <td style="padding: 15px; color: #555;">${date}</td>
-                         </tr>`;
-      });
-      html += `</table>`;
-      adminOrderList.innerHTML = html;
-    } catch (error) {
-      adminOrderList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
-    }
-  }
-  fetchAdminOrders();
-}
-
-const adminCustomerList = document.getElementById("admin-customer-list");
-
-if (adminCustomerList) {
-  async function fetchAdminCustomers() {
-    try {
-      const res = await fetch("http://localhost:3000/api/admin/customers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) throw new Error("Unable to load the customer list.");
-      const customers = await res.json();
-
-      let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                                <th style="padding: 15px;">ID</th>
-                                <th style="padding: 15px;">Full Name</th>
-                                <th style="padding: 15px;">Email</th>
-                                <th style="padding: 15px;">Phone Number</th>
-                                <th style="padding: 15px;">Role</th>
-                            </tr>`;
-
-      customers.forEach((c) => {
-        const roleColor = c.role === "admin" ? "#bfdbfe" : "#e5e7eb";
-
-        html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                            <td style="padding: 15px; font-weight: bold;">${c.id}</td>
-                            <td style="padding: 15px; font-weight: bold; color: #040c13;">${c.full_name}</td>
-                            <td style="padding: 15px; color: #555;">${c.email}</td>
-                            <td style="padding: 15px;">${c.phone || "Not yet updated"}</td>
-                            <td style="padding: 15px;">
-                                <span style="padding: 5px 10px; border-radius: 4px; background: ${roleColor}; color: #000; font-size: 0.85rem; font-weight: bold;">
-                                    ${c.role.toUpperCase()}
-                                </span>
-                            </td>
-                         </tr>`;
-      });
-      html += `</table>`;
-      adminCustomerList.innerHTML = html;
-    } catch (error) {
-      adminCustomerList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
-    }
-  }
-  fetchAdminCustomers();
-}
-
-// Function to send API request to update order status
-async function updateOrderStatus(orderId, newStatus) {
-  if (
-    !confirm(
-      `Are you sure you want to change the status of order #${orderId} to ${newStatus.toUpperCase()}?`,
-    )
-  ) {
-    fetchAdminOrders();
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `http://localhost:3000/api/admin/orders/${orderId}/status`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      },
-    );
-
-    const data = await res.json();
-    if (res.ok) {
-      alert(data.message);
-      fetchAdminOrders();
-    } else {
-      alert("Error: " + data.error);
-    }
-  } catch (error) {
-    alert("Server connection error.");
-  }
-}
-
-// ==========================================
-// FEATURE: MANAGE & DELETE PRODUCTS
-// ==========================================
-const adminProductList = document.getElementById("admin-product-list");
-
-let globalAdminProducts = [];
-
-async function fetchAdminProducts() {
-  if (!adminProductList) return;
-  try {
-    // Load Products and Categories simultaneously to optimize speed
-    const [resProducts, resCategories] = await Promise.all([
-      fetch("http://localhost:3000/api/products"),
-      fetch("http://localhost:3000/api/categories"),
-    ]);
-
-    const products = await resProducts.json();
-    const categories = await resCategories.json();
-
-    // Save products globally to access them later when editing
-    globalAdminProducts = products;
-
-    // Create a dictionary (map) to quickly look up category names by ID
-    const categoryDict = {};
-    categories.forEach((c) => {
-      categoryDict[c.id] = c.name;
+if (goToRegisterBtn && goToLoginBtn) {
+    goToRegisterBtn.addEventListener("click", () => {
+        loginView.style.display = "none";
+        registerView.style.display = "block";
     });
 
-    // Algorithm to group products by category name
-    const groupedProducts = {};
-    products.forEach((p) => {
-      // Use category name if found, otherwise group into "Other"
-      const catName = categoryDict[p.category_id] || "Other";
-
-      if (!groupedProducts[catName]) {
-        groupedProducts[catName] = [];
-      }
-      groupedProducts[catName].push(p);
+    goToLoginBtn.addEventListener("click", () => {
+        registerView.style.display = "none";
+        loginView.style.display = "block";
     });
-
-    // Sort categories alphabetically, pushing "Other" to the bottom
-    const sortedCategoryNames = Object.keys(groupedProducts).sort((a, b) => {
-      if (a === "Other") return 1;
-      if (b === "Other") return -1;
-      return a.localeCompare(b);
-    });
-
-    // Start rendering the UI
-    let html = "";
-
-    if (products.length === 0) {
-      html =
-        '<p style="color: #666;">No products available in the system yet.</p>';
-    } else {
-      sortedCategoryNames.forEach((catName) => {
-        // Title for each category group
-        html += `
-                <div style="margin-top: 35px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                    <h3 style="margin: 0; color: #0046be; font-size: 1.3rem;">${catName}</h3>
-                    <span style="background: #e0e6ef; color: #555; padding: 3px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
-                        ${groupedProducts[catName].length} items
-                    </span>
-                </div>`;
-
-        // Product table for that category
-        html += `
-                <table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 10px;">
-                    <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                        <th style="padding: 15px; width: 80px;">Image</th>
-                        <th style="padding: 15px;">Product</th>
-                        <th style="padding: 15px; width: 150px;">Price / Stock</th>
-                        <th style="padding: 15px; width: 180px;">Action</th>
-                    </tr>`;
-
-        groupedProducts[catName].forEach((p) => {
-          // Handle missing image with a placeholder
-          const imgSrc = p.image_url || "https://via.placeholder.com/50";
-
-          html += `
-                    <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                        <td style="padding: 15px;">
-                            <img src="${imgSrc}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px; border: 1px solid #eee; padding: 2px;">
-                        </td>
-                        <td style="padding: 15px; font-weight: 500; color: #040c13;">
-                            ${p.brand ? '<strong style="color: #0046be;">' + p.brand + "</strong> " : ""}${p.name}
-                            <br>
-                            <small style="color: #666; font-weight: normal;">SKU: ${p.sku || "N/A"}</small>
-                        </td>
-                        <td style="padding: 15px; color: #0046be; font-weight: 900;">
-                            $${p.price}
-                            <br>
-                            <small style="color: ${p.stock > 0 ? "#059669" : "#ef4444"}; font-weight: bold;">
-                                Stock: ${p.stock}
-                            </small>
-                        </td>
-                        <td style="padding: 15px;">
-                            <button onclick="openEditModal(${p.id})" style="background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s; margin-right: 5px;">Edit</button>
-                            <button onclick="deleteProduct(${p.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">Delete</button>
-                        </td>
-                    </tr>`;
-        });
-
-        html += `</table>`;
-      });
-    }
-
-    adminProductList.innerHTML = html;
-  } catch (error) {
-    adminProductList.innerHTML = `<p style="color: red;">Error loading products: ${error.message}</p>`;
-  }
 }
 
-async function deleteProduct(productId) {
-  if (
-    !confirm(
-      "This action cannot be undone! Are you sure you want to delete this product?",
-    )
-  )
-    return;
-
-  try {
-    const res = await fetch(
-      `http://localhost:3000/api/admin/products/${productId}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
-    const data = await res.json();
-
-    if (res.ok) {
-      alert(data.message);
-      fetchAdminProducts();
-    } else {
-      alert("Error: " + data.error);
-    }
-  } catch (error) {
-    alert("System error during deletion.");
-  }
-}
-
-// PRODUCT EDITING LOGIC
-const editModal = document.getElementById("edit-product-modal");
-const editForm = document.getElementById("edit-product-form");
-
-function openEditModal(productId) {
-  // Find the product data from the globally stored array
-  const product = globalAdminProducts.find((p) => p.id === productId);
-  if (!product) return;
-
-  // Populate the form fields with existing data
-  document.getElementById("edit-product-id").value = product.id;
-  document.getElementById("edit-name").value = product.name;
-  document.getElementById("edit-brand").value = product.brand || "";
-  document.getElementById("edit-sku").value = product.sku || "";
-  document.getElementById("edit-price").value = product.price;
-  document.getElementById("edit-stock").value = product.stock || 0;
-  document.getElementById("edit-category-id").value = product.category_id;
-  document.getElementById("edit-description").value = product.description || "";
-
-  // Clear the file input in case it was used previously
-  document.getElementById("edit-image-file").value = "";
-
-  // Display the modal
-  if (editModal) editModal.style.display = "flex";
-}
-
-function closeEditModal() {
-  if (editModal) editModal.style.display = "none";
-}
-
-if (editForm) {
-  editForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const productId = document.getElementById("edit-product-id").value;
-    const formData = new FormData();
-
-    formData.append("name", document.getElementById("edit-name").value.trim());
-    formData.append(
-      "brand",
-      document.getElementById("edit-brand").value.trim(),
-    );
-    formData.append("sku", document.getElementById("edit-sku").value.trim());
-    formData.append("price", document.getElementById("edit-price").value);
-    formData.append("stock", document.getElementById("edit-stock").value || 0);
-    formData.append(
-      "category_id",
-      document.getElementById("edit-category-id").value,
-    );
-    formData.append(
-      "description",
-      document.getElementById("edit-description").value.trim(),
-    );
-
-    const imageFile = document.getElementById("edit-image-file").files[0];
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-
-    const submitBtn = editForm.querySelector("button[type='submit']");
-    submitBtn.innerText = "Saving...";
+if (loginForm) {
+  loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault(); 
+    
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    submitBtn.innerText = "Authenticating...";
     submitBtn.disabled = true;
 
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/admin/products/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        },
-      );
-
+      const response = await fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }), 
+      });
       const data = await response.json();
-
+      
       if (response.ok) {
-        alert(data.message);
-        closeEditModal();
-        fetchAdminProducts();
-      } else {
-        alert("Failed to update product: " + data.error);
-        if (response.status === 403 || response.status === 401) {
-          logout();
+        localStorage.setItem("token", data.token);
+        
+        if (data.role === 'admin') {
+            alert("Login successful! Welcome to the Admin Dashboard.");
+            window.location.href = "/frontend/admin.html";
+        } else {
+            alert("Login successful! Welcome back to BestTech.");
+            window.location.href = "/frontend/index.html"; 
         }
+      } else {
+        alert(data.error || "Login failed. Please check your credentials.");
       }
     } catch (error) {
-      console.error("Update Error: ", error);
-      alert("Server connection error.");
+      console.error(error);
+      alert("Server connection error. Please try again later.");
     } finally {
-      submitBtn.innerText = "Save Changes";
+      submitBtn.innerText = originalText;
       submitBtn.disabled = false;
     }
   });
 }
 
-fetchAdminProducts();
+if (registerForm) {
+  registerForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const full_name = document.getElementById("reg-name").value;
+    const phone = document.getElementById("reg-phone").value;
+    const email = document.getElementById("reg-email").value;
+    const password = document.getElementById("reg-password").value;
+
+    try {
+      const response = await fetch("http://localhost:3000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, full_name, phone }),
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert("Account created successfully! You can now sign in.");
+        registerForm.reset();
+        goToLoginBtn.click(); 
+      } else {
+        alert(data.error || "Registration failed. Email might already exist.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server connection error. Is your Backend running?");
+    }
+  });
+}
+
+document.addEventListener("click", (e) => {
+  if (userDropdown && accountWrapper && !accountWrapper.contains(e.target)) {
+     userDropdown.style.display = "none";
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (userDropdown && accountWrapper && !accountWrapper.contains(e.target)) {
+     userDropdown.style.display = "none";
+  }
+});
+
+const btnLogout = document.getElementById("menu-logout");
+if (btnLogout) {
+  btnLogout.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    alert("You have been logged out successfully.");
+    window.location.reload(); 
+  });
+}
+
+const btnMyOrders = document.getElementById("menu-orders");
+if (btnMyOrders) {
+  btnMyOrders.addEventListener("click", () => {
+    userDropdown.style.display = "none"; 
+    if(historyTrigger) historyTrigger.click();
+  });
+}
+
+if (btnProfile) {
+  btnProfile.addEventListener("click", async () => {
+    userDropdown.style.display = "none";
+    if (profileModal) {
+        profileModal.style.display = "flex"; 
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch("http://localhost:3000/api/profile", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById("profile-email").value = data.email;
+                document.getElementById("profile-name").value = data.full_name;
+                document.getElementById("profile-phone").value = data.phone || "";
+            } else {
+                alert("Your login session has expired.");
+                btnLogout.click();
+            }
+        } catch(err) {
+            console.error("Error loading profile information:", err);
+            document.getElementById("profile-name").value = "Server Error!";
+        }
+    }
+  });
+}
+
+if (closeProfileModal) {
+    closeProfileModal.addEventListener("click", () => {
+        profileModal.style.display = "none";
+    });
+}
+
+if (profileForm) {
+    profileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem("token");
+        const full_name = document.getElementById("profile-name").value.trim();
+        const phone = document.getElementById("profile-phone").value.trim();
+        const submitBtn = profileForm.querySelector("button[type='submit']");
+        submitBtn.innerText = "Saving...";
+        submitBtn.disabled = true;
+
+        try {
+            const res = await fetch("http://localhost:3000/api/profile", {
+                method: "PUT",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` 
+                },
+                body: JSON.stringify({ full_name, phone })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                profileModal.style.display = "none";
+            } else {
+                alert("Lỗi: " + data.error);
+            }
+        } catch(err) {
+            alert("System error while saving information.");
+        } finally {
+            submitBtn.innerText = "Save Changes";
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+if (localStorage.getItem("token")) {
+  if (accountText) accountText.innerText = "My Account";
+  if (loginTrigger) loginTrigger.querySelector("span").innerText = "My Account";
+  if (historyTrigger) historyTrigger.style.display = "flex";
+}
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let allProducts = [];
+
+if (backToShopBtn) {
+  backToShopBtn.addEventListener("click", () => {
+    if (detailView) detailView.style.display = "none";
+    if (shopLayout) shopLayout.style.display = "flex";
+  });
+}
+
+if (openCartBtn) openCartBtn.addEventListener("click", () => { if(cartDrawer) cartDrawer.classList.add("open"); });
+if (closeCartBtn) closeCartBtn.addEventListener("click", () => { if(cartDrawer) cartDrawer.classList.remove("open"); });
+
+function renderProducts(productsToDisplay) {
+  const productListEl = document.getElementById("product-list");
+  if (!productListEl) return;
+  productListEl.innerHTML = "";
+
+  if (productsToDisplay.length === 0) {
+    productListEl.innerHTML = "<p style='grid-column: 1/-1; text-align: center; font-size: 1.2rem;'>We couldn't find any matches. Try checking your spelling or using less specific terms.</p>";
+    return;
+  }
+
+  productsToDisplay.forEach((product) => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+            <div class="img-wrapper">
+                <img src="${product.image_url || "https://via.placeholder.com/300"}" 
+                     alt="${product.name}" 
+                     onclick="showProductDetail(${product.id})" 
+                     style="cursor: pointer;">
+                <div class="quick-add" onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
+                    Add to Cart
+                </div>
+            </div>
+            <div class="product-info" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
+                <h3 class="product-name">${product.brand ? product.brand + " " : ""}${product.name}</h3>
+                <p class="product-price">$${product.price}</p>
+            </div>
+        `;
+    productListEl.appendChild(card);
+  });
+}
+
+// ----------------------------------------------------
+// DYNAMIC FILTERS, SORTING & RENDERING LOGIC
+// ----------------------------------------------------
+let currentPageProducts = [];
+
+async function fetchProducts() {
+  try {
+    const response = await fetch(API_URL);
+    const products = await response.json();
+    allProducts = products; 
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('q');
+
+    if (searchQuery) {
+        const titleEl = document.getElementById("page-title");
+        if (titleEl) titleEl.innerText = `Search results for: "${searchQuery}"`;
+        document.title = `Search: ${searchQuery} | Best Tech`;
+
+        currentPageProducts = allProducts.filter(product => {
+            const name = product.name.toLowerCase();
+            const brand = (product.brand || "").toLowerCase();
+            const keyword = searchQuery.toLowerCase();
+            return name.includes(keyword) || brand.includes(keyword);
+        });
+    } else if (typeof PAGE_KEYWORD !== 'undefined') {
+        const titleEl = document.getElementById("page-title");
+        if (titleEl) titleEl.innerText = PAGE_TITLE;
+        document.title = PAGE_TITLE + " | Best Tech";
+
+        currentPageProducts = allProducts.filter(product => {
+            const name = product.name.toLowerCase();
+            const brand = (product.brand || "").toLowerCase();
+            const keyword = PAGE_KEYWORD.toLowerCase();
+            return name.includes(keyword) || brand.includes(keyword);
+        });
+    } else {
+        currentPageProducts = [...allProducts]; 
+    }
+
+    renderDynamicBrands(currentPageProducts);
+    handleFilters(); 
+
+  } catch (error) {
+    const listEl = document.getElementById("product-list");
+    if (listEl) {
+      listEl.innerHTML = "Connection error. Please check if your Backend server is running at :3000";
+    }
+  }
+}
+
+function renderDynamicBrands(products) {
+    const brandFiltersEl = document.getElementById("brand-filters");
+    if (!brandFiltersEl) return;
+
+    const uniqueBrands = [...new Set(products.map(p => p.brand).filter(b => b && b.trim() !== ""))].sort();
+
+    if (uniqueBrands.length === 0) {
+        brandFiltersEl.innerHTML = "<li style='color: #666; font-size: 0.9rem;'>No brands available</li>";
+        return;
+    }
+
+    brandFiltersEl.innerHTML = uniqueBrands.map(brand => `
+        <li>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" value="${brand}" class="dynamic-brand-checkbox"> 
+                ${brand}
+            </label>
+        </li>
+    `).join('');
+
+    const newCheckboxes = document.querySelectorAll('.dynamic-brand-checkbox');
+    newCheckboxes.forEach(cb => cb.addEventListener('change', handleFilters));
+}
+
+function addToCart(id, name, price) {
+  const existingItem = cart.find((item) => item.product_id === id);
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({ product_id: id, name: name, price: price, quantity: 1 });
+  }
+  updateCart();
+  if (cartDrawer) cartDrawer.classList.add("open");
+}
+
+function removeFromCart(id) {
+  cart = cart.filter((item) => item.product_id !== id);
+  updateCart();
+}
+
+function updateCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCartUI();
+}
+
+function renderCartUI() {
+  if (!cartItemList || !cartCount || !cartTotal) return;
+  cartItemList.innerHTML = "";
+  let total = 0;
+  let count = 0;
+
+  cart.forEach((item) => {
+    total += item.price * item.quantity;
+    count += item.quantity;
+    const li = document.createElement("li");
+    li.className = "cart-item";
+    li.innerHTML = `
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <p>$${item.price} x ${item.quantity}</p>
+                <button class="remove-item" onclick="removeFromCart(${item.product_id})">Remove</button>
+            </div>
+        `;
+    cartItemList.appendChild(li);
+  });
+  cartCount.innerText = count;
+  cartTotal.innerText = total.toFixed(2);
+}
+
+function handleSearch() {
+  if(!searchInput) return;
+  const searchTerm = searchInput.value.trim();
+  if (!searchTerm) return;
+
+  const currentUrl = window.location.href;
+  const frontendIndex = currentUrl.indexOf('/frontend/');
+
+  if (frontendIndex !== -1) {
+      const basePath = currentUrl.substring(0, frontendIndex + 10); 
+      window.location.href = `${basePath}search.html?q=${encodeURIComponent(searchTerm)}`;
+  } else {
+      window.location.href = `/search.html?q=${encodeURIComponent(searchTerm)}`;
+  }
+}
+
+if (searchBtn) searchBtn.addEventListener("click", handleSearch);
+if (searchInput) {
+  searchInput.addEventListener("keypress", function (event) {
+    if (event.key === "Enter") handleSearch();
+  });
+}
+
+if (orderForm) {
+  orderForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Security Alert: Please sign in to complete your purchase.");
+      if(authModal) authModal.style.display = "flex";
+      return;
+    }
+    const address = document.getElementById("shipping-address").value;
+    const orderData = {
+      shipping_address: address,
+      total_amount: parseFloat(cartTotal.innerText),
+      cartItems: cart,
+    };
+    try {
+      const response = await fetch(ORDER_API, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert("Order placed successfully! Order ID: " + data.order_id);
+        cart = [];
+        updateCart();
+        orderForm.reset();
+        if(cartDrawer) cartDrawer.classList.remove("open");
+      } else {
+        if (response.status === 401 || response.status === 403) {
+          alert("Your session has expired. Please log in again.");
+          localStorage.removeItem("token");
+          if(loginTrigger) loginTrigger.querySelector("span").innerText = "Account";
+          if(authModal) authModal.style.display = "flex";
+        } else {
+          alert("Failed to place order: " + data.error);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error. Please try again later.");
+    }
+  });
+}
+
+function showProductDetail(product_id) {
+  const product = allProducts.find((p) => p.id === product_id);
+  if (!product) return;
+  
+  const imgElement = document.getElementById("detail-img");
+  if (imgElement) {
+      imgElement.src = product.image_url || "https://via.placeholder.com/500";
+      imgElement.style.opacity = 1; 
+  }
+
+  const thumbContainer = document.getElementById("detail-thumbnails");
+  if (thumbContainer) {
+      let images = [];
+      
+      if (product.all_images && product.all_images.length > 0) {
+          images = product.all_images;
+      } 
+      else if (product.image_url) {
+          images = [product.image_url];
+      } 
+      else {
+          images = ["https://via.placeholder.com/500"];
+      }
+
+      thumbContainer.innerHTML = images.map((img, index) => `
+          <img src="${img}" class="thumbnail-img ${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
+      `).join('');
+
+      if (images.length <= 1) {
+          thumbContainer.style.display = "none";
+      } else {
+          thumbContainer.style.display = "flex";
+      }
+  }
+
+  if(document.getElementById("detail-name")) document.getElementById("detail-name").innerText = product.brand ? `${product.brand} ${product.name}` : product.name;
+  if(document.getElementById("detail-price")) document.getElementById("detail-price").innerText = `$${product.price}`;
+  if(document.getElementById("detail-sku")) document.getElementById("detail-sku").innerText = product.sku || "N/A";
+  if(document.getElementById("detail-desc")) document.getElementById("detail-desc").innerText = product.description || "No description available for this product.";
+
+  const stockElement = document.getElementById("detail-stock");
+  if(stockElement) {
+      if (product.stock > 0) {
+        stockElement.innerText = `In Stock (${product.stock} units)`;
+        stockElement.style.color = "#059669";
+      } else {
+        stockElement.innerText = "Out of Stock";
+        stockElement.style.color = "#ef4444";
+      }
+  }
+
+  const detailAddBtn = document.getElementById("detail-add-btn");
+  const qtyInput = document.getElementById("qty-input");
+  
+  if (detailAddBtn) {
+    detailAddBtn.onclick = () => {
+      const quantityToAdd = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+      
+      const existingItem = cart.find((item) => item.product_id === product_id);
+      if (existingItem) {
+        existingItem.quantity += quantityToAdd;
+      } else {
+        cart.push({ product_id: product_id, name: product.name, price: product.price, quantity: quantityToAdd });
+      }
+      
+      updateCart();
+      
+      const drawer = document.getElementById("cart-drawer");
+      if (drawer) drawer.classList.add("open");
+      if (qtyInput) qtyInput.value = 1;
+    };
+  }
+
+  if (shopLayout && detailView) {
+      shopLayout.style.display = "none";
+      detailView.style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+// HELPER: CHANGE MAIN IMAGE WHEN CLICKING THUMBNAIL
+function changeMainImage(element, newSrc) {
+    const imgElement = document.getElementById("detail-img");
+    if (imgElement) {
+        // Quick fade effect for better UX
+        imgElement.style.opacity = 0.5;
+        setTimeout(() => {
+            imgElement.src = newSrc;
+            imgElement.style.opacity = 1;
+        }, 150);
+    }
+    
+    const allThumbs = document.querySelectorAll(".thumbnail-img");
+    allThumbs.forEach(th => th.classList.remove("active"));
+    element.classList.add("active");
+}
+
+function handleFilters() {
+  const activeBrandCheckboxes = document.querySelectorAll('.dynamic-brand-checkbox:checked');
+  const selectedBrands = Array.from(activeBrandCheckboxes).map(cb => cb.value.toLowerCase());
+
+  const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || 'all';
+  
+  const sortOption = document.getElementById("sort-options")?.value || "default";
+
+  let filteredProducts = currentPageProducts.filter((product) => {
+    const productBrand = (product.brand || "").toLowerCase();
+    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(productBrand);
+
+    let matchesPrice = true;
+    if (selectedPrice === 'under500') matchesPrice = product.price < 500;
+    else if (selectedPrice === '500to999') matchesPrice = product.price >= 500 && product.price <= 999;
+    else if (selectedPrice === 'over1000') matchesPrice = product.price > 999;
+
+    return matchesBrand && matchesPrice;
+  });
+
+  if (sortOption === "price-asc") {
+      filteredProducts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+  } else if (sortOption === "price-desc") {
+      filteredProducts.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+  }
+
+  if (detailView && detailView.style.display === "block") {
+    detailView.style.display = "none";
+    if (shopLayout) shopLayout.style.display = "flex";
+  }
+
+  renderProducts(filteredProducts);
+}
+
+const staticPriceRadios = document.querySelectorAll('input[name="price"]');
+staticPriceRadios.forEach((radio) => radio.addEventListener("change", handleFilters));
+
+const sortDropdown = document.getElementById("sort-options");
+if (sortDropdown) sortDropdown.addEventListener("change", handleFilters);
+
+if (historyTrigger) {
+    historyTrigger.addEventListener("click", async () => {
+        if(historyModal) historyModal.style.display = "flex";
+        if(historyList) historyList.innerHTML = "<p style='text-align:center; font-size: 1.1rem;'>Loading your orders...</p>";
+
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch("http://localhost:3000/api/orders/history", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error("Fetch failed");
+            const orders = await response.json();
+
+            if (orders.length === 0) {
+                if(historyList) historyList.innerHTML = "<p style='text-align:center;'>You haven't placed any orders yet.</p>";
+                return;
+            }
+
+            if(historyList) {
+                historyList.innerHTML = orders.map(order => `
+                    <div style="border: 1px solid #c8c8c8; border-radius: 8px; margin-bottom: 25px; padding: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                            <strong style="font-size: 1.2rem;">Order #${order.order_id}</strong>
+                            <span style="color: ${order.status === 'completed' ? '#059669' : '#d97706'}; font-weight: 900; text-transform: uppercase;">
+                                ${order.status}
+                            </span>
+                            <span style="color: #666; font-weight: 500;">
+                                ${new Date(order.create_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </span>
+                        </div>
+                        ${order.items.map(item => `
+                            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+                                <img src="${item.image_url || 'https://via.placeholder.com/60'}" style="width: 70px; height: 70px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; padding: 5px;">
+                                <div style="flex: 1; font-weight: 500; font-size: 1.1rem;">${item.product_name} <span style="color: #666;">(x${item.quantity})</span></div>
+                                <div style="font-weight: 900; color: #040c13; font-size: 1.1rem;">$${item.price}</div>
+                            </div>
+                        `).join('')}
+                        <div style="text-align: right; font-size: 1.3rem; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                            Total Amount: <strong style="color: #0046be;">$${order.total_amount}</strong>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error(error);
+            if(historyList) historyList.innerHTML = "<p style='color: red; text-align: center;'>Connection error while fetching orders.</p>";
+        }
+    });
+}
+
+if (closeHistoryModal) {
+    closeHistoryModal.addEventListener("click", () => {
+        if(historyModal) historyModal.style.display = "none";
+    });
+}
+
+const menuBtns = document.querySelectorAll('.menu-pill-btn');
+const dropdownBoxes = document.querySelectorAll('.dropdown-menu-box');
+const menuOverlay = document.getElementById('menu-overlay');
+const closeDropdownBtns = document.querySelectorAll('.close-dropdown');
+
+function closeAllMenus() {
+  dropdownBoxes.forEach(box => box.style.display = 'none');
+  menuBtns.forEach(btn => btn.classList.remove('active'));
+  if (menuOverlay) menuOverlay.style.display = 'none';
+}
+
+menuBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const targetId = btn.getAttribute('data-target');
+    const targetBox = document.getElementById(targetId);
+
+    if (targetBox.style.display === 'flex') {
+      closeAllMenus();
+      return;
+    }
+    closeAllMenus();
+    targetBox.style.display = 'flex';
+    btn.classList.add('active');
+    if (menuOverlay) menuOverlay.style.display = 'block';
+  });
+});
+
+closeDropdownBtns.forEach(btn => btn.addEventListener('click', closeAllMenus));
+if (menuOverlay) menuOverlay.addEventListener('click', closeAllMenus);
+
+// Đồng hồ đếm ngược Flash Sale
+const timerDisplay = document.getElementById("flash-timer");
+if (timerDisplay) {
+    let timeLeft = (12 * 3600) + (45 * 60) + 30; 
+    const countdownInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            timerDisplay.innerText = "EXPIRED";
+            return;
+        }
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+        const formatTime = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+        timerDisplay.innerText = formatTime;
+        timeLeft--;
+    }, 1000); 
+}
+
+const searchSuggestions = document.getElementById("search-suggestions");
+
+if (searchInput && searchSuggestions) {
+    searchInput.addEventListener("input", function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        
+        if (searchTerm.length < 2) {
+            searchSuggestions.style.display = "none";
+            return;
+        }
+
+        const filtered = allProducts.filter(product => {
+            const name = product.name.toLowerCase();
+            const brand = (product.brand || "").toLowerCase();
+            return name.includes(searchTerm) || brand.includes(searchTerm);
+        }).slice(0, 5); 
+
+        if (filtered.length === 0) {
+            searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #666; font-style: italic;">No products found for "${searchTerm}"</div>`;
+            searchSuggestions.style.display = "block";
+            return;
+        }
+
+        searchSuggestions.innerHTML = filtered.map(p => {
+            const safeName = p.name.replace(/'/g, "\\'"); // Prevent errors with names containing single quotes
+            return `
+            <div class="suggestion-item" onclick="goToSearch('${safeName}')">
+                <img src="${p.image_url || 'https://via.placeholder.com/50'}" class="suggestion-img">
+                <div class="suggestion-info">
+                    <div class="suggestion-name">${p.brand ? p.brand + ' ' : ''}${p.name}</div>
+                    <div class="suggestion-price">$${p.price}</div>
+                </div>
+            </div>
+            `;
+        }).join("");
+        
+        searchSuggestions.style.display = "block";
+    });
+
+    document.addEventListener("click", function(e) {
+        if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+            searchSuggestions.style.display = "none";
+        }
+    });
+}
+
+function goToSearch(keyword) {
+    searchInput.value = keyword;
+    handleSearch();
+}
+
+fetchProducts();
+renderCartUI();
