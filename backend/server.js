@@ -51,21 +51,36 @@ db.connect((err) => {
 // 2. Write an API to display a list of products (GET /api/products)
 app.get('/api/products', (req, res) => {
     const { brand } = req.query; 
-    
-    let sql = 'SELECT * FROM Products';
+
+    let sql = `
+        SELECT p.*, 
+               (SELECT GROUP_CONCAT(pi.image_url SEPARATOR ',') FROM Product_Images pi WHERE pi.product_id = p.id) AS gallery
+        FROM Products p
+    `;
     let queryParams = [];
 
     if (brand) {
-        sql += ' WHERE brand = ?';
+        sql += ' WHERE p.brand = ?';
         queryParams.push(brand);
     }
 
     db.query(sql, queryParams, (err, results) => {
         if (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Lỗi máy chủ' });
+            console.error("Fetch products error:", err);
+            return res.status(500).json({ error: 'Server error while fetching products.' });
         }
-        res.json(results);
+        
+        const finalResults = results.map(row => {
+            let images = [];
+            if (row.image_url) images.push(row.image_url);
+            if (row.gallery) {
+                images = images.concat(row.gallery.split(','));
+            }
+            row.all_images = images;
+            return row;
+        });
+        
+        res.json(finalResults);
     });
 });
 
@@ -163,7 +178,6 @@ const isAdmin = (req, res, next) => {
 app.post("/api/products", 
   authenticateToken, 
   isAdmin, 
-  upload.single('image'),
   [
     body('name').notEmpty().withMessage('The product name cannot be left blank!'),
     body('category_id').isInt({ min: 1 }).withMessage('The Category ID must be a positive integer!'),
@@ -173,37 +187,30 @@ app.post("/api/products",
   ],
   (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-    const { category_id, name, sku, brand, price, stock, description } = req.body;
+    const { category_id, name, sku, brand, price, stock, description, main_image, extra_images } = req.body;
     const finalStock = stock || 0; 
 
-    const image_url = req.file ? `http://localhost:3000/images/${req.file.filename}` : null;
+    const sql = `INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    const sql = `INSERT INTO Products 
-      (category_id, name, sku, brand, price, stock, image_url, description) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    db.query(
-      sql,
-      [category_id, name, sku, brand, price, finalStock, image_url, description],
-      (err, result) => {
+    db.query(sql, [category_id, name, sku, brand, price, finalStock, main_image || null, description], (err, result) => {
         if (err) {
-          console.error("Insert Product Error:", err);
-          if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ error: "This SKU already exists in the system!" });
-          }
+          if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: "This SKU already exists in the system!" });
           return res.status(500).json({ error: "Server error when saving the product." });
         }
 
-        res.status(201).json({ 
-          message: "Product added successfully!", 
-          product_id: result.insertId 
-        });
-      }
-    );
+        const productId = result.insertId;
+
+        if (extra_images && Array.isArray(extra_images) && extra_images.length > 0) {
+            const extraValues = extra_images.map(url => [productId, url]);
+            db.query("INSERT INTO Product_Images (product_id, image_url) VALUES ?", [extraValues], () => {
+                res.status(201).json({ message: "Product and gallery linked successfully!", product_id: productId });
+            });
+        } else {
+            res.status(201).json({ message: "Product added successfully!", product_id: productId });
+        }
+    });
 });
 
 // 7. Ordering API
@@ -391,7 +398,6 @@ app.delete("/api/admin/products/:id", authenticateToken, isAdmin, (req, res) => 
 app.put("/api/admin/products/:id", 
   authenticateToken, 
   isAdmin, 
-  upload.single('image'),
   [
     body('name').notEmpty().withMessage('The product name cannot be empty.'),
     body('category_id').isInt({ min: 1 }).withMessage('The Category ID must be a positive integer.'),
@@ -401,44 +407,103 @@ app.put("/api/admin/products/:id",
   ],
   (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const productId = req.params.id;
-    const { category_id, name, sku, brand, price, stock, description } = req.body;
+    const { category_id, name, sku, brand, price, stock, description, main_image, extra_images } = req.body;
     const finalStock = stock || 0; 
 
-    let sql;
-    let values;
+    const sql = `UPDATE Products SET category_id=?, name=?, sku=?, brand=?, price=?, stock=?, image_url=?, description=? WHERE id=?`;
+    const values = [category_id, name, sku, brand, price, finalStock, main_image || null, description, productId];
+      
+    db.query(sql, values, (err, result) => {
+        if (err) return res.status(500).json({ error: "Server error." });
+          
+        db.query("DELETE FROM Product_Images WHERE product_id = ?", [productId], () => {
+            if (extra_images && Array.isArray(extra_images) && extra_images.length > 0) {
+                const extraValues = extra_images.map(url => [productId, url]);
+                db.query("INSERT INTO Product_Images (product_id, image_url) VALUES ?", [extraValues], () => {
+                    res.json({ message: "Product updated with new gallery links!" });
+                });
+            } else {
+                res.json({ message: "Product updated successfully!" });
+            }
+        });
+    });
+});
 
-    if (req.file) {
-      const image_url = `http://localhost:3000/images/${req.file.filename}`;
-      sql = `UPDATE Products 
-             SET category_id = ?, name = ?, sku = ?, brand = ?, price = ?, stock = ?, image_url = ?, description = ? 
-             WHERE id = ?`;
-      values = [category_id, name, sku, brand, price, finalStock, image_url, description, productId];
-    } else {
-      sql = `UPDATE Products 
-             SET category_id = ?, name = ?, sku = ?, brand = ?, price = ?, stock = ?, description = ? 
-             WHERE id = ?`;
-      values = [category_id, name, sku, brand, price, finalStock, description, productId];
+// API: MEDIA LIBRARY MANAGER (WITH FOLDERS)
+app.get("/api/admin/media/folders", authenticateToken, isAdmin, (req, res) => {
+    db.query("SELECT * FROM Media_Folders ORDER BY name ASC", (err, results) => {
+        if (err) return res.status(500).json({ error: "Failed to fetch folders." });
+        res.json(results);
+    });
+});
+
+app.post("/api/admin/media/folders", authenticateToken, isAdmin, (req, res) => {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Folder name is required." });
+    
+    db.query("INSERT INTO Media_Folders (name) VALUES (?)", [name], (err, result) => {
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: "Folder already exists." });
+            return res.status(500).json({ error: "Database error." });
+        }
+        res.status(201).json({ message: "Folder created!", id: result.insertId });
+    });
+});
+
+app.post("/api/admin/media", authenticateToken, isAdmin, upload.array('images', 10), (req, res) => {
+    const files = req.files;
+    const folder_id = req.body.folder_id;
+
+    if (!files || files.length === 0) {
+        return res.status(400).json({ error: "Please select at least one image." });
     }
 
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        console.error("Update Product Error:", err);
-        if (err.code === 'ER_DUP_ENTRY') {
-          return res.status(400).json({ error: "This SKU already exists in the system." });
+    const finalFolderId = (folder_id && folder_id !== 'null' && folder_id !== '') ? folder_id : null;
+    const values = files.map(f => [f.originalname, `http://localhost:3000/images/${f.filename}`, finalFolderId]);
+    
+    db.query("INSERT INTO Media_Library (file_name, file_url, folder_id) VALUES ?", [values], (err, result) => {
+        if (err) {
+            console.error("Media Upload Error:", err);
+            return res.status(500).json({ error: "Database error while saving media." });
         }
-        return res.status(500).json({ error: "Server error when updating the product." });
-      }
+        res.status(201).json({ message: "Images successfully added to the Media Library!" });
+    });
+});
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Product not found." });
-      }
+app.get("/api/admin/media", authenticateToken, isAdmin, (req, res) => {
+    const { folder_id } = req.query;
+    
+    let sql = "SELECT * FROM Media_Library ";
+    let params = [];
 
-      res.json({ message: "Product updated successfully!" });
+    if (folder_id) {
+        if (folder_id === 'unassigned') {
+            sql += "WHERE folder_id IS NULL ";
+        } else {
+            sql += "WHERE folder_id = ? ";
+            params.push(folder_id);
+        }
+    }
+    
+    sql += "ORDER BY uploaded_at DESC";
+
+    db.query(sql, params, (err, results) => {
+        if (err) return res.status(500).json({ error: "Failed to fetch media." });
+        res.json(results);
+    });
+});
+
+app.delete("/api/admin/media/:id", authenticateToken, isAdmin, (req, res) => {
+    const mediaId = req.params.id;
+    db.query("DELETE FROM Media_Library WHERE id = ?", [mediaId], (err, result) => {
+        if (err) {
+            console.error("Delete Media Error:", err);
+            return res.status(500).json({ error: "Failed to delete media." });
+        }
+        res.json({ message: "Media deleted successfully!" });
     });
 });
 
