@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Best Tech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2 style="margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+      <a href="index.html" style="color: #ffe000; text-decoration: none;">BestTech Admin</a>
+    </h2>
+    <ul class="menu">
+      <li style="color: #ffe000; font-weight: bold;">
+        <a href="admin.html" style="color: inherit; text-decoration: none; display: block;">+ Add New Product</a>
+      </li>
+      <li>
+        <a href="admin-orders.html" style="color: inherit; text-decoration: none; display: block;">Order Management</a>
+      </li>
+      <li>
+        <a href="admin-customers.html" style="color: inherit; text-decoration: none; display: block;">Customer List</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="header-bar">
+      <h1>Add New Product</h1>
+      <button class="logout-btn" onclick="logout()">Log Out</button>
+    </div>
+
+    <!-- ADD PRODUCT FORM -->
+    <div class="card">
+      <form id="add-product-form">
+
+        <div class="form-group">
+          <label>Product Name (including product type) *</label>
+          <input type="text" id="name" required placeholder="Ex: Apple iPhone 15 Pro Max 256GB">
+          <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+            Tip: Include the product type in the name (Ex: <b>iPhone</b>, <b>Laptop</b>, <b>TV</b>) to allow the system to automatically place the product on the correct category page.
+          </small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Main Category *</label>
+            <select id="main_category" required style="height: 40px;">
+              <option value="">-- Select main category --</option>
+              <option value="1">Shop by Brand</option>
+              <option value="2">TV & Home Theater</option>
+              <option value="3">Computers & Tablets</option>
+              <option value="4">Appliances</option>
+              <option value="5">Small Kitchen Appliances</option>
+              <option value="6">Video Games</option>
+              <option value="7">Cell Phones</option>
+              <option value="8">Headphones</option>
+              <option value="9">Home Audio & Speakers</option>
+              <option value="10">Music, Movies & TV Shows</option>
+              <option value="11">Cameras, Camcorders & Drones</option>
+              <option value="12">Wearable Technology</option>
+              <option value="13">Fitness, Sports & Outdoors</option>
+              <option value="14">Sports Fan Shop</option>
+              <option value="15">Health, Wellness & Personal Care</option>
+              <option value="16">Home, Furniture & Office</option>
+              <option value="17">Smart Home, Security & Wifi</option>
+              <option value="18">Outdoor Living</option>
+              <option value="19">Electric Transportation</option>
+              <option value="20">Car Electronics & GPS</option>
+              <option value="21">Collectibles & Memorabilia</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Sub Category *</label>
+            <select id="category_id" required style="height: 40px;" disabled>
+              <option value="">-- Please select the main category first --</option>
+            </select>
+            <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+              The product will be saved directly into this subcategory.
+            </small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Brand *</label>
+            <input type="text" id="brand" required placeholder="Ex: Apple, Samsung, Sony...">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+              Enter the brand name accurately so the product appears in the "Shop by Brand" menu.
+            </small>
+          </div>
+          <div class="form-group">
+            <label>SKU (Unique) *</label>
+            <input type="text" id="sku" required placeholder="Ex: APP-IPH15-256">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Selling Price ($) *</label>
+            <input type="number" id="price" step="0.01" required placeholder="999.99">
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity</label>
+            <input type="number" id="stock" value="10" min="0">
+          </div>
+        </div>
+
+        <!-- UPDATED: Product Images (Add Form) -->
+        <div class="form-group">
+          <label>Product Images (Select from Media Library)</label>
+          <button type="button" class="btn-submit" style="background: #4b5563; margin-bottom: 10px; padding: 8px 15px; font-size: 0.95rem;" onclick="openMediaManager('add')">
+            Browse Media Library
+          </button>
+          <div id="add-selected-images" style="display: flex; gap: 10px; flex-wrap: wrap;">
+             <p style="color: #888; font-size: 0.9rem; margin: 0; font-style: italic;">No images selected.</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Detailed Description</label>
+          <textarea id="description" rows="4" placeholder="Enter product specifications, key features..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" style="width: 100%;">+ Add Product to Store</button>
+      </form>
+    </div>
+
+    <!-- PRODUCT MANAGEMENT LIST -->
+    <div style="margin-top: 50px; border-top: 2px solid #eee; padding-top: 30px;">
+      <h2>Product Management</h2>
+      <p style="color: #666; margin-bottom: 20px;">List of products currently available on the system.</p>
+      <div id="admin-product-list"></div>
+    </div>
+
+  </main>
+
+  <!-- EDIT PRODUCT MODAL -->
+  <div id="edit-product-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center;">
+    <div class="card" style="position: relative; max-height: 90vh; overflow-y: auto; width: 800px; margin: 0;">
+      <button onclick="closeEditModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #555;">&times;</button>
+      
+      <h2 style="margin-top: 0; color: #0046be; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px;">Edit Product</h2>
+      
+      <form id="edit-product-form">
+        <input type="hidden" id="edit-product-id">
+
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" id="edit-name" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Brand *</label>
+            <input type="text" id="edit-brand" required>
+          </div>
+          <div class="form-group">
+            <label>SKU (Unique) *</label>
+            <input type="text" id="edit-sku" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price ($) *</label>
+            <input type="number" id="edit-price" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input type="number" id="edit-stock" min="0">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Sub Category ID (Read-only for quick edits)</label>
+          <input type="number" id="edit-category-id" readonly style="background: #f4f6f9; color: #666;">
+        </div>
+
+        <!-- UPDATED: Product Images (Edit Form) -->
+        <div class="form-group">
+          <label>Product Images (Main Image & Gallery)</label>
+          <button type="button" class="btn-submit" style="background: #4b5563; margin-bottom: 10px; padding: 8px 15px; font-size: 0.95rem;" onclick="openMediaManager('edit')">
+            Browse Media Library
+          </button>
+          <div id="edit-selected-images" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="edit-description" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" style="width: 100%; background: #eab308; color: #000;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MEDIA LIBRARY MANAGER MODAL (UPGRADED) -->
+  <div id="media-manager-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10000; justify-content: center; align-items: center;">
+    <!-- NÂNG CẤP: Card có thể tự do kéo giãn (resize: both) và mặc định to hơn -->
+    <div class="card" style="width: 80vw; height: 80vh; min-width: 800px; min-height: 500px; max-width: 95vw; max-height: 95vh; display: flex; flex-direction: column; padding: 25px; resize: both; overflow: auto; margin: auto;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #0046be;">Media Library</h2>
+        <button onclick="closeMediaManager()" style="background: none; border: none; font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      
+      <div style="display: flex; gap: 20px; flex: 1; overflow: hidden;">
+        
+        <!-- Left Sidebar: Folders -->
+        <div style="width: 250px; background: #f4f6f9; border-radius: 8px; padding: 15px; display: flex; flex-direction: column; border: 1px solid #e0e6ef;">
+            <h3 style="margin-top: 0; font-size: 1.1rem; color: #333; margin-bottom: 15px;">Documents</h3>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                <input type="text" id="new-folder-name" placeholder="New folder..." style="flex: 1; padding: 8px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 0.9rem;">
+                <button onclick="createFolder()" style="background: #0046be; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;" title="Tạo Thư mục">+</button>
+            </div>
+
+            <ul id="folder-list" style="list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1;">
+                <!-- Folders injected via JS -->
+            </ul>
+        </div>
+
+        <!-- Right Area: Media Grid & Actions -->
+        <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+            
+            <!-- Toolbar: Upload & Search -->
+            <div style="background: #f4f6f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; border: 1px solid #e0e6ef;">
+                <span id="current-folder-label" style="font-weight: bold; color: #0046be; min-width: 100px;">All Media</span>
+                
+                <!-- Thanh Tìm kiếm Ảnh -->
+                <input type="text" id="media-search-input" placeholder="🔍 Search image by name..." onkeyup="filterMediaByName()" style="flex: 1; padding: 8px 12px; border: 1px solid #c8c8c8; border-radius: 4px; outline: none;">
+                
+                <!-- Khu vực Upload -->
+                <input type="file" id="media-upload-input" multiple accept="image/*" style="width: 220px; padding: 5px; background: #fff; border: 1px dashed #c8c8c8; border-radius: 4px;">
+                <button type="button" class="btn-submit" style="background: #10b981; padding: 8px 15px; font-size: 0.95rem;" onclick="uploadMediaToLibrary()">Upload</button>
+            </div>
+
+            <!-- Image Grid -->
+            <div id="media-grid" class="media-grid" style="flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 15px; align-content: flex-start;">
+                <p style="text-align: center; color: #666; width: 100%;">Loading media...</p>
+            </div>
+
+            <!-- Footer Action -->
+            <div style="border-top: 2px solid #eee; padding-top: 15px; text-align: right; display: flex; justify-content: space-between; align-items: center;">
+                <span id="media-selection-count" style="font-weight: bold; color: #555;">0 images selected</span>
+                <button type="button" class="btn-submit" style="background: #ffe000; color: #000;" onclick="confirmMediaSelection()">Confirm Selection</button>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- logic JS -->
+  <script src="admin.js"></script>
+</body>
+</html>
