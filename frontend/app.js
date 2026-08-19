@@ -784,6 +784,18 @@ if (reviewForm) {
     });
 }
 
+if (backToShopBtn) {
+  backToShopBtn.addEventListener("click", () => {
+    if (detailView) {
+        detailView.style.display = "none";
+    }
+    if (shopLayout) {
+        shopLayout.style.display = "flex";
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
 // Initialize Application
 fetchProducts();
 renderCartUI();
