@@ -211,6 +211,11 @@ menuBtns.forEach(btn => {
       return;
     }
     closeAllMenus();
+
+    const btnRect = btn.getBoundingClientRect(); 
+    targetBox.style.top = (btnRect.bottom + window.scrollY + 10) + "px";
+    targetBox.style.left = btnRect.left + "px";
+
     targetBox.style.display = 'flex';
     btn.classList.add('active');
     if (menuOverlay) menuOverlay.style.display = 'block';
@@ -219,6 +224,8 @@ menuBtns.forEach(btn => {
 
 closeDropdownBtns.forEach(btn => btn.addEventListener('click', closeAllMenus));
 if (menuOverlay) menuOverlay.addEventListener('click', closeAllMenus);
+
+window.addEventListener('resize', closeAllMenus);
 
 // --- PRODUCTS & FILTERS ---
 async function fetchProducts() {
@@ -357,7 +364,7 @@ function renderProducts(productsToDisplay) {
                 </div>
             </div>
             <div class="product-info" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
-                <h3 class="product-name">${product.brand ? product.brand + " " : ""}${product.name}</h3>
+                <h3 class="product-name">${product.name}</h3>
                 <p class="product-price">$${product.price}</p>
             </div>
         `;
@@ -393,7 +400,7 @@ function showProductDetail(product_id) {
       thumbContainer.style.display = images.length <= 1 ? "none" : "flex";
   }
 
-  if(document.getElementById("detail-name")) document.getElementById("detail-name").innerText = product.brand ? `${product.brand} ${product.name}` : product.name;
+  if(document.getElementById("detail-name")) document.getElementById("detail-name").innerText = product.name;
   if(document.getElementById("detail-price")) document.getElementById("detail-price").innerText = `$${product.price}`;
   if(document.getElementById("detail-sku")) document.getElementById("detail-sku").innerText = product.sku || "N/A";
   if(document.getElementById("detail-desc")) document.getElementById("detail-desc").innerText = product.description || "No description available for this product.";
@@ -429,6 +436,41 @@ function showProductDetail(product_id) {
       shopLayout.style.display = "none";
       detailView.style.display = "block";
       window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const specsContainer = document.getElementById("detail-specs-container");
+  const specsContent = document.getElementById("detail-specs-content");
+  
+  if (specsContainer && specsContent) {
+      let specs = product.specifications;
+      
+      if (typeof specs === 'string') {
+          try { specs = JSON.parse(specs); } catch(e) { specs = null; }
+      }
+
+      if (specs && Array.isArray(specs) && specs.length > 0) {
+          const groupedSpecs = {};
+          specs.forEach(spec => {
+              const groupName = spec.group || "General";
+              if (!groupedSpecs[groupName]) groupedSpecs[groupName] = [];
+              groupedSpecs[groupName].push(spec);
+          });
+
+          let html = "";
+          for (const group in groupedSpecs) {
+              html += `<div class="specs-group-title">${group}</div>`;
+              html += `<table class="specs-table">`;
+              groupedSpecs[group].forEach(s => {
+                  html += `<tr><td class="spec-name">${s.name}</td><td class="spec-value">${s.value}</td></tr>`;
+              });
+              html += `</table>`;
+          }
+          specsContent.innerHTML = html;
+          specsContainer.style.display = "block";
+      } else {
+          specsContainer.style.display = "none";
+          specsContent.innerHTML = "";
+      }
   }
 
   currentDetailProductId = product_id;
@@ -536,46 +578,129 @@ if (orderForm) {
 }
 
 // --- HISTORY & PROFILE ---
+let userOrderHistoryCache = []; 
+
 if (historyTrigger) {
     historyTrigger.addEventListener("click", async () => {
         if(historyModal) historyModal.style.display = "flex";
-        if(historyList) historyList.innerHTML = "<p style='text-align:center;'>Loading...</p>";
+        if(historyList) historyList.innerHTML = "<p style='text-align:center;'>Loading your orders...</p>";
 
         const token = localStorage.getItem("token");
         try {
+            // 1. Fetch User Profile for Sidebar
+            const profileRes = await fetch("http://localhost:3000/api/profile", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (profileRes.ok) {
+                const profile = await profileRes.json();
+                const nameEl = document.getElementById("order-user-name");
+                const avatarEl = document.getElementById("order-user-avatar");
+                if (nameEl) nameEl.innerText = profile.full_name;
+                if (avatarEl) avatarEl.innerText = profile.full_name.charAt(0).toUpperCase();
+            }
+
+            // 2. Fetch Orders
             const response = await fetch("http://localhost:3000/api/orders/history", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
-            const orders = await response.json();
+            userOrderHistoryCache = await response.json();
 
-            if (orders.length === 0) {
-                if(historyList) historyList.innerHTML = "<p style='text-align:center;'>No orders yet.</p>";
-                return;
-            }
+            // Render default Tab (All)
+            renderOrdersByStatus('all');
 
-            if(historyList) {
-                historyList.innerHTML = orders.map(order => `
-                    <div style="border: 1px solid #c8c8c8; border-radius: 8px; margin-bottom: 25px; padding: 25px;">
-                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
-                            <strong>Order #${order.order_id}</strong>
-                            <span style="color: ${order.status === 'completed' ? '#059669' : '#d97706'}; font-weight: bold; text-transform: uppercase;">${order.status}</span>
-                        </div>
-                        ${order.items.map(item => `
-                            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
-                                <img src="${item.image_url || 'https://via.placeholder.com/60'}" style="width: 70px; height: 70px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; padding: 5px;">
-                                <div style="flex: 1;">${item.product_name} <span style="color: #666;">(x${item.quantity})</span></div>
-                                <div style="font-weight: bold;">$${item.price}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `).join('');
-            }
         } catch (error) {
             if(historyList) historyList.innerHTML = "<p style='color: red; text-align: center;'>Connection error.</p>";
         }
     });
 }
-if (closeHistoryModal) closeHistoryModal.addEventListener("click", () => { if(historyModal) historyModal.style.display = "none"; });
+
+if (closeHistoryModal) {
+    closeHistoryModal.addEventListener("click", () => { 
+        if(historyModal) historyModal.style.display = "none"; 
+    });
+}
+
+// Tab Click Logic
+const orderTabs = document.querySelectorAll('.order-tab');
+orderTabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        orderTabs.forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        const status = e.target.getAttribute('data-status');
+        renderOrdersByStatus(status);
+    });
+});
+
+function renderOrdersByStatus(statusFilter) {
+    if(!historyList) return;
+    let filteredOrders = userOrderHistoryCache;
+
+    // Filter logic
+    if (statusFilter !== 'all') {
+        filteredOrders = userOrderHistoryCache.filter(o => o.status.toLowerCase() === statusFilter.toLowerCase());
+    }
+
+    // Empty State
+    if (filteredOrders.length === 0) {
+        historyList.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px;">
+            <svg width="60" height="60" fill="#c8c8c8" viewBox="0 0 24 24" style="margin-bottom: 15px;"><path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 18.5c-.82 0-1.5-.67-1.5-1.5s.68-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 8.5c-.82 0-1.5-.67-1.5-1.5S6.18 5.5 7 5.5s1.5.68 1.5 1.5S7.83 8.5 7 8.5z"/></svg>
+            <p style="color: #666; font-size: 1.1rem;">No orders found in this category.</p>
+        </div>`;
+        return;
+    }
+
+    // Status Color Helper
+    const getStatusColor = (status) => {
+        switch(status.toLowerCase()) {
+            case 'completed': return '#10b981'; // Green
+            case 'pending': return '#f59e0b'; // Yellow
+            case 'shipping': return '#3b82f6'; // Blue
+            case 'cancelled': return '#ef4444'; // Red
+            default: return '#6b7280'; // Gray
+        }
+    };
+
+    // Render Orders
+    historyList.innerHTML = filteredOrders.map(order => `
+        <div style="background: #fff; border: 1px solid #e0e6ef; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow: hidden;">
+            
+            <!-- Order Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #fafafa; border-bottom: 1px solid #e0e6ef; padding: 15px 20px;">
+                <div>
+                    <strong style="font-size: 1.1rem; color: #040c13;">Order #${order.order_id}</strong>
+                    <span style="color: #666; margin-left: 10px; font-size: 0.9rem;">
+                        ${new Date(order.create_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                </div>
+                <span style="color: ${getStatusColor(order.status)}; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 6px; font-size: 0.95rem;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: ${getStatusColor(order.status)};"></span>
+                    ${order.status}
+                </span>
+            </div>
+
+            <!-- Order Items -->
+            <div style="padding: 20px;">
+                ${order.items.map(item => `
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee;">
+                        <img src="${item.image_url || 'https://via.placeholder.com/60'}" style="width: 70px; height: 70px; object-fit: contain; border: 1px solid #eee; border-radius: 8px; padding: 5px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; font-size: 1.1rem; color: #040c13; margin-bottom: 5px;">${item.product_name}</div>
+                            <div style="color: #666;">Quantity: <strong>${item.quantity}</strong></div>
+                        </div>
+                        <div style="font-weight: 900; color: #0046be; font-size: 1.1rem;">$${item.price}</div>
+                    </div>
+                `).join('')}
+                
+                <!-- Order Footer -->
+                <div style="text-align: right; margin-top: 15px;">
+                    <span style="color: #666; font-size: 1.1rem; margin-right: 15px;">Total Amount:</span>
+                    <strong style="color: #ef4444; font-size: 1.6rem;">$${order.total_amount}</strong>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
 
 if (btnProfile) {
   btnProfile.addEventListener("click", async () => {
@@ -652,7 +777,7 @@ if (searchInput && searchSuggestions) {
                 <div class="suggestion-item" onclick="goToSearch('${safeName}')">
                     <img src="${p.image_url || 'https://via.placeholder.com/50'}" class="suggestion-img">
                     <div class="suggestion-info">
-                        <div class="suggestion-name">${p.brand ? p.brand + ' ' : ''}${p.name}</div>
+                        <div class="suggestion-name">${p.name}</div>
                         <div class="suggestion-price">$${p.price}</div>
                     </div>
                 </div>`;
@@ -791,7 +916,7 @@ if (backToShopBtn) {
     }
     if (shopLayout) {
         shopLayout.style.display = "flex";
-    }
+    } 
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }

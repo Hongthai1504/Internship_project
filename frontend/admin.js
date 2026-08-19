@@ -302,6 +302,7 @@ if (addProductionForm) {
       price: parseFloat(document.getElementById("price").value),
       stock: parseInt(document.getElementById("stock").value) || 0,
       description: document.getElementById("description").value.trim(),
+      specifications: gatherSpecs('add'),
       main_image: formState.add.length > 0 ? formState.add[0] : null,
       extra_images: formState.add.length > 1 ? formState.add.slice(1) : []
     };
@@ -365,11 +366,25 @@ if (adminOrderList) {
 
       orders.forEach((o) => {
         const date = new Date(o.create_at).toLocaleDateString("en-US");
-        const statuses = ["pending", "shipping", "completed"];
-        let statusSelect = `<select onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 5px; border-radius: 4px; font-weight: bold; cursor: pointer; background: #fef08a;">`;
+        
+        const statuses = ["pending", "shipping", "completed", "cancelled"];
+        
+        const getStatusBgColor = (status) => {
+            switch(status.toLowerCase()) {
+                case 'completed': return '#d1fae5';
+                case 'pending': return '#fef08a';
+                case 'shipping': return '#dbeafe';
+                case 'cancelled': return '#fee2e2';
+                default: return '#f3f4f6'; 
+            }
+        };
+
+        // Gắn màu nền vào thẻ <select>
+        let statusSelect = `<select onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; border: 1px solid #c8c8c8; outline: none; color: #040c13; background-color: ${getStatusBgColor(o.status)};">`;
+        
         statuses.forEach((s) => {
           const isSelected = o.status === s ? "selected" : "";
-          statusSelect += `<option value="${s}" ${isSelected}>${s.toUpperCase()}</option>`;
+          statusSelect += `<option value="${s}" ${isSelected} style="background: #fff;">${s.toUpperCase()}</option>`;
         });
         statusSelect += `</select>`;
 
@@ -570,6 +585,20 @@ function openEditModal(productId) {
   document.getElementById("edit-category-id").value = product.category_id;
   document.getElementById("edit-description").value = product.description || "";
 
+  const editSpecsContainer = document.getElementById("edit-specs-container");
+  if (editSpecsContainer) {
+      editSpecsContainer.innerHTML = "";
+      
+      let specs = product.specifications;
+      if (typeof specs === 'string') {
+          try { specs = JSON.parse(specs); } catch(e) { specs = null; }
+      }
+      
+      if (specs && Array.isArray(specs)) {
+          specs.forEach(s => addSpecRow('edit', s.group, s.name, s.value));
+      }
+  }
+
   formState.edit = product.all_images && product.all_images.length > 0 
                     ? [...product.all_images] 
                     : (product.image_url ? [product.image_url] : []);
@@ -597,7 +626,8 @@ if (editForm) {
       sku: document.getElementById("edit-sku").value.trim(),
       price: parseFloat(document.getElementById("edit-price").value),
       stock: parseInt(document.getElementById("edit-stock").value) || 0,
-      description: document.getElementById("edit-description").value.trim(),
+      description: document.getElementById("description").value.trim(),
+      specifications: gatherSpecs('edit'),
       main_image: formState.edit.length > 0 ? formState.edit[0] : null,
       extra_images: formState.edit.length > 1 ? formState.edit.slice(1) : []
     };
@@ -631,6 +661,38 @@ if (editForm) {
       submitBtn.disabled = false;
     }
   });
+}
+
+// DYNAMIC SPECIFICATIONS LOGIC
+function addSpecRow(target, group = "", name = "", value = "") {
+    const container = document.getElementById(`${target}-specs-container`);
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.gap = "10px";
+    row.className = "spec-row";
+    
+    row.innerHTML = `
+        <input type="text" placeholder="Group (e.g. Display)" value="${group}" class="spec-group" style="flex: 1; padding: 8px; border: 1px solid #c8c8c8; border-radius: 4px;">
+        <input type="text" placeholder="Spec Name (e.g. Resolution)" value="${name}" class="spec-name" style="flex: 1.5; padding: 8px; border: 1px solid #c8c8c8; border-radius: 4px;">
+        <input type="text" placeholder="Value (e.g. 4K UHD)" value="${value}" class="spec-value" style="flex: 2; padding: 8px; border: 1px solid #c8c8c8; border-radius: 4px;">
+        <button type="button" onclick="this.parentElement.remove()" style="background: #ef4444; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">X</button>
+    `;
+    container.appendChild(row);
+}
+
+function gatherSpecs(target) {
+    const container = document.getElementById(`${target}-specs-container`);
+    const rows = container.querySelectorAll(".spec-row");
+    const specs = [];
+    rows.forEach(row => {
+        const group = row.querySelector(".spec-group").value.trim();
+        const name = row.querySelector(".spec-name").value.trim();
+        const value = row.querySelector(".spec-value").value.trim();
+        if (name && value) {
+            specs.push({ group: group || "General", name, value });
+        }
+    });
+    return specs.length > 0 ? specs : null;
 }
 
 fetchAdminProducts();

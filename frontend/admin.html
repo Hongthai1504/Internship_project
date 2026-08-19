@@ -122,6 +122,17 @@
           </div>
         </div>
 
+        <div class="form-group" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e0e6ef; margin-bottom: 25px;">
+            <label style="font-size: 1.1rem; color: #0046be; border-bottom: 2px solid #e0e6ef; padding-bottom: 10px; margin-bottom: 15px;">Technical Specifications (Optional)</label>
+            
+            <div id="add-specs-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;"></div>
+            
+            <button type="button" class="btn-submit" style="background: #eef2f7; color: #0046be; border: 1px dashed #0046be; padding: 8px 15px; font-size: 0.9rem;" onclick="addSpecRow('add')">
+                + Add Specification Row
+            </button>
+            <small style="display: block; margin-top: 10px; color: #666;">Group (e.g., "Processor"), Name (e.g., "CPU Speed"), Value (e.g., "2.8GHz").</small>
+        </div>
+
         <div class="form-group">
           <label>Detailed Description</label>
           <textarea id="description" rows="4" placeholder="Enter product specifications, key features..."></textarea>
@@ -189,6 +200,17 @@
             Browse Media Library
           </button>
           <div id="edit-selected-images" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- DYNAMIC SPECIFICATIONS BUILDER (EDIT FORM) -->
+        <div class="form-group" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e0e6ef; margin-bottom: 25px;">
+            <label style="font-size: 1.1rem; color: #0046be; border-bottom: 2px solid #e0e6ef; padding-bottom: 10px; margin-bottom: 15px;">Technical Specifications (Optional)</label>
+            
+            <div id="edit-specs-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;"></div>
+            
+            <button type="button" class="btn-submit" style="background: #eef2f7; color: #0046be; border: 1px dashed #0046be; padding: 8px 15px; font-size: 0.9rem;" onclick="addSpecRow('edit')">
+                + Add Specification Row
+            </button>
         </div>
 
         <div class="form-group">

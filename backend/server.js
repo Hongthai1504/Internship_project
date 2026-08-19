@@ -410,11 +410,11 @@ app.put("/api/admin/products/:id",
     if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const productId = req.params.id;
-    const { category_id, name, sku, brand, price, stock, description, main_image, extra_images } = req.body;
+    const { category_id, name, sku, brand, price, stock, description, main_image, extra_images, specifications } = req.body;
     const finalStock = stock || 0; 
-
-    const sql = `UPDATE Products SET category_id=?, name=?, sku=?, brand=?, price=?, stock=?, image_url=?, description=? WHERE id=?`;
-    const values = [category_id, name, sku, brand, price, finalStock, main_image || null, description, productId];
+    const specsJson = specifications ? JSON.stringify(specifications) : null;
+    const sql = `UPDATE Products SET category_id=?, name=?, sku=?, brand=?, price=?, stock=?, image_url=?, description=?, specifications=? WHERE id=?`;
+    const values = [category_id, name, sku, brand, price, finalStock, main_image || null, description, specsJson, productId];
       
     db.query(sql, values, (err, result) => {
         if (err) return res.status(500).json({ error: "Server error." });
@@ -423,7 +423,7 @@ app.put("/api/admin/products/:id",
             if (extra_images && Array.isArray(extra_images) && extra_images.length > 0) {
                 const extraValues = extra_images.map(url => [productId, url]);
                 db.query("INSERT INTO Product_Images (product_id, image_url) VALUES ?", [extraValues], () => {
-                    res.json({ message: "Product updated with new gallery links!" });
+                    res.json({ message: "Product updated with specifications and new gallery!" });
                 });
             } else {
                 res.json({ message: "Product updated successfully!" });
@@ -527,16 +527,13 @@ app.get("/api/products/:id/reviews", (req, res) => {
 });
 
 app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
-    const productId = req.params.id;
-    const userId = req.user.id;
-    const { rating, comment } = req.body;
+    const { category_id, name, sku, brand, price, stock, description, main_image, extra_images, specifications } = req.body;
+    const finalStock = stock || 0;
 
-    if (!rating || rating < 1 || rating > 5) {
-        return res.status(400).json({ error: "Please provide a valid rating (1-5 stars)." });
-    }
+    const specsJson = specifications ? JSON.stringify(specifications) : null;
 
-    const sql = "INSERT INTO Reviews (product_id, user_id, rating, comment) VALUES (?, ?, ?, ?)";
-    db.query(sql, [productId, userId, rating, comment], (err, result) => {
+    const sql = `INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, description, specifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    db.query(sql, [category_id, name, sku, brand, price, finalStock, main_image || null, description, specsJson], (err, result) => {
         if (err) {
             console.error("Submit Review Error:", err);
             return res.status(500).json({ error: "Failed to submit your review." });
@@ -549,6 +546,5 @@ app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(
-    `The server backend is currently running at http://localhost:${PORT}`,
-  );
+    `The server backend is currently running at http://localhost:${PORT}`);
 });
