@@ -13,6 +13,30 @@ let allProducts = [];
 let currentPageProducts = [];
 let cart = [];
 
+// SMART SEARCH ALGORITHM
+function isProductMatch(product, searchKeyword) {
+    const term = searchKeyword.toLowerCase().trim();
+    
+    const name = (product.name || "").toLowerCase();
+    const brand = (product.brand || "").toLowerCase();
+    
+    const reviews = (product.all_reviews || "").toLowerCase();
+    
+    let specsText = "";
+    let specsObj = product.specifications;
+    if (typeof specsObj === 'string') {
+        try { specsObj = JSON.parse(specsObj); } catch(e) { specsObj = null; }
+    }
+    if (specsObj && Array.isArray(specsObj)) {
+        specsText = specsObj.map(s => `${s.name} ${s.value}`).join(" ").toLowerCase();
+    }
+
+    return name.includes(term) || 
+           brand.includes(term) || 
+           reviews.includes(term) || 
+           specsText.includes(term);
+}
+
 try {
     const savedCart = localStorage.getItem("cart");
     if (savedCart && savedCart !== "undefined") {
@@ -245,12 +269,7 @@ async function fetchProducts() {
         if (titleEl) titleEl.innerText = `Search results for: "${searchQuery}"`;
         document.title = `Search: ${searchQuery} | Best Tech`;
 
-        currentPageProducts = allProducts.filter(product => {
-            const name = product.name.toLowerCase();
-            const brand = (product.brand || "").toLowerCase();
-            const keyword = searchQuery.toLowerCase();
-            return name.includes(keyword) || brand.includes(keyword);
-        });
+        currentPageProducts = allProducts.filter(product => isProductMatch(product, searchQuery));
     } else if (typeof PAGE_KEYWORD !== 'undefined') {
         const titleEl = document.getElementById("page-title");
         if (titleEl) titleEl.innerText = PAGE_TITLE;
@@ -703,57 +722,9 @@ function renderOrdersByStatus(statusFilter) {
 }
 
 if (btnProfile) {
-  btnProfile.addEventListener("click", async () => {
-    userDropdown.style.display = "none";
-    if (profileModal) {
-        profileModal.style.display = "flex"; 
-        const token = localStorage.getItem("token");
-        try {
-            const res = await fetch("http://localhost:3000/api/profile", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                document.getElementById("profile-email").value = data.email;
-                document.getElementById("profile-name").value = data.full_name;
-                document.getElementById("profile-phone").value = data.phone || "";
-            }
-        } catch(err) {
-            document.getElementById("profile-name").value = "Error!";
-        }
-    }
+  btnProfile.addEventListener("click", () => {
+    window.location.href = "profile.html";
   });
-}
-if (closeProfileModal) closeProfileModal.addEventListener("click", () => { if(profileModal) profileModal.style.display = "none"; });
-
-if (profileForm) {
-    profileForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem("token");
-        const full_name = document.getElementById("profile-name").value.trim();
-        const phone = document.getElementById("profile-phone").value.trim();
-        const submitBtn = profileForm.querySelector("button[type='submit']");
-        submitBtn.innerText = "Saving...";
-        
-        try {
-            const res = await fetch("http://localhost:3000/api/profile", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify({ full_name, phone })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                profileModal.style.display = "none";
-            } else {
-                alert(data.error);
-            }
-        } catch(err) {
-            alert("System error while saving.");
-        } finally {
-            submitBtn.innerText = "Save Changes";
-        }
-    });
 }
 
 // --- LIVE SEARCH ---
@@ -762,11 +733,7 @@ if (searchInput && searchSuggestions) {
         const searchTerm = this.value.trim().toLowerCase();
         if (searchTerm.length < 2) { searchSuggestions.style.display = "none"; return; }
 
-        const filtered = allProducts.filter(product => {
-            const name = product.name.toLowerCase();
-            const brand = (product.brand || "").toLowerCase();
-            return name.includes(searchTerm) || brand.includes(searchTerm);
-        }).slice(0, 5); 
+        const filtered = allProducts.filter(product => isProductMatch(product, searchTerm)).slice(0, 5); 
 
         if (filtered.length === 0) {
             searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #666; font-style: italic;">No products found for "${searchTerm}"</div>`;

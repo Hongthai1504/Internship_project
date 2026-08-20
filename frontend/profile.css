@@ -1,0 +1,42 @@
+/* =========================================
+   MY PROFILE PAGE STYLES
+========================================= */
+.profile-tab {
+    transition: all 0.2s ease;
+}
+
+.profile-tab:hover {
+    background: #eef2f7 !important;
+    color: #0046be !important;
+    transform: translateX(5px);
+}
+
+#profile-form button:hover,
+#add-address-form button[type="submit"]:hover,
+#btn-show-add-address:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+#btn-cancel-address:hover {
+    background: #d1d5db !important;
+}
+
+#address-list button {
+    transition: all 0.2s ease;
+}
+
+#address-list button:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+@media (max-width: 850px) {
+    main[style*="max-width: 1200px"] {
+        flex-direction: column !important;
+    }
+    aside[style*="width: 280px"] {
+        width: 100% !important;
+        margin-bottom: 20px;
+    }
+}

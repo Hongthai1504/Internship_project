@@ -217,3 +217,14 @@ CREATE TABLE IF NOT EXISTS Reviews (
 
 ALTER TABLE Orders 
 MODIFY COLUMN status ENUM('pending', 'shipping', 'completed', 'cancelled') DEFAULT 'pending';
+
+ALTER TABLE Products ADD COLUMN specifications JSON DEFAULT NULL;
+
+CREATE TABLE IF NOT EXISTS User_Addresses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    is_default BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile | Best Tech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body style="background: #f4f6f9;">
+  
+  <header class="bb-header" style="padding: 20px 40px; border-bottom: 4px solid #ffe000; display: flex; justify-content: space-between; align-items: center;">
+    <a href="index.html" class="logo" style="text-decoration: none; color: white; font-size: 2rem;">BestTech</a>
+    <a href="index.html" style="color: white; text-decoration: none; font-weight: bold;">← Back to Home</a>
+  </header>
+
+  <main style="max-width: 1200px; margin: 40px auto; display: flex; gap: 30px; padding: 0 20px;">
+    
+    <!-- SIDEBAR -->
+    <aside style="width: 280px; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: fit-content;">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+            <div id="avatar-icon" style="width: 50px; height: 50px; background: #e0e6ef; color: #0046be; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">U</div>
+            <div>
+                <h3 id="sidebar-name" style="margin: 0; font-size: 1.1rem; color: #040c13;">Loading...</h3>
+                <small style="color: #666;">My Account</small>
+            </div>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px;">
+            <li>
+                <button id="tab-info" class="profile-tab active" style="width: 100%; text-align: left; padding: 12px 15px; border: none; background: #eef2f7; color: #0046be; font-weight: bold; border-radius: 4px; cursor: pointer;">Personal Info</button>
+            </li>
+            <li>
+                <button id="tab-address" class="profile-tab" style="width: 100%; text-align: left; padding: 12px 15px; border: none; background: transparent; color: #555; font-weight: bold; border-radius: 4px; cursor: pointer;">Address Book</button>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <div style="flex: 1; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        
+        <!-- SECTION 1: PERSONAL INFO -->
+        <section id="section-info">
+            <h2 style="margin-top: 0; color: #040c13; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 30px;">Personal Information</h2>
+            <form id="profile-form" style="max-width: 500px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Email Address <span style="font-weight: normal; color: #888; font-size: 0.9rem;">(Read-only)</span></label>
+                    <input type="email" id="profile-email" disabled style="width: 100%; padding: 12px; border: 1px solid #c8c8c8; border-radius: 4px; background: #f4f6f9; color: #666; font-size: 1rem;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Full Name</label>
+                    <input type="text" id="profile-name" required style="width: 100%; padding: 12px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 1rem;">
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Phone Number</label>
+                    <input type="tel" id="profile-phone" placeholder="Enter your phone number" style="width: 100%; padding: 12px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 1rem;">
+                </div>
+                <button type="submit" style="padding: 12px 30px; background: #ffe000; color: #000; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+                    Save Changes
+                </button>
+            </form>
+        </section>
+
+        <!-- SECTION 2: ADDRESS BOOK -->
+        <section id="section-address" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 30px;">
+                <h2 style="margin: 0; color: #040c13;">Address Book</h2>
+                <button id="btn-show-add-address" style="background: #0046be; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add New Address</button>
+            </div>
+
+            <!-- Add Address Form (Hidden by default) -->
+            <div id="add-address-container" style="display: none; background: #f4f6f9; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e0e6ef;">
+                <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; color: #0046be;">Add Delivery Address</h3>
+                <form id="add-address-form">
+                    <textarea id="new-address-text" rows="3" required placeholder="Ex: 123 Main St, Apt 4B, New York, NY 10001" style="width: 100%; padding: 12px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 1rem; margin-bottom: 15px; font-family: inherit; resize: vertical;"></textarea>
+                    
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 20px;">
+                        <input type="checkbox" id="new-address-default" style="width: 18px; height: 18px;">
+                        <span style="font-weight: 500;">Set as default shipping address</span>
+                    </label>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" style="padding: 10px 20px; background: #10b981; color: #fff; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;">Save Address</button>
+                        <button type="button" id="btn-cancel-address" style="padding: 10px 20px; background: #e0e6ef; color: #333; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- List of Addresses -->
+            <div id="address-list" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="color: #666;">Loading addresses...</p>
+            </div>
+        </section>
+
+    </div>
+  </main>
+
+  <script src="profile.js"></script>
+</body>
+</html>

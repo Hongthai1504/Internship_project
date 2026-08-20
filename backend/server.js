@@ -54,7 +54,8 @@ app.get('/api/products', (req, res) => {
 
     let sql = `
         SELECT p.*, 
-               (SELECT GROUP_CONCAT(pi.image_url SEPARATOR ',') FROM Product_Images pi WHERE pi.product_id = p.id) AS gallery
+               (SELECT GROUP_CONCAT(pi.image_url SEPARATOR ',') FROM Product_Images pi WHERE pi.product_id = p.id) AS gallery,
+               (SELECT GROUP_CONCAT(r.comment SEPARATOR ' ') FROM Reviews r WHERE r.product_id = p.id) AS all_reviews
         FROM Products p
     `;
     let queryParams = [];
@@ -289,9 +290,7 @@ app.get("/api/orders/history", authenticateToken, (req, res) => {
   });
 });
 
-// ==========================================
 // API: USER PROFILE
-// ==========================================
 app.get("/api/profile", authenticateToken, (req, res) => {
   const userId = req.user.id;
   const sql = "SELECT email, full_name, phone FROM Users WHERE id = ?";
@@ -319,6 +318,63 @@ app.put("/api/profile", authenticateToken, (req, res) => {
     }
     res.json({ message: "Your profile has been successfully updated!" });
   });
+});
+
+// --- USER ADDRESSES APIs ---
+// Get all addresses for a user
+app.get("/api/profile/addresses", authenticateToken, (req, res) => {
+    const userId = req.user.id;
+    db.query("SELECT * FROM User_Addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC", [userId], (err, results) => {
+        if (err) return res.status(500).json({ error: "Server error" });
+        res.json(results);
+    });
+});
+
+// Add a new address
+app.post("/api/profile/addresses", authenticateToken, (req, res) => {
+    const userId = req.user.id;
+    let { address, is_default } = req.body;
+    
+    if (!address) return res.status(400).json({ error: "Address cannot be empty" });
+
+    const insertAddress = (defaultFlag) => {
+        db.query("INSERT INTO User_Addresses (user_id, address, is_default) VALUES (?, ?, ?)", [userId, address, defaultFlag], (err) => {
+            if (err) return res.status(500).json({ error: "Failed to add address" });
+            res.status(201).json({ message: "Address added successfully" });
+        });
+    };
+
+    if (is_default) {
+        db.query("UPDATE User_Addresses SET is_default = FALSE WHERE user_id = ?", [userId], (err) => {
+            insertAddress(true);
+        });
+    } else {
+        db.query("SELECT COUNT(*) as count FROM User_Addresses WHERE user_id = ?", [userId], (err, results) => {
+            const isFirst = (!err && results[0].count === 0);
+            insertAddress(isFirst);
+        });
+    }
+});
+
+app.put("/api/profile/addresses/:id/default", authenticateToken, (req, res) => {
+    const addressId = req.params.id;
+    const userId = req.user.id;
+
+    db.query("UPDATE User_Addresses SET is_default = FALSE WHERE user_id = ?", [userId], (err) => {
+        if (err) return res.status(500).json({ error: "Server error" });
+        db.query("UPDATE User_Addresses SET is_default = TRUE WHERE id = ? AND user_id = ?", [addressId, userId], (err) => {
+            res.json({ message: "Default address updated!" });
+        });
+    });
+});
+
+app.delete("/api/profile/addresses/:id", authenticateToken, (req, res) => {
+    const addressId = req.params.id;
+    const userId = req.user.id;
+    db.query("DELETE FROM User_Addresses WHERE id = ? AND user_id = ?", [addressId, userId], (err) => {
+        if (err) return res.status(500).json({ error: "Server error" });
+        res.json({ message: "Address deleted successfully!" });
+    });
 });
 
 // API for Admin: Get Orders
@@ -527,13 +583,15 @@ app.get("/api/products/:id/reviews", (req, res) => {
 });
 
 app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
-    const { category_id, name, sku, brand, price, stock, description, main_image, extra_images, specifications } = req.body;
-    const finalStock = stock || 0;
+    const productId = req.params.id;
+    const userId = req.user.id; 
+    const { rating, comment } = req.body;
 
-    const specsJson = specifications ? JSON.stringify(specifications) : null;
+    if (!rating) return res.status(400).json({ error: "Please select a star rating." });
 
-    const sql = `INSERT INTO Products (category_id, name, sku, brand, price, stock, image_url, description, specifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    db.query(sql, [category_id, name, sku, brand, price, finalStock, main_image || null, description, specsJson], (err, result) => {
+    const sql = `INSERT INTO Reviews (product_id, user_id, rating, comment) VALUES (?, ?, ?, ?)`;
+    
+    db.query(sql, [productId, userId, rating, comment], (err, result) => {
         if (err) {
             console.error("Submit Review Error:", err);
             return res.status(500).json({ error: "Failed to submit your review." });

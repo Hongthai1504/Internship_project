@@ -88,29 +88,181 @@
   </main>
 
   <!-- PRODUCT DETAIL VIEW -->
-  <section id="product-detail-view" class="product-detail-view" style="display: none">
-    <div class="container" style="max-width: 1400px; margin: 40px auto; padding: 0 40px">
-      <button id="back-to-shop" class="back-link" style="background: none; border: none; color: #0046be; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 20px;">← Back to Results</button>
-      <div class="detail-grid" style="display: flex; gap: 60px; background: #fff; padding: 40px; border-radius: 8px; border: 1px solid #c8c8c8;">
-        <div class="detail-media" style="flex: 1"><img id="detail-img" src="" alt="Product" style="width: 100%; max-width: 500px; display: block; margin: 0 auto;"/></div>
-        <div class="detail-info" style="flex: 1">
-          <p id="detail-brand" style="color: #0046be; font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;"></p>
-          <h1 id="detail-name" style="font-size: 2rem; color: #040c13; margin-bottom: 15px; font-weight: 700;">Product Name</h1>
-          <p><strong>SKU:</strong> <span id="detail-sku" style="color: #555">N/A</span></p>
-          <hr style="border-top: 1px solid #e0e6ef; margin: 20px 0" />
-          <p id="detail-price" style="font-size: 2.5rem; font-weight: 900; color: #040c13; margin-bottom: 20px;">$0.00</p>
-          <div class="purchase-box" style="background: #f4f6f9; padding: 25px; border-radius: 8px; border: 1px solid #c8c8c8;">
-            <p style="margin-bottom: 15px; font-weight: bold"><span id="detail-stock">In Stock</span></p>
-            <div style="display: flex; gap: 15px">
-              <input type="number" id="qty-input" value="1" min="1" style="width: 70px; text-align: center; font-size: 1.2rem; border: 1px solid #c8c8c8; border-radius: 4px;"/>
-              <button id="detail-add-btn" style="flex: 1; background: #ffe000; color: #000; border: none; font-weight: bold; font-size: 1.1rem; padding: 15px; border-radius: 4px; cursor: pointer;">Add to Cart</button>
+  <section
+      id="product-detail-view"
+      class="product-detail-view"
+      style="display: none"
+    >
+      <div
+        class="container"
+        style="max-width: 1400px; margin: 40px auto; padding: 0 40px"
+      >
+        <button
+          id="back-to-shop"
+          class="back-link"
+          style="
+            background: none;
+            border: none;
+            color: #0046be;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+          "
+        >
+          ← Back to Results
+        </button>
+        <div
+          class="detail-grid"
+          style="
+            display: flex;
+            gap: 60px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #c8c8c8;
+          "
+        >
+          <div class="detail-media" style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+            <div style="border: 1px solid #c8c8c8; border-radius: 8px; padding: 30px; text-align: center; background: #fff; position: relative;">
+              <img id="detail-img" src="" alt="Product" style="width: 100%; max-width: 400px; height: 400px; object-fit: contain; display: block; margin: 0 auto; transition: opacity 0.2s ease-in-out;" />
+            </div>
+
+            <div id="detail-thumbnails" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
             </div>
           </div>
-          <div style="margin-top: 30px"><h3 style="font-size: 1.2rem; margin-bottom: 10px">About this item</h3><p id="detail-desc" style="color: #555; line-height: 1.6"></p></div>
+          <div class="detail-info" style="flex: 1">
+            <p
+              id="detail-brand"
+              style="
+                color: #0046be;
+                font-weight: 700;
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+              "
+            ></p>
+            <h1
+              id="detail-name"
+              style="
+                font-size: 2rem;
+                color: #040c13;
+                margin-bottom: 15px;
+                font-weight: 700;
+              "
+            >
+              Product Name
+            </h1>
+            <p>
+              <strong>SKU:</strong>
+              <span id="detail-sku" style="color: #555">N/A</span>
+            </p>
+            <hr style="border-top: 1px solid #e0e6ef; margin: 20px 0" />
+            <p
+              id="detail-price"
+              style="
+                font-size: 2.5rem;
+                font-weight: 900;
+                color: #040c13;
+                margin-bottom: 20px;
+              "
+            >
+              $0.00
+            </p>
+
+            <div
+              class="purchase-box"
+              style="
+                background: #f4f6f9;
+                padding: 25px;
+                border-radius: 8px;
+                border: 1px solid #c8c8c8;
+             "
+            >
+              <p style="margin-bottom: 15px; font-weight: bold">
+                <span id="detail-stock">In Stock</span>
+              </p>
+              <div style="display: flex; gap: 15px">
+                <input
+                  type="number"
+                  id="qty-input"
+                  value="1"
+                  min="1"
+                  style="
+                   width: 70px;
+                    text-align: center;
+                    font-size: 1.2rem;
+                    border: 1px solid #c8c8c8;
+                    border-radius: 4px;
+                  "
+                />
+                <button
+                  id="detail-add-btn"
+                  style="
+                    flex: 1;
+                    background: #ffe000;
+                    color: #000;
+                    border: none;
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                    padding: 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                  "
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top: 30px">
+              <h3 style="font-size: 1.2rem; margin-bottom: 10px">
+                About this item
+              </h3>
+              <p id="detail-desc" style="color: #555; line-height: 1.6"></p>
+            </div>
+            <div id="detail-specs-container" class="specs-table-wrapper" style="display: none;">
+                <h3 style="font-size: 1.5rem; margin-top: 40px; margin-bottom: 15px; color: #040c13; border-bottom: 2px solid #eee; padding-bottom: 10px;">Technical Specifications</h3>
+                <div id="detail-specs-content"></div>
+            </div>
+            <div id="detail-specs-container" class="specs-table-wrapper" style="display: none;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #040c13; border-bottom: 2px solid #eee; padding-bottom: 10px;">Technical Specifications</h3>
+                <div id="detail-specs-content"></div>
+            </div>
+          </div>
+        </div>
+        <div class="reviews-section" style="margin-top: 50px; background: #fff; padding: 40px; border-radius: 8px; border: 1px solid #c8c8c8;">
+            <h2 style="font-size: 1.8rem; color: #040c13; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Customer Reviews</h2>
+            
+            <div id="review-form-container" style="background: #f4f6f9; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+                <h3 style="margin-top: 0; font-size: 1.2rem; color: #0046be;">Write a Review</h3>
+                <p id="review-login-prompt" style="color: #666; font-style: italic; margin-bottom: 0;">Please <a href="login.html" style="color: #0046be; font-weight: bold;">Sign In</a> to write a review.</p>
+                
+                <form id="product-review-form" style="display: none;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Rating *</label>
+                        <select id="review-rating" required style="padding: 10px; border-radius: 4px; border: 1px solid #c8c8c8; width: 180px; font-size: 1rem;">
+                            <option value="">Select rating</option>
+                            <option value="5">★★★★★ (5/5)</option>
+                            <option value="4">★★★★☆ (4/5)</option>
+                            <option value="3">★★★☆☆ (3/5)</option>
+                            <option value="2">★★☆☆☆ (2/5)</option>
+                            <option value="1">★☆☆☆☆ (1/5)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Comment</label>
+                        <textarea id="review-comment" rows="3" placeholder="Share your experience with this product..." style="width: 100%; padding: 10px; border: 1px solid #c8c8c8; border-radius: 4px; font-family: inherit; font-size: 1rem; outline: none;"></textarea>
+                    </div>
+                    <button type="submit" style="background: #ffe000; color: #000; border: none; padding: 10px 20px; font-weight: bold; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background 0.2s;">Submit Review</button>
+                </form>
+            </div>
+
+            <div id="reviews-list">
+                <p style="color: #666; font-style: italic;">Loading reviews...</p>
+            </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
   <!-- CART DRAWER -->
   <div id="cart-drawer" class="cart-drawer">
