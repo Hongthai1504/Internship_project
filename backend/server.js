@@ -1,4 +1,5 @@
 require("dotenv").config(); // Active read file .env
+console.log("CHECKED API KEY", process.env.GEMINI_API_KEY);
 const express = require("express");
 const mysql = require("mysql2");
 
@@ -11,6 +12,9 @@ const { body, validationResult } = require("express-validator");
 
 const multer = require("multer");
 const path = require("path");
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -597,6 +601,38 @@ app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
             return res.status(500).json({ error: "Failed to submit your review." });
         }
         res.status(201).json({ message: "Thank you for your review!" });
+    });
+});
+
+// API: AI CHATBOT (GEMINI 1.5 FLASH)
+app.post("/api/chat", async (req, res) => {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ error: "Message is required." });
+
+    db.query("SELECT name, brand, price, stock FROM Products LIMIT 20", async (err, products) => {
+        if (err) return res.status(500).json({ error: "Database error." });
+
+        const finalPrompt = `
+        You are a helpful, concise, and professional customer support virtual assistant for "Best Tech", an electronics e-commerce store.
+        Here is the list of our current available products (Name - Brand - Price - Stock):
+        ${JSON.stringify(products)}
+        If a customer asks about a product not on this list, politely inform them that you need to check the full catalog or suggest similar available items. Always reply in English.
+        
+        Customer's question: "${message}"
+        `;
+
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            const result = await model.generateContent(finalPrompt);
+            const response = await result.response;
+            const text = response.text();
+
+            res.json({ reply: text });
+        } catch (error) {
+            console.error("Gemini Error:", error);
+            res.status(500).json({ error: "AI is sleeping. Please try again later." });
+        }
     });
 });
 

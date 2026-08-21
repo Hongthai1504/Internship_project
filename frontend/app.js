@@ -6,6 +6,13 @@ console.log("App.js is loading...");
 const API_URL = "http://localhost:3000/api/products";
 const ORDER_API = "http://localhost:3000/api/orders";
 
+const chatToggle = document.getElementById('chatbot-toggle');
+const chatWindow = document.getElementById('chatbot-window');
+const chatClose = document.getElementById('chatbot-close');
+const chatForm = document.getElementById('chatbot-form');
+const chatInput = document.getElementById('chatbot-input');
+const chatMessages = document.getElementById('chatbot-messages');
+
 let currentDetailProductId = null; 
 
 // Global Variables
@@ -195,12 +202,20 @@ if (registerForm) {
 }
 
 // --- AUTH STATE CHECKS ---
-if (localStorage.getItem("token")) {
+const token = localStorage.getItem("token");
+
+if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
   if (accountText) accountText.innerText = "My Account";
   if (loginTrigger && loginTrigger.querySelector("span")) {
       loginTrigger.querySelector("span").innerText = "My Account";
   }
   if (historyTrigger) historyTrigger.style.display = "flex";
+} else {
+  if (accountText) accountText.innerText = "Account";
+  if (loginTrigger && loginTrigger.querySelector("span")) {
+      loginTrigger.querySelector("span").innerText = "Account";
+  }
+  if (historyTrigger) historyTrigger.style.display = "none";
 }
 
 if (btnLogout) {
@@ -382,9 +397,13 @@ function renderProducts(productsToDisplay) {
                     Add to Cart
                 </div>
             </div>
-            <div class="product-info" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
-                <h3 class="product-name">${product.name}</h3>
+            <div class="product-info">
+                <h3 class="product-name" onclick="showProductDetail(${product.id})" style="cursor: pointer;">${product.name}</h3>
                 <p class="product-price">$${product.price}</p>
+                <label style="font-size: 0.85rem; color: #555; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px 8px; border: 1px solid #e0e6ef; border-radius: 4px; background: #f9fafb;">
+                    <input type="checkbox" value="${product.id}" onchange="toggleCompare(${product.id}, this)" class="compare-cb-${product.id}">
+                    Compare
+                </label>
             </div>
         `;
     productListEl.appendChild(card);
@@ -886,6 +905,156 @@ if (backToShopBtn) {
     } 
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+}
+
+// AI CHATBOT LOGIC
+if (chatToggle && chatWindow) {
+    chatToggle.addEventListener('click', () => chatWindow.style.display = 'flex');
+    chatClose.addEventListener('click', () => chatWindow.style.display = 'none');
+
+    function appendMessage(sender, text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.padding = '10px 15px';
+        msgDiv.style.maxWidth = '80%';
+        
+        if (sender === 'user') {
+            msgDiv.style.background = '#0046be';
+            msgDiv.style.color = 'white';
+            msgDiv.style.borderRadius = '15px 15px 0 15px';
+            msgDiv.style.alignSelf = 'flex-end';
+        } else {
+            msgDiv.style.background = '#eef2f7';
+            msgDiv.style.color = '#040c13';
+            msgDiv.style.borderRadius = '15px 15px 15px 0';
+            msgDiv.style.alignSelf = 'flex-start';
+        }
+        
+        msgDiv.innerText = text;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userText = chatInput.value.trim();
+        if (!userText) return;
+
+        appendMessage('user', userText);
+        chatInput.value = '';
+
+        const typingId = 'typing-' + Date.now();
+        const typingDiv = document.createElement('div');
+        typingDiv.id = typingId;
+        typingDiv.style.alignSelf = 'flex-start';
+        typingDiv.style.color = '#888';
+        typingDiv.style.fontSize = '0.85rem';
+        typingDiv.innerText = 'AI is thinking...';
+        chatMessages.appendChild(typingDiv);
+
+        try {
+            const response = await fetch("http://localhost:3000/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userText })
+            });
+            const data = await response.json();
+            
+            document.getElementById(typingId).remove();
+            
+            if (response.ok) {
+                appendMessage('bot', data.reply);
+            } else {
+                appendMessage('bot', "Sorry, my system is currently experiencing issues.");
+            }
+        } catch (error) {
+            document.getElementById(typingId).remove();
+            appendMessage('bot', "Cannot connect to the AI server.");
+        }
+    });
+}
+
+// PRODUCT COMPARE LOGIC
+let compareList = [];
+const MAX_COMPARE = 3;
+const compareDock = document.getElementById('compare-dock');
+const compareDockItems = document.getElementById('compare-dock-items');
+const compareCount = document.getElementById('compare-count');
+const btnCompareNow = document.getElementById('btn-compare-now');
+
+function toggleCompare(productId, checkboxElem) {
+    const index = compareList.indexOf(productId);
+    
+    if (index > -1) {
+        compareList.splice(index, 1);
+    } else {
+        if (compareList.length >= MAX_COMPARE) {
+            alert("You can only compare up to 3 products at a time.");
+            checkboxElem.checked = false; 
+            return;
+        }
+        compareList.push(productId);
+    }
+    
+    const allCheckboxes = document.querySelectorAll(`.compare-cb-${productId}`);
+    allCheckboxes.forEach(cb => cb.checked = (index === -1));
+
+    renderCompareDock();
+}
+
+function renderCompareDock() {
+    if (compareList.length === 0) {
+        if (compareDock) compareDock.style.display = 'none';
+        return;
+    }
+
+    if (compareDock) compareDock.style.display = 'flex';
+    if (compareCount) compareCount.innerText = compareList.length;
+
+    // Bật/tắt nút Compare Now
+    if (compareList.length >= 2) {
+        btnCompareNow.disabled = false;
+        btnCompareNow.style.opacity = '1';
+    } else {
+        btnCompareNow.disabled = true;
+        btnCompareNow.style.opacity = '0.5';
+    }
+
+    if (compareDockItems) {
+        compareDockItems.innerHTML = compareList.map(id => {
+            const p = allProducts.find(prod => prod.id === id);
+            if(!p) return '';
+            return `
+                <div style="display: flex; align-items: center; gap: 10px; background: #f4f6f9; padding: 5px 10px; border-radius: 6px; border: 1px solid #c8c8c8; position: relative;">
+                    <img src="${p.image_url}" style="width: 35px; height: 35px; object-fit: contain;">
+                    <div style="font-size: 0.85rem; color: #040c13; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${p.name}
+                    </div>
+                    <button onclick="removeCompareItem(${p.id})" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; cursor: pointer; display: flex; justify-content: center; align-items: center;">&times;</button>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function removeCompareItem(productId) {
+    const cb = document.querySelector(`.compare-cb-${productId}`);
+    if (cb) cb.checked = false;
+    toggleCompare(productId, cb || { checked: false });
+}
+
+function clearCompare() {
+    compareList.forEach(id => {
+        const cb = document.querySelector(`.compare-cb-${id}`);
+        if (cb) cb.checked = false;
+    });
+    compareList = [];
+    renderCompareDock();
+}
+
+function goToComparePage() {
+    if (compareList.length < 2) return;
+    localStorage.setItem('besttech_compare_list', JSON.stringify(compareList));
+    window.location.href = 'compare.html';
 }
 
 // Initialize Application

@@ -425,10 +425,10 @@
         <li class="has-submenu">
           <a href="collectibles.html">Collectibles & Memorabilia</a> <span class="right-arrow">▾</span>
           <ul class="submenu">
-            <li><a href="Shop/Collectibles/all-collectibles.html">All Collectibles & Memorabilia</a></li>
-            <li><a href="Shop/Collectibles/trading-cards.html">Trading Cards</a></li>
-            <li><a href="Shop/Collectibles/bobbleheads.html">Bobbleheads & Figurines</a></li>
-            <li><a href="Shop/Collectibles/diecast.html">Diecast</a></li>
+            <li><a href="/frontend/Shop/Collectibles/all-collectibles.html">All Collectibles & Memorabilia</a></li>
+            <li><a href="/frontend/Shop/Collectibles/trading-cards.html">Trading Cards</a></li>
+            <li><a href="/frontend/Shop/Collectibles/bobbleheads.html">Bobbleheads & Figurines</a></li>
+            <li><a href="/frontend/Shop/Collectibles/diecast.html">Diecast</a></li>
           </ul>
         </li>
 
@@ -845,6 +845,55 @@
         </div>
 
       </div>
+    </div>
+
+    <!-- PRODUCT COMPARE DOCK -->
+    <div id="compare-dock" style="display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 95%; max-width: 1100px; background: #fff; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); border-radius: 12px 12px 0 0; z-index: 9998; padding: 15px 25px; flex-direction: row; justify-content: space-between; align-items: center; border: 1px solid #e0e6ef;">
+        
+        <div style="display: flex; flex-direction: column; gap: 5px; flex-shrink: 0;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: #040c13;">Compare Products (<span id="compare-count">0</span>/3)</h3>
+            <span style="font-size: 0.85rem; color: #666;" id="compare-text-guide">Select at least 2 products</span>
+        </div>
+
+        <div id="compare-dock-items" style="display: flex; gap: 15px; flex: 1; margin: 0 20px; border-left: 2px solid #eee; border-right: 2px solid #eee; padding: 0 20px; overflow: hidden;">
+            <!-- JS will inject selected items here -->
+        </div>
+
+        <div style="display: flex; gap: 15px; align-items: center; flex-shrink: 0;">
+            <button onclick="clearCompare()" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.95rem; white-space: nowrap;">Clear All</button>
+            <button id="btn-compare-now" onclick="goToComparePage()" style="background: #ffe000; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; white-space: nowrap;" disabled>Compare Now</button>
+        </div>
+    </div>
+
+    <!-- AI CHATBOT UI -->
+    <div id="chatbot-container" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999;">
+        <!-- Floating Button -->
+        <button id="chatbot-toggle" style="width: 60px; height: 60px; border-radius: 50%; background: #0046be; color: white; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s;">
+            💬
+        </button>
+
+        <!-- Chat Window (Hidden by default) -->
+        <div id="chatbot-window" style="display: none; position: absolute; bottom: 80px; right: 0; width: 350px; height: 450px; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #e0e6ef;">
+            <!-- Header -->
+            <div style="background: #0046be; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <span>Best Tech Assistant 🤖</span>
+                <button id="chatbot-close" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <!-- Message List -->
+            <div id="chatbot-messages" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f9fafb; font-size: 0.95rem; line-height: 1.5;">
+                <!-- Default greeting -->
+                <div style="background: #eef2f7; color: #040c13; padding: 10px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; align-self: flex-start;">
+                    Hello! I'm the Best Tech virtual assistant. How can I help you today?
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <form id="chatbot-form" style="display: flex; border-top: 1px solid #eee; padding: 10px; background: #fff; gap: 10px;">
+                <input type="text" id="chatbot-input" placeholder="Type your message..." required style="flex: 1; padding: 10px; border: 1px solid #c8c8c8; border-radius: 20px; outline: none;">
+                <button type="submit" style="background: #ffe000; color: #000; border: none; padding: 0 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">Send</button>
+            </form>
+        </div>
     </div>
 
     <!-- FOOTER -->

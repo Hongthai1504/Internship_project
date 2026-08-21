@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compare Products | Best Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="compare.css" />
+</head>
+<body style="background-color: #f4f6f9;">
+
+    <!-- HEADER MINIMAL -->
+    <header class="bb-header" style="padding: 20px 0; text-align: center; border-bottom: 4px solid #ffe000;">
+      <a href="index.html" class="logo" style="text-decoration: none; color: white; font-size: 2.5rem;">BestTech</a>
+    </header>
+
+    <div class="compare-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="color: #111827; margin: 0; font-size: 2rem;">Product Comparison</h1>
+            <a href="index.html" style="color: #2563eb; font-weight: bold; text-decoration: none; font-size: 1.1rem;">← Back to Shop</a>
+        </div>
+        
+        <div id="compare-content">
+            <p style="text-align: center; color: #6b7280; font-style: italic; font-size: 1.1rem;">Loading comparison data...</p>
+        </div>
+    </div>
+
+    <script>
+        const compareIds = JSON.parse(localStorage.getItem('besttech_compare_list')) || [];
+
+        async function initCompare() {
+            const contentDiv = document.getElementById('compare-content');
+            
+            if (compareIds.length < 2) {
+                contentDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 1.1rem;">Not enough products selected. Please go back and select at least 2 products.</p>';
+                return;
+            }
+
+            try {
+                const res = await fetch("http://localhost:3000/api/products");
+                const allProducts = await res.json();
+                
+                const productsToCompare = compareIds.map(id => allProducts.find(p => p.id === id)).filter(p => p);
+
+                if (productsToCompare.length < 2) {
+                    contentDiv.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading selected products.</p>';
+                    return;
+                }
+
+                let allSpecsGroups = {};
+                
+                productsToCompare.forEach(product => {
+                    let specs = product.specifications;
+                    if (typeof specs === 'string') {
+                        try { specs = JSON.parse(specs); } catch(e) { specs = null; }
+                    }
+                    if (specs && Array.isArray(specs)) {
+                        specs.forEach(s => {
+                            const groupName = s.group || "General";
+                            if (!allSpecsGroups[groupName]) allSpecsGroups[groupName] = new Set();
+                            allSpecsGroups[groupName].add(s.name);
+                        });
+                    }
+                });
+
+                let html = '<div class="compare-table-wrapper"><table class="compare-table">';
+                
+                html += '<thead><tr class="sticky-header"><th class="spec-name-col" style="border-top-left-radius: 12px;"></th>';
+                productsToCompare.forEach(p => {
+                    html += `
+                    <td class="compare-item-header">
+                        <img src="${p.image_url || 'https://via.placeholder.com/300'}" class="compare-item-img">
+                        <div class="compare-item-name" title="${p.name}">${p.name}</div>
+                        <button class="compare-add-btn" onclick="addToCartCompare(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Add to Cart</button>
+                    </td>`;
+                });
+                html += '</tr></thead>';
+
+                html += '<tbody>';
+                html += `<tr><th colspan="${productsToCompare.length + 1}" class="group-header">Basic Information</th></tr>`;
+                
+                let priceValues = productsToCompare.map(p => p.price);
+                let priceAllSame = priceValues.every(val => val === priceValues[0]);
+                html += `<tr><td class="spec-name-col">Price</td>`;
+                priceValues.forEach(val => {
+                    const bgClass = (!priceAllSame) ? 'diff-highlight' : '';
+                    html += `<td class="${bgClass} compare-item-price">$${val}</td>`;
+                });
+                html += `</tr>`;
+
+                let brandValues = productsToCompare.map(p => p.brand || "N/A");
+                let brandAllSame = brandValues.every(val => val === brandValues[0]);
+                html += `<tr><td class="spec-name-col">Brand</td>`;
+                brandValues.forEach(val => {
+                    const bgClass = (!brandAllSame && val !== "N/A") ? 'diff-highlight' : '';
+                    const displayVal = val === "N/A" ? `<span class="text-na">N/A</span>` : `<strong>${val}</strong>`;
+                    html += `<td class="${bgClass}">${displayVal}</td>`;
+                });
+                html += `</tr>`;
+
+                for (const group in allSpecsGroups) {
+                    html += `<tr><th colspan="${productsToCompare.length + 1}" class="group-header">${group}</th></tr>`;
+                    const specNames = Array.from(allSpecsGroups[group]);
+                    
+                    specNames.forEach(specName => {
+                        html += `<tr><td class="spec-name-col">${specName}</td>`;
+                        
+                        let rowValues = [];
+                        productsToCompare.forEach(p => {
+                            let val = "N/A";
+                            let specs = typeof p.specifications === 'string' ? JSON.parse(p.specifications || "[]") : (p.specifications || []);
+                            if (specs && Array.isArray(specs)) {
+                                const found = specs.find(s => (s.group || "General") === group && s.name === specName);
+                                if (found) val = found.value;
+                            }
+                            rowValues.push(val);
+                        });
+
+                        const allSame = rowValues.every(val => val === rowValues[0]);
+                        
+                        rowValues.forEach(val => {
+                            const bgClass = (!allSame && val !== "N/A") ? 'diff-highlight' : '';
+                            const displayVal = val === "N/A" ? `<span class="text-na">N/A</span>` : val;
+                            html += `<td class="${bgClass}">${displayVal}</td>`;
+                        });
+                        
+                        html += `</tr>`;
+                    });
+                }
+
+                html += '</tbody></table></div>';
+                contentDiv.innerHTML = html;
+
+            } catch (error) {
+                contentDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 1.1rem;">Connection error to server.</p>';
+            }
+        }
+
+        function addToCartCompare(id, name, price) {
+            let cart = [];
+            try {
+                const saved = localStorage.getItem("cart");
+                if (saved && saved !== "undefined") cart = JSON.parse(saved);
+            } catch (e) {}
+
+            const existingItem = cart.find(item => item.product_id === id);
+            if (existingItem) existingItem.quantity += 1;
+            else cart.push({ product_id: id, name: name, price: price, quantity: 1 });
+            
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert("Added to cart successfully!");
+        }
+
+        initCompare();
+    </script>
+</body>
+</html>
