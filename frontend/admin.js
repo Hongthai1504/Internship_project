@@ -112,11 +112,16 @@ async function createFolder() {
     const name = nameInput.value.trim();
     if(!name) return;
 
+    let parent_id = null;
+    if (currentFolderId && currentFolderId !== 'unassigned') {
+        parent_id = currentFolderId;
+    }
+
     try {
         const res = await fetch("http://localhost:3000/api/admin/media/folders", {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ name })
+            body: JSON.stringify({ name, parent_id }) // Gửi kèm parent_id
         });
         if(res.ok) {
             nameInput.value = "";
@@ -125,6 +130,25 @@ async function createFolder() {
             const data = await res.json(); alert(data.error);
         }
     } catch (err) { alert("Error creating folder"); }
+}
+
+async function deleteFolder(event, folderId, folderName) {
+    event.stopPropagation(); // Tránh kích hoạt sự kiện chọn thư mục
+    if (!confirm(`Are you sure you want to delete folder "${folderName}"?\nAll images inside will be moved to 'Unassigned'.`)) return;
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/media/folders/${folderId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+            if (currentFolderId === folderId) selectFolder(null, 'All Media');
+            fetchFolders();
+            fetchMediaLibrary(); 
+        } else {
+            alert("Error deleting folder.");
+        }
+    } catch (err) { alert("Server error."); }
 }
 
 function selectFolder(id, name) {
@@ -136,20 +160,40 @@ function selectFolder(id, name) {
 
 function renderFolders() {
     let html = `
-        <li class="folder-item ${currentFolderId === null ? 'active' : ''}" onclick="selectFolder(null, 'All Media')">
+        <li class="folder-item ${currentFolderId === null ? 'active' : ''}" onclick="selectFolder(null, 'All Media')" style="padding: 10px;">
             <span class="folder-icon">📁</span> All Media
         </li>
-        <li class="folder-item ${currentFolderId === 'unassigned' ? 'active' : ''}" onclick="selectFolder('unassigned', 'Unassigned')">
+        <li class="folder-item ${currentFolderId === 'unassigned' ? 'active' : ''}" onclick="selectFolder('unassigned', 'Unassigned')" style="padding: 10px;">
             <span class="folder-icon">📂</span> Unassigned
         </li>
     `;
 
-    libraryFolders.forEach(f => {
-        html += `
-        <li class="folder-item ${currentFolderId === f.id ? 'active' : ''}" onclick="selectFolder(${f.id}, '${f.name}')">
-            <span class="folder-icon">📁</span> ${f.name}
-        </li>`;
-    });
+    const buildTree = (parentId, level) => {
+        const children = libraryFolders.filter(f => f.parent_id === parentId);
+        children.forEach(f => {
+            const indent = level * 15;
+            const icon = level > 0 ? '↳ 📁' : '📁'; 
+            
+            html += `
+            <li class="folder-item ${currentFolderId === f.id ? 'active' : ''}" 
+                style="padding: 10px; padding-left: ${indent + 10}px; display: flex; justify-content: space-between; align-items: center;" 
+                onclick="selectFolder(${f.id}, '${f.name}')">
+                
+                <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <span class="folder-icon">${icon}</span> ${f.name}
+                </div>
+                
+                <button onclick="deleteFolder(event, ${f.id}, '${f.name}')" 
+                        style="background: transparent; color: #ef4444; border: none; cursor: pointer; font-weight: bold; font-size: 1.1rem; padding: 0 5px;" 
+                        title="Delete Folder">×</button>
+            </li>`;
+            
+            buildTree(f.id, level + 1); 
+        });
+    };
+
+    buildTree(null, 0);
+    
     folderList.innerHTML = html;
 }
 
@@ -583,6 +627,7 @@ function openEditModal(productId) {
   document.getElementById("edit-price").value = product.price;
   document.getElementById("edit-stock").value = product.stock || 0;
   document.getElementById("edit-category-id").value = product.category_id;
+  
   document.getElementById("edit-description").value = product.description || "";
 
   const editSpecsContainer = document.getElementById("edit-specs-container");
@@ -604,6 +649,9 @@ function openEditModal(productId) {
                     : (product.image_url ? [product.image_url] : []);
   
   currentMediaTarget = 'edit';
+  
+  temporarySelection = [...formState.edit]; 
+  
   confirmMediaSelection(); 
 
   if (editModal) editModal.style.display = "flex";
@@ -626,7 +674,9 @@ if (editForm) {
       sku: document.getElementById("edit-sku").value.trim(),
       price: parseFloat(document.getElementById("edit-price").value),
       stock: parseInt(document.getElementById("edit-stock").value) || 0,
-      description: document.getElementById("description").value.trim(),
+      
+      description: document.getElementById("edit-description").value.trim(),
+      
       specifications: gatherSpecs('edit'),
       main_image: formState.edit.length > 0 ? formState.edit[0] : null,
       extra_images: formState.edit.length > 1 ? formState.edit.slice(1) : []

@@ -552,34 +552,66 @@
           </div>
         </div>
 
-        <!-- 2. TOP CATEGORIES -->
-        <div class="top-categories-section">
-          <h2 class="section-title">Shop Top Categories</h2>
-          <div class="top-categories-grid">
-            <a href="shop/cell-phones" class="cat-circle-card">
-              <div class="cat-icon">📱</div>
-              <span>Cell Phones</span>
+        <!-- 2. TOP CATEGORIES (PREMIUM UI UPGRADE) -->
+        <div class="top-categories-section" style="margin-top: 40px; margin-bottom: 40px;">
+          <h2 class="section-title" style="font-size: 1.8rem; margin-bottom: 20px;">Explore Categories</h2>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <!-- Category Card 1 -->
+            <a href="shop/cell-phones" style="text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 25px rgba(0,70,190,0.1)'; this.style.borderColor='#0046be';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)'; this.style.borderColor='#e5e7eb';">
+              <div style="width: 70px; height: 70px; background: #f0f4fc; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #0046be;">📱</div>
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #040c13; font-size: 1.2rem;">Cell Phones</h3>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">iPhone, Galaxy & Accessories</p>
+              </div>
             </a>
-            <a href="shop/computers-tablets" class="cat-circle-card">
-              <div class="cat-icon">💻</div>
-              <span>Computers</span>
+
+            <!-- Category Card 2 -->
+            <a href="shop/computers-tablets" style="text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 25px rgba(0,70,190,0.1)'; this.style.borderColor='#0046be';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)'; this.style.borderColor='#e5e7eb';">
+              <div style="width: 70px; height: 70px; background: #f0f4fc; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #0046be;">💻</div>
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #040c13; font-size: 1.2rem;">Computers</h3>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">Laptops, Desktops & Monitors</p>
+              </div>
             </a>
-            <a href="shop/tv-home-theater" class="cat-circle-card">
-              <div class="cat-icon">📺</div>
-              <span>TV & Theater</span>
+
+            <!-- Category Card 3 -->
+            <a href="shop/tv-home-theater" style="text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 25px rgba(0,70,190,0.1)'; this.style.borderColor='#0046be';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)'; this.style.borderColor='#e5e7eb';">
+              <div style="width: 70px; height: 70px; background: #f0f4fc; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #0046be;">📺</div>
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #040c13; font-size: 1.2rem;">TV & Theater</h3>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">OLED, QLED & Soundbars</p>
+              </div>
             </a>
-            <a href="shop/audio" class="cat-circle-card">
-              <div class="cat-icon">🎧</div>
-              <span>Audio</span>
+
+            <!-- Category Card 4 -->
+            <a href="shop/audio" style="text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 25px rgba(0,70,190,0.1)'; this.style.borderColor='#0046be';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)'; this.style.borderColor='#e5e7eb';">
+              <div style="width: 70px; height: 70px; background: #f0f4fc; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #0046be;">🎧</div>
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #040c13; font-size: 1.2rem;">Audio</h3>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">Headphones & Speakers</p>
+              </div>
             </a>
-            <a href="shop/video-games" class="cat-circle-card">
-              <div class="cat-icon">🎮</div>
-              <span>Gaming</span>
+
+            <!-- Category Card 5 -->
+            <a href="shop/video-games" style="text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 25px rgba(0,70,190,0.1)'; this.style.borderColor='#0046be';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)'; this.style.borderColor='#e5e7eb';">
+              <div style="width: 70px; height: 70px; background: #f0f4fc; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #0046be;">🎮</div>
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #040c13; font-size: 1.2rem;">Gaming</h3>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">Consoles, Games & VR</p>
+              </div>
             </a>
-            <a href="shop/appliances" class="cat-circle-card">
-              <div class="cat-icon">🏠</div>
-              <span>Appliances</span>
+
+            <!-- Category Card 6 -->
+            <a href="shop/appliances" style="text-decoration: none; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 25px rgba(0,70,190,0.1)'; this.style.borderColor='#0046be';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.02)'; this.style.borderColor='#e5e7eb';">
+              <div style="width: 70px; height: 70px; background: #f0f4fc; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #0046be;">🏠</div>
+              <div>
+                <h3 style="margin: 0 0 5px 0; color: #040c13; font-size: 1.2rem;">Appliances</h3>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">Kitchen & Smart Home</p>
+              </div>
             </a>
+
           </div>
         </div>
 

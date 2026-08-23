@@ -1,5 +1,4 @@
 require("dotenv").config(); // Active read file .env
-console.log("CHECKED API KEY", process.env.GEMINI_API_KEY);
 const express = require("express");
 const mysql = require("mysql2");
 
@@ -13,8 +12,11 @@ const { body, validationResult } = require("express-validator");
 const multer = require("multer");
 const path = require("path");
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY.trim());
+const { OpenAI } = require("openai");
+const groq = new OpenAI({ 
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: "https://api.groq.com/openai/v1" 
+});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -444,7 +446,7 @@ app.delete("/api/admin/products/:id", authenticateToken, isAdmin, (req, res) => 
   
   db.query("DELETE FROM Products WHERE id = ?", [productId], (err, result) => {
     if (err) {
-      console.error("Lỗi xóa sản phẩm:", err);
+      console.error("Error deleting product:", err);
       if (err.code === 'ER_ROW_IS_REFERENCED_2') {
         return res.status(400).json({ error: "Cannot be deleted because this product has already been ordered by a customer." });
       }
@@ -501,10 +503,10 @@ app.get("/api/admin/media/folders", authenticateToken, isAdmin, (req, res) => {
 });
 
 app.post("/api/admin/media/folders", authenticateToken, isAdmin, (req, res) => {
-    const { name } = req.body;
+    const { name, parent_id } = req.body; 
     if (!name) return res.status(400).json({ error: "Folder name is required." });
     
-    db.query("INSERT INTO Media_Folders (name) VALUES (?)", [name], (err, result) => {
+    db.query("INSERT INTO Media_Folders (name, parent_id) VALUES (?, ?)", [name, parent_id || null], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: "Folder already exists." });
             return res.status(500).json({ error: "Database error." });
@@ -556,14 +558,19 @@ app.get("/api/admin/media", authenticateToken, isAdmin, (req, res) => {
     });
 });
 
-app.delete("/api/admin/media/:id", authenticateToken, isAdmin, (req, res) => {
-    const mediaId = req.params.id;
-    db.query("DELETE FROM Media_Library WHERE id = ?", [mediaId], (err, result) => {
-        if (err) {
-            console.error("Delete Media Error:", err);
-            return res.status(500).json({ error: "Failed to delete media." });
-        }
-        res.json({ message: "Media deleted successfully!" });
+app.delete("/api/admin/media/folders/:id", authenticateToken, isAdmin, (req, res) => {
+    const folderId = req.params.id;
+    
+    db.query("UPDATE Media_Library SET folder_id = NULL WHERE folder_id = ?", [folderId], (err) => {
+        if (err) return res.status(500).json({ error: "Failed to move images." });
+        
+        db.query("UPDATE Media_Folders SET parent_id = NULL WHERE parent_id = ?", [folderId], (err) => {
+            
+            db.query("DELETE FROM Media_Folders WHERE id = ?", [folderId], (err) => {
+                if (err) return res.status(500).json({ error: "Failed to delete folder." });
+                res.json({ message: "Folder deleted successfully!" });
+            });
+        });
     });
 });
 
@@ -604,7 +611,7 @@ app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
     });
 });
 
-// API: AI CHATBOT (GEMINI 1.5 FLASH)
+// API: AI CHATBOT (GROQ - LLaMA 3)
 app.post("/api/chat", async (req, res) => {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: "Message is required." });
@@ -612,25 +619,26 @@ app.post("/api/chat", async (req, res) => {
     db.query("SELECT name, brand, price, stock FROM Products LIMIT 20", async (err, products) => {
         if (err) return res.status(500).json({ error: "Database error." });
 
-        const finalPrompt = `
+        const systemPrompt = `
         You are a helpful, concise, and professional customer support virtual assistant for "Best Tech", an electronics e-commerce store.
         Here is the list of our current available products (Name - Brand - Price - Stock):
         ${JSON.stringify(products)}
         If a customer asks about a product not on this list, politely inform them that you need to check the full catalog or suggest similar available items. Always reply in English.
-        
-        Customer's question: "${message}"
         `;
 
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const completion = await groq.chat.completions.create({
+                model: "groq/compound-mini",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: message }
+                ],
+                temperature: 0.7
+            });
 
-            const result = await model.generateContent(finalPrompt);
-            const response = await result.response;
-            const text = response.text();
-
-            res.json({ reply: text });
+            res.json({ reply: completion.choices[0].message.content });
         } catch (error) {
-            console.error("Gemini Error:", error);
+            console.error("Groq Error:", error);
             res.status(500).json({ error: "AI is sleeping. Please try again later." });
         }
     });
