@@ -18,6 +18,10 @@ const groq = new OpenAI({
     baseURL: "https://api.groq.com/openai/v1" 
 });
 
+const { OAuth2Client } = require('google-auth-library');
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "MÃ_CLIENT_ID_CỦA_BẠN.apps.googleusercontent.com";
+const googleClient = new OAuth2Client(CLIENT_ID);
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'images/');
@@ -642,6 +646,44 @@ app.post("/api/chat", async (req, res) => {
             res.status(500).json({ error: "AI is sleeping. Please try again later." });
         }
     });
+});
+
+// API: GOOGLE OAUTH 
+app.post("/api/auth/google", async (req, res) => {
+    const { token } = req.body;
+    
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID, 
+        });
+        
+        const payload = ticket.getPayload();
+        const email = payload.email;
+        const full_name = payload.name;
+        
+        db.query("SELECT * FROM Users WHERE email = ?", [email], (err, results) => {
+            if (err) return res.status(500).json({ error: "Database error." });
+
+            if (results.length > 0) {
+                const user = results[0];
+                const jwtToken = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
+                res.json({ message: "Google Login successful!", token: jwtToken });
+            } else {
+                const sql = "INSERT INTO Users (email, full_name, role) VALUES (?, ?, 'user')";
+                db.query(sql, [email, full_name], (err, result) => {
+                    if (err) return res.status(500).json({ error: "Could not create account." });
+                    
+                    const newUserId = result.insertId;
+                    const jwtToken = jwt.sign({ id: newUserId, role: "user" }, JWT_SECRET, { expiresIn: "1d" });
+                    res.json({ message: "Account created via Google!", token: jwtToken });
+                });
+            }
+        });
+    } catch (error) {
+        console.error("Google Auth Error:", error);
+        res.status(401).json({ error: "Invalid Google Token." });
+    }
 });
 
 // Start the server on port 3000

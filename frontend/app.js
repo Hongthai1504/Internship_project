@@ -266,6 +266,18 @@ if (menuOverlay) menuOverlay.addEventListener('click', closeAllMenus);
 
 window.addEventListener('resize', closeAllMenus);
 
+if (openCartBtn) {
+    openCartBtn.addEventListener("click", () => {
+        if (cartDrawer) cartDrawer.classList.add("open");
+    });
+}
+
+if (closeCartBtn) {
+    closeCartBtn.addEventListener("click", () => {
+        if (cartDrawer) cartDrawer.classList.remove("open");
+    });
+}
+
 // --- PRODUCTS & FILTERS ---
 async function fetchProducts() {
   try {
@@ -393,7 +405,7 @@ function renderProducts(productsToDisplay) {
                      alt="${product.name}" 
                      onclick="showProductDetail(${product.id})" 
                      style="cursor: pointer;">
-                <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price})">
+                <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price}, '${product.image_url || ''}')">
                     Add to Cart
                 </div>
             </div>
@@ -530,21 +542,73 @@ function changeMainImage(element, newSrc) {
 }
 
 // --- CART & ORDER LOGIC ---
-if (openCartBtn) openCartBtn.addEventListener("click", () => { if(cartDrawer) cartDrawer.classList.add("open"); });
-if (closeCartBtn) closeCartBtn.addEventListener("click", () => { if(cartDrawer) cartDrawer.classList.remove("open"); });
+function addToCart(id, name, price, image_url) {
+    let cart = [];
+    try {
+        const saved = localStorage.getItem("cart");
+        if (saved && saved !== "undefined") cart = JSON.parse(saved);
+    } catch (e) {}
 
-function addToCart(id, name, price) {
-  const existingItem = cart.find((item) => item.product_id === id);
-  if (existingItem) existingItem.quantity += 1;
-  else cart.push({ product_id: id, name: name, price: price, quantity: 1 });
-  updateCart();
-  if (cartDrawer) cartDrawer.classList.add("open");
+    const existingItem = cart.find(item => item.product_id === id);
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({ product_id: id, name: name, price: price, quantity: 1, image_url: image_url });
+    }
+    
+    localStorage.setItem("cart", JSON.stringify(cart));
+    
+    renderCart(); 
 }
 
-function removeFromCart(id) {
-  cart = cart.filter((item) => item.product_id !== id);
-  updateCart();
+function renderCart() {
+    const cartItems = document.getElementById("cart-items");
+    const cartTotal = document.getElementById("cart-total");
+    const cartCount = document.getElementById("cart-count");
+
+    if (!cartItems || !cartTotal) return;
+
+    let cart = [];
+    try {
+        const saved = localStorage.getItem("cart");
+        if (saved && saved !== "undefined") cart = JSON.parse(saved);
+    } catch (e) {}
+
+    cartItems.innerHTML = "";
+    let total = 0;
+    let count = 0;
+
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        count += item.quantity;
+
+        const imgSrc = item.image_url || 'https://via.placeholder.com/50';
+
+        cartItems.innerHTML += `
+            <li style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
+                <img src="${imgSrc}" style="width: 50px; height: 50px; object-fit: contain; border: 1px solid #e0e6ef; border-radius: 4px; padding: 2px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; font-size: 0.9rem; color: #040c13; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.name}</div>
+                    <div style="color: #666; font-size: 0.85rem; margin-top: 4px;">$${item.price} x ${item.quantity}</div>
+                    <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #ef4444; font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 5px; text-decoration: underline;">Remove</button>
+                </div>
+            </li>
+        `;
+    });
+
+    cartTotal.innerText = total.toFixed(2);
+    if (cartCount) cartCount.innerText = count;
 }
+
+function removeFromCart(index) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+}
+
+document.addEventListener("DOMContentLoaded", renderCart);
 
 function updateCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
@@ -1055,6 +1119,52 @@ function goToComparePage() {
     if (compareList.length < 2) return;
     localStorage.setItem('besttech_compare_list', JSON.stringify(compareList));
     window.location.href = 'compare.html';
+}
+
+function goToCheckout() {
+    let cart = [];
+    try {
+        const saved = localStorage.getItem("cart");
+        if (saved) cart = JSON.parse(saved);
+    } catch (e) {}
+
+    if (cart.length === 0) {
+        alert("Your cart is empty! Let's find some great tech first.");
+        return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please log in to proceed to checkout.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    window.location.href = "checkout.html";
+}
+
+async function handleGoogleResponse(response) {
+    const googleToken = response.credential;
+    
+    try {
+        const res = await fetch("http://localhost:3000/api/auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: googleToken })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+            localStorage.setItem("token", data.token);
+            alert(data.message);
+            window.location.href = "index.html";
+        } else {
+            alert("Google Login Failed: " + data.error);
+        }
+    } catch (err) {
+        alert("Server connection error.");
+    }
 }
 
 // Initialize Application

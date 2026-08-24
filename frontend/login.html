@@ -12,6 +12,7 @@
     <!-- MINIMAL HEADER FOR AUTH PAGE -->
     <header class="bb-header" style="padding: 20px 0; text-align: center; border-bottom: 4px solid #ffe000;">
       <a href="index.html" class="logo" style="text-decoration: none; color: white; font-size: 2.5rem;">BestTech</a>
+      <script src="https://accounts.google.com/gsi/client" async defer></script>
     </header>
 
     <!-- AUTHENTICATION WRAPPER -->
@@ -28,6 +29,24 @@
             <input type="password" id="login-password" class="auth-input" required placeholder="Password" />
           </div>
           <button type="submit" class="btn-auth-primary">Sign In</button>
+          <div style="text-align: center; margin: 20px 0; color: #666;">--- OR ---</div>
+
+          <div id="g_id_onload"
+              data-client_id="MÃ_CLIENT_ID_CỦA_BẠN.apps.googleusercontent.com"
+              data-context="signin"
+              data-ux_mode="popup"
+              data-callback="handleGoogleResponse"
+              data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin"
+              data-type="standard"
+              data-shape="rectangular"
+              data-theme="outline"
+              data-text="signin_with"
+              data-size="large"
+              data-logo_alignment="left"
+              style="display: flex; justify-content: center;">
+          </div>
         </form>
 
         <div class="auth-divider"><span>OR</span></div>
