@@ -28,8 +28,10 @@
           <div class="form-group">
             <input type="password" id="login-password" class="auth-input" required placeholder="Password" />
           </div>
+          
           <button type="submit" class="btn-auth-primary">Sign In</button>
-          <div style="text-align: center; margin: 20px 0; color: #666;">--- OR ---</div>
+          
+          <div class="auth-divider" style="margin: 25px 0;"><span>OR</span></div>
 
           <div id="g_id_onload"
               data-client_id="MÃ_CLIENT_ID_CỦA_BẠN.apps.googleusercontent.com"
@@ -38,29 +40,23 @@
               data-callback="handleGoogleResponse"
               data-auto_prompt="false">
           </div>
+          
           <div class="g_id_signin"
               data-type="standard"
               data-shape="rectangular"
               data-theme="outline"
               data-text="signin_with"
               data-size="large"
-              data-logo_alignment="left"
-              style="display: flex; justify-content: center;">
+              data-logo_alignment="center"
+              style="display: flex; justify-content: center; margin-bottom: 15px;">
           </div>
+          <button type="button" class="btn-social">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" width="18" style="margin-bottom: 2px;">
+            Sign in with Apple
+          </button>
         </form>
 
-        <div class="auth-divider"><span>OR</span></div>
-
-        <button class="btn-social">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="20">
-          Sign in with Google
-        </button>
-        <button class="btn-social">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" width="18" style="margin-bottom: 2px;">
-          Sign in with Apple
-        </button>
-
-        <div class="auth-switch">
+        <div class="auth-switch" style="margin-top: 25px;">
           Don't have an account? <a href="javascript:void(0)" id="go-to-register">Create an account</a>
         </div>
       </div>

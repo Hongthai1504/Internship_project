@@ -185,6 +185,15 @@ const isAdmin = (req, res, next) => {
   }
 };
 
+// Only Shipper (or Admin) can pass
+const isShipper = (req, res, next) => {
+  if (req.user && (req.user.role === 'shipper' || req.user.role === 'admin')) {
+    next();
+  } else {
+    return res.status(403).json({ error: "Access Denied. You are not a shipper."});
+  }
+};
+
 // API: Admin add new Products (have Validation)
 app.post("/api/products", 
   authenticateToken, 
@@ -390,7 +399,7 @@ app.delete("/api/profile/addresses/:id", authenticateToken, (req, res) => {
 // API for Admin: Get Orders
 app.get("/api/admin/orders", authenticateToken, isAdmin, (req, res) => {
   const sql = `
-    SELECT o.id, o.total_amount, o.status, o.shipping_address, o.create_at,
+    SELECT o.id, o.total_amount, o.status, o.shipping_address, o.create_at, o.shipper_id,
            u.full_name, u.email, u.phone
     FROM Orders o
     JOIN Users u ON o.user_id = u.id
@@ -432,15 +441,26 @@ app.get("/api/categories", (req, res) => {
 
 // Order Status Update API
 app.put("/api/admin/orders/:id/status", authenticateToken, isAdmin, (req, res) => {
-  const { status } = req.body;
+  const { status, shipper_id } = req.body;
   const orderId = req.params.id;
 
-  db.query("UPDATE Orders SET status = ? WHERE id = ?", [status, orderId], (err, result) => {
+  let sql = "UPDATE Orders SET status = ?";
+  let params = [status];
+
+  if (shipper_id !== undefined) {
+      sql += ", shipper_id = ?";
+      params.push(shipper_id === "" ? null : shipper_id);
+  }
+
+  sql += " WHERE id = ?";
+  params.push(orderId);
+
+  db.query(sql, params, (err, result) => {
     if (err) {
       console.error("Error updating order status:", err);
       return res.status(500).json({ error: "Server error during update." });
     }
-    res.json({ message: "Status updated successfully!" });
+    res.json({ message: "Order updated successfully!" });
   });
 });
 
@@ -612,6 +632,48 @@ app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
             return res.status(500).json({ error: "Failed to submit your review." });
         }
         res.status(201).json({ message: "Thank you for your review!" });
+    });
+});
+
+// API: SHIPPING & LOGISTICS LOGIC
+app.get("/api/admin/shippers", authenticateToken, isAdmin, (req, res) => {
+    db.query("SELECT id, full_name, phone FROM Users WHERE role = 'shipper'", (err, results) => {
+        if (err) return res.status(500).json({ error: "Failed to fetch shippers." });
+        res.json(results);
+    });
+});
+
+app.get("/api/shipper/orders", authenticateToken, isShipper, (req, res) => {
+    const shipperId = req.user.id;
+    const sql = `
+        SELECT o.id, o.total_amount, o.status, o.shipping_address, o.create_at,
+               u.full_name, u.phone
+        FROM Orders o
+        JOIN Users u ON o.user_id = u.id
+        WHERE o.shipper_id = ?
+        ORDER BY o.create_at DESC
+    `;
+    
+    db.query(sql, [shipperId], (err, results) => {
+        if (err) return res.status(500).json({ error: "Failed to fetch assigned orders." });
+        res.json(results);
+    });
+});
+
+app.put("/api/shipper/orders/:id/status", authenticateToken, isShipper, (req, res) => {
+    const shipperId = req.user.id;
+    const orderId = req.params.id;
+    const { status } = req.body; 
+
+    if (status !== 'completed' && status !== 'cancelled' && status !== 'pending') {
+        return res.status(400).json({ error: "Invalid status update from shipper." });
+    }
+
+    db.query("UPDATE Orders SET status = ? WHERE id = ? AND shipper_id = ?", [status, orderId, shipperId], (err, result) => {
+        if (err) return res.status(500).json({ error: "Server error." });
+        if (result.affectedRows === 0) return res.status(403).json({ error: "Unauthorized or order not found." });
+        
+        res.json({ message: "Delivery status updated successfully!" });
     });
 });
 

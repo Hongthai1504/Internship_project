@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shipper Dashboard | Best Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #040c13; }
+        .header { background: #001e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 1.2rem; font-weight: 900; color: #ffe000; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        .page-title { margin-bottom: 20px; border-bottom: 2px solid #e0e6ef; padding-bottom: 10px; }
+        
+        .order-card { background: #fff; border-radius: 8px; border: 1px solid #e0e6ef; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .order-id { font-size: 1.2rem; font-weight: 900; color: #0046be; }
+        .order-status { font-weight: bold; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; text-transform: uppercase; }
+        .status-shipping { background: #dbeafe; color: #1d4ed8; }
+        
+        .order-info { margin-bottom: 20px; line-height: 1.6; }
+        .info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+        .info-icon { font-size: 1.2rem; }
+        .cod-amount { font-size: 1.4rem; font-weight: 900; color: #ef4444; }
+        
+        .action-buttons { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        
+        .empty-state { text-align: center; padding: 50px 20px; color: #666; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>BestTech | Shipper App</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="container">
+        <h2 class="page-title">My Delivery Tasks</h2>
+        <div id="shipper-orders-list">
+            <p style="text-align: center;">Loading assigned orders...</p>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Access Denied. Please log in.");
+            window.location.href = "login.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        }
+
+        async function fetchShipperOrders() {
+            const listEl = document.getElementById("shipper-orders-list");
+            try {
+                const res = await fetch("http://localhost:3000/api/shipper/orders", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                
+                if (!res.ok) {
+                    listEl.innerHTML = `<p style="color: red; text-align: center;">Error: Unauthorized or Session expired.</p>`;
+                    return;
+                }
+
+                const orders = await res.json();
+                
+                const activeOrders = orders.filter(o => o.status === 'shipping');
+
+                if (activeOrders.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <h2 style="margin-bottom: 10px;">🎉 Great Job!</h2>
+                            <p>You have no pending deliveries right now.</p>
+                        </div>`;
+                    return;
+                }
+
+                listEl.innerHTML = activeOrders.map(order => {
+                    const date = new Date(order.create_at).toLocaleString();
+                    return `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div class="order-id">#${order.id}</div>
+                                <div class="order-status status-shipping">Delivering</div>
+                            </div>
+                            
+                            <div class="order-info">
+                                <div class="info-row">
+                                    <span class="info-icon">👤</span>
+                                    <div>
+                                        <strong>${order.full_name}</strong><br>
+                                        <a href="tel:${order.phone}" style="color: #0046be; font-weight: bold; text-decoration: none;">📞 ${order.phone || 'No phone number'}</a>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-icon">📍</span>
+                                    <div><strong>Address:</strong><br> ${order.shipping_address}</div>
+                                </div>
+                                <div class="info-row" style="margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
+                                    <span class="info-icon">💰</span>
+                                    <div><strong>COD Amount:</strong><br> <span class="cod-amount">$${order.total_amount}</span></div>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-success" onclick="updateStatus(${order.id}, 'completed')">
+                                    ✓ Delivered
+                                </button>
+                                <button class="btn btn-danger" onclick="updateStatus(${order.id}, 'cancelled')">
+                                    ✕ Failed
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                listEl.innerHTML = `<p style="color: red; text-align: center;">Connection error.</p>`;
+            }
+        }
+
+        async function updateStatus(orderId, newStatus) {
+            const actionText = newStatus === 'completed' ? 'DELIVERED SUCCESSFULLY' : 'DELIVERY FAILED';
+            if (!confirm(`Are you sure you want to mark Order #${orderId} as ${actionText}?`)) return;
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/shipper/orders/${orderId}/status`, {
+                    method: "PUT",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    alert("Order status updated!");
+                    fetchShipperOrders(); // Refresh the list
+                } else {
+                    const data = await res.json();
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Server error.");
+            }
+        }
+
+        fetchShipperOrders();
+    </script>
+</body>
+</html>

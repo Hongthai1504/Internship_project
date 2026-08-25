@@ -153,9 +153,13 @@ if (loginForm) {
       
       if (response.ok) {
         localStorage.setItem("token", data.token);
+        
         if (data.role === 'admin') {
             alert("Login successful! Welcome to Admin Dashboard.");
             window.location.href = "admin.html";
+        } else if (data.role === 'shipper') {
+            alert("Login successful! Routing to Shipper Dashboard.");
+            window.location.href = "shipper.html";
         } else {
             alert("Login successful! Welcome back.");
             window.location.href = "index.html"; 

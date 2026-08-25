@@ -378,76 +378,85 @@ if (addProductionForm) {
   });
 }
 
-// ==========================================
 // ADMIN DASHBOARD PANELS
-// ==========================================
 const adminOrderList = document.getElementById("admin-order-list");
 
-if (adminOrderList) {
-  async function fetchAdminOrders() {
-    try {
-      const res = await fetch("http://localhost:3000/api/admin/orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+let globalShippers = [];
 
-      if (!res.ok) throw new Error("Unable to load order data.");
-      const orders = await res.json();
-
-      if (orders.length === 0) {
-        adminOrderList.innerHTML = "<p>There are no orders in the system yet.</p>";
-        return;
-      }
-
-      let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                                <th style="padding: 15px;">Order ID</th>
-                                <th style="padding: 15px;">Customer</th>
-                                <th style="padding: 15px;">Contact</th>
-                                <th style="padding: 15px;">Total payment</th>
-                                <th style="padding: 15px;">Status</th>
-                                <th style="padding: 15px;">Booking date</th>
-                            </tr>`;
-
-      orders.forEach((o) => {
-        const date = new Date(o.create_at).toLocaleDateString("en-US");
-        
-        const statuses = ["pending", "shipping", "completed", "cancelled"];
-        
-        const getStatusBgColor = (status) => {
-            switch(status.toLowerCase()) {
-                case 'completed': return '#d1fae5';
-                case 'pending': return '#fef08a';
-                case 'shipping': return '#dbeafe';
-                case 'cancelled': return '#fee2e2';
-                default: return '#f3f4f6'; 
-            }
-        };
-
-        // Gắn màu nền vào thẻ <select>
-        let statusSelect = `<select onchange="updateOrderStatus(${o.id}, this.value)" style="padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; border: 1px solid #c8c8c8; outline: none; color: #040c13; background-color: ${getStatusBgColor(o.status)};">`;
-        
-        statuses.forEach((s) => {
-          const isSelected = o.status === s ? "selected" : "";
-          statusSelect += `<option value="${s}" ${isSelected} style="background: #fff;">${s.toUpperCase()}</option>`;
-        });
-        statusSelect += `</select>`;
-
-        html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                            <td style="padding: 15px; font-weight: bold;">#${o.id}</td>
-                            <td style="padding: 15px;">${o.full_name}</td>
-                            <td style="padding: 15px;">${o.phone}<br><small style="color: #666;">${o.email}</small></td>
-                            <td style="padding: 15px; font-weight: 900; color: #0046be;">$${o.total_amount}</td>
-                            <td style="padding: 15px;">${statusSelect}</td>
-                            <td style="padding: 15px; color: #555;">${date}</td>
-                         </tr>`;
-      });
-      html += `</table>`;
-      adminOrderList.innerHTML = html;
-    } catch (error) {
-      adminOrderList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
+async function fetchAdminOrders() {
+  try {
+    const shipperRes = await fetch("http://localhost:3000/api/admin/shippers", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (shipperRes.ok) {
+        globalShippers = await shipperRes.json();
     }
+
+    const res = await fetch("http://localhost:3000/api/admin/orders", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("Unable to load order data.");
+    const orders = await res.json();
+
+    if (orders.length === 0) {
+      adminOrderList.innerHTML = "<p>There are no orders in the system yet.</p>";
+      return;
+    }
+
+    let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
+                        <th style="padding: 15px;">Order ID</th>
+                        <th style="padding: 15px;">Customer</th>
+                        <th style="padding: 15px;">Total payment</th>
+                        <th style="padding: 15px;">Status</th>
+                        <th style="padding: 15px;">Assign Shipper</th>
+                        <th style="padding: 15px;">Action</th>
+                    </tr>`;
+
+    orders.forEach((o) => {
+      const statuses = ["pending", "shipping", "completed", "cancelled"];
+      
+      const getStatusBgColor = (status) => {
+          switch(status.toLowerCase()) {
+              case 'completed': return '#d1fae5';
+              case 'pending': return '#fef08a';
+              case 'shipping': return '#dbeafe';
+              case 'cancelled': return '#fee2e2';
+              default: return '#f3f4f6'; 
+          }
+      };
+
+      let statusSelect = `<select id="status-${o.id}" style="padding: 6px; border-radius: 4px; font-weight: bold; border: 1px solid #c8c8c8; outline: none; background-color: ${getStatusBgColor(o.status)};">`;
+      statuses.forEach((s) => {
+        const isSelected = o.status === s ? "selected" : "";
+        statusSelect += `<option value="${s}" ${isSelected} style="background: #fff;">${s.toUpperCase()}</option>`;
+      });
+      statusSelect += `</select>`;
+      let shipperSelect = `<select id="shipper-${o.id}" style="padding: 6px; border-radius: 4px; border: 1px solid #c8c8c8; outline: none; width: 100%;">
+          <option value="">-- Unassigned --</option>`;
+      globalShippers.forEach((s) => {
+          const isSelected = o.shipper_id === s.id ? "selected" : "";
+          shipperSelect += `<option value="${s.id}" ${isSelected}>${s.full_name}</option>`;
+      });
+      shipperSelect += `</select>`;
+
+      html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
+                  <td style="padding: 15px; font-weight: bold;">#${o.id}</td>
+                  <td style="padding: 15px;">${o.full_name}<br><small style="color: #666;">${o.phone}</small></td>
+                  <td style="padding: 15px; font-weight: 900; color: #0046be;">$${o.total_amount}</td>
+                  <td style="padding: 15px;">${statusSelect}</td>
+                  <td style="padding: 15px;">${shipperSelect}</td>
+                  <td style="padding: 15px;">
+                      <button onclick="saveOrderUpdates(${o.id})" style="background: #0046be; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">Save</button>
+                  </td>
+               </tr>`;
+    });
+    html += `</table>`;
+    adminOrderList.innerHTML = html;
+  } catch (error) {
+    adminOrderList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
   }
-  fetchAdminOrders();
 }
 
 const adminCustomerList = document.getElementById("admin-customer-list");
@@ -495,21 +504,35 @@ if (adminCustomerList) {
   fetchAdminCustomers();
 }
 
-async function updateOrderStatus(orderId, newStatus) {
-  if (!confirm(`Are you sure you want to change the status of order #${orderId} to ${newStatus.toUpperCase()}?`)) {
-    fetchAdminOrders(); return;
+
+async function saveOrderUpdates(orderId) {
+  const status = document.getElementById(`status-${orderId}`).value;
+  const shipper_id = document.getElementById(`shipper-${orderId}`).value;
+
+  if (status === 'shipping' && !shipper_id) {
+      alert("Please assign a Shipper before changing status to SHIPPING!");
+      return;
   }
+
+  if (!confirm(`Update Order #${orderId}?`)) return;
+
   try {
     const res = await fetch(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: status, shipper_id: shipper_id }),
       }
     );
     const data = await res.json();
-    if (res.ok) fetchAdminOrders();
-    else alert("Error: " + data.error);
-  } catch (error) { alert("Server error."); }
+    if (res.ok) {
+        alert("Order updated successfully!");
+        fetchAdminOrders();
+    } else {
+        alert("Error: " + data.error);
+    }
+  } catch (error) { 
+      alert("Server error."); 
+  }
 }
 
 const adminProductList = document.getElementById("admin-product-list");
@@ -745,4 +768,7 @@ function gatherSpecs(target) {
     return specs.length > 0 ? specs : null;
 }
 
+if (adminOrderList) {
+    fetchAdminOrders();
+}
 fetchAdminProducts();
