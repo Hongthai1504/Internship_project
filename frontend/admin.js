@@ -542,12 +542,13 @@ async function fetchAdminProducts() {
   if (!adminProductList) return;
   try {
     const [resProducts, resCategories] = await Promise.all([
-      fetch("http://localhost:3000/api/products"),
+      fetch("http://localhost:3000/api/products?limit=1000"),
       fetch("http://localhost:3000/api/categories"),
     ]);
 
-    const products = await resProducts.json();
+    const productsResponse = await resProducts.json();
     const categories = await resCategories.json();
+    const products = productsResponse.data || productsResponse;
     globalAdminProducts = products;
 
     const categoryDict = {};

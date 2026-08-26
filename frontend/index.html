@@ -27,6 +27,7 @@
           <div id="search-suggestions" class="search-suggestions-box"></div>
         </div>
 
+        
         <div class="nav-actions">
           <!-- ACCOUNT WRAPPER -->
           <div class="nav-item" style="position: relative;" id="account-wrapper">
@@ -63,6 +64,16 @@
             <span>Orders</span>
           </div>
 
+          <!-- WISHLIST TRIGGER -->
+          <div class="nav-item" id="wishlist-trigger" style="cursor: pointer;" onclick="alert('Trang Wishlist đang được xây dựng!')">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+            <span>Saved</span>
+            <span class="badge" id="wishlist-count" style="background: #ef4444;">0</span>
+          </div>
+          
+          <!-- CART TRIGGER -->
           <div class="cart-trigger" id="open-cart">
             <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
               <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />

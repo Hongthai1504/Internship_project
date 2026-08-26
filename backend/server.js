@@ -60,38 +60,48 @@ db.connect((err) => {
 
 // 2. Write an API to display a list of products (GET /api/products)
 app.get('/api/products', (req, res) => {
-    const { brand } = req.query; 
-
-    let sql = `
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const offset = (page - 1) * limit;
+    
+    const sqlCount = "SELECT COUNT(id) as total FROM Products";
+    
+    const sqlData = `
         SELECT p.*, 
                (SELECT GROUP_CONCAT(pi.image_url SEPARATOR ',') FROM Product_Images pi WHERE pi.product_id = p.id) AS gallery,
                (SELECT GROUP_CONCAT(r.comment SEPARATOR ' ') FROM Reviews r WHERE r.product_id = p.id) AS all_reviews
         FROM Products p
+        ORDER BY p.id DESC
+        LIMIT ${limit} OFFSET ${offset}
     `;
-    let queryParams = [];
 
-    if (brand) {
-        sql += ' WHERE p.brand = ?';
-        queryParams.push(brand);
-    }
-
-    db.query(sql, queryParams, (err, results) => {
-        if (err) {
-            console.error("Fetch products error:", err);
-            return res.status(500).json({ error: 'Server error while fetching products.' });
-        }
+    db.query(sqlCount, (err, countResult) => {
+        if (err) return res.status(500).json({ error: 'Server error counting products.' });
         
-        const finalResults = results.map(row => {
-            let images = [];
-            if (row.image_url) images.push(row.image_url);
-            if (row.gallery) {
-                images = images.concat(row.gallery.split(','));
-            }
-            row.all_images = images;
-            return row;
+        const totalProducts = countResult[0].total;
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        db.query(sqlData, (err, results) => {
+            if (err) return res.status(500).json({ error: 'Server error fetching products.' });
+            
+            const finalResults = results.map(row => {
+                let images = [];
+                if (row.image_url) images.push(row.image_url);
+                if (row.gallery) images = images.concat(row.gallery.split(','));
+                row.all_images = images;
+                return row;
+            });
+            
+            res.json({
+                data: finalResults,
+                pagination: {
+                    total_records: totalProducts,
+                    current_page: page,
+                    total_pages: totalPages,
+                    limit: limit
+                }
+            });
         });
-        
-        res.json(finalResults);
     });
 });
 
@@ -155,7 +165,8 @@ app.post("/api/login", loginLimiter, (req, res) => {
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: "1d",
     });
-    res.json({ message: "Login successful!", token: token });
+    
+    res.json({ message: "Login successful!", token: token, role: user.role }); 
   });
 });
 
@@ -730,7 +741,7 @@ app.post("/api/auth/google", async (req, res) => {
             if (results.length > 0) {
                 const user = results[0];
                 const jwtToken = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
-                res.json({ message: "Google Login successful!", token: jwtToken });
+                res.json({ message: "Google Login successful!", token: jwtToken, role: user.role });
             } else {
                 const sql = "INSERT INTO Users (email, full_name, role) VALUES (?, ?, 'user')";
                 db.query(sql, [email, full_name], (err, result) => {
@@ -738,7 +749,7 @@ app.post("/api/auth/google", async (req, res) => {
                     
                     const newUserId = result.insertId;
                     const jwtToken = jwt.sign({ id: newUserId, role: "user" }, JWT_SECRET, { expiresIn: "1d" });
-                    res.json({ message: "Account created via Google!", token: jwtToken });
+                    res.json({ message: "Account created via Google!", token: jwtToken, role: "user" });
                 });
             }
         });

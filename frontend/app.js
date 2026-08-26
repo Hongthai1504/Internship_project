@@ -19,6 +19,7 @@ let currentDetailProductId = null;
 let allProducts = [];
 let currentPageProducts = [];
 let cart = [];
+let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 
 // SMART SEARCH ALGORITHM
 function isProductMatch(product, searchKeyword) {
@@ -283,14 +284,25 @@ if (closeCartBtn) {
 }
 
 // --- PRODUCTS & FILTERS ---
-async function fetchProducts() {
-  try {
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    
-    if (!response.ok || data.error) throw new Error(data.error || "API Error");
+let currentCatalogPage = 1;
+let totalCatalogPages = 1;
 
-    allProducts = Array.isArray(data) ? data : []; 
+async function fetchProducts(page = 1, isAppending = false) {
+  try {
+    const response = await fetch(`${API_URL}?page=${page}&limit=12`);
+    const result = await response.json();
+    
+    if (!response.ok || result.error) throw new Error(result.error || "API Error");
+
+    const productsData = result.data || [];
+    currentCatalogPage = result.pagination.current_page;
+    totalCatalogPages = result.pagination.total_pages;
+
+    if (isAppending) {
+        allProducts = [...allProducts, ...productsData];
+    } else {
+        allProducts = [...productsData];
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('q');
@@ -299,25 +311,15 @@ async function fetchProducts() {
         const titleEl = document.getElementById("page-title");
         if (titleEl) titleEl.innerText = `Search results for: "${searchQuery}"`;
         document.title = `Search: ${searchQuery} | Best Tech`;
-
         currentPageProducts = allProducts.filter(product => isProductMatch(product, searchQuery));
-    } else if (typeof PAGE_KEYWORD !== 'undefined') {
-        const titleEl = document.getElementById("page-title");
-        if (titleEl) titleEl.innerText = PAGE_TITLE;
-        document.title = PAGE_TITLE + " | Best Tech";
-
-        currentPageProducts = allProducts.filter(product => {
-            const name = product.name.toLowerCase();
-            const brand = (product.brand || "").toLowerCase();
-            const keyword = PAGE_KEYWORD.toLowerCase();
-            return name.includes(keyword) || brand.includes(keyword);
-        });
     } else {
         currentPageProducts = [...allProducts]; 
     }
 
     renderDynamicBrands(currentPageProducts);
     handleFilters(); 
+    
+    renderLoadMoreButton();
 
   } catch (error) {
     const listEl = document.getElementById("product-list");
@@ -325,6 +327,38 @@ async function fetchProducts() {
       listEl.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: red;'>Connection error. Please check your Backend server.</p>";
     }
   }
+}
+
+function renderLoadMoreButton() {
+    let container = document.getElementById("load-more-container");
+    
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "load-more-container";
+        container.style.gridColumn = "1/-1";
+        container.style.textAlign = "center";
+        container.style.marginTop = "40px";
+        container.style.marginBottom = "20px";
+        const productListEl = document.getElementById("product-list");
+        if(productListEl) productListEl.after(container);
+    }
+
+    if (currentCatalogPage < totalCatalogPages) {
+        container.innerHTML = `
+            <button id="btn-load-more" style="background: #0046be; color: white; padding: 12px 30px; font-size: 1.1rem; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,70,190,0.2); transition: 0.2s;">
+                Show More Products ↓
+            </button>`;
+            
+        document.getElementById("btn-load-more").addEventListener("click", () => {
+            document.getElementById("btn-load-more").innerText = "Loading...";
+            document.getElementById("btn-load-more").style.opacity = "0.7";
+            fetchProducts(currentCatalogPage + 1, true); 
+        });
+    } else if (totalCatalogPages > 1) {
+        container.innerHTML = `<p style="color: #888; font-style: italic; border-top: 1px solid #eee; padding-top: 20px;">You've reached the end of the catalog.</p>`;
+    } else {
+        container.innerHTML = "";
+    }
 }
 
 function renderDynamicBrands(products) {
@@ -403,25 +437,33 @@ function renderProducts(productsToDisplay) {
     const safeName = product.name.replace(/'/g, "\\'");
     const card = document.createElement("div");
     card.className = "product-card";
+
+    const isWished = wishlist.includes(product.id);
+    const heartFill = isWished ? '#ef4444' : 'none';
+    const heartColor = isWished ? '#ef4444' : '#666';
+
     card.innerHTML = `
-            <div class="img-wrapper">
-                <img src="${product.image_url || "https://via.placeholder.com/300"}" 
-                     alt="${product.name}" 
-                     onclick="showProductDetail(${product.id})" 
-                     style="cursor: pointer;">
-                <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price}, '${product.image_url || ''}')">
-                    Add to Cart
-                </div>
+        <div class="img-wrapper" style="position: relative;">
+            <button class="wishlist-btn" onclick="toggleWishlist(${product.id}, event)" style="position: absolute; top: 10px; right: 10px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: ${heartColor}; z-index: 2; transition: 0.2s;">
+                <svg width="18" height="18" fill="${heartFill}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </button>
+            <img src="${product.image_url || "https://via.placeholder.com/300"}" 
+                 alt="${product.name}" 
+                 onclick="showProductDetail(${product.id})" 
+                 style="cursor: pointer;">
+            <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price}, '${product.image_url || ''}')">
+                Add to Cart
             </div>
-            <div class="product-info">
-                <h3 class="product-name" onclick="showProductDetail(${product.id})" style="cursor: pointer;">${product.name}</h3>
-                <p class="product-price">$${product.price}</p>
-                <label style="font-size: 0.85rem; color: #555; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px 8px; border: 1px solid #e0e6ef; border-radius: 4px; background: #f9fafb;">
-                    <input type="checkbox" value="${product.id}" onchange="toggleCompare(${product.id}, this)" class="compare-cb-${product.id}">
-                    Compare
-                </label>
-            </div>
-        `;
+        </div>
+        <div class="product-info">
+            <h3 class="product-name" onclick="showProductDetail(${product.id})" style="cursor: pointer;">${product.name}</h3>
+            <p class="product-price">$${product.price}</p>
+            <label style="font-size: 0.85rem; color: #555; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px 8px; border: 1px solid #e0e6ef; border-radius: 4px; background: #f9fafb;">
+                <input type="checkbox" value="${product.id}" onchange="toggleCompare(${product.id}, this)" class="compare-cb-${product.id}">
+                Compare
+            </label>
+        </div>
+    `;
     productListEl.appendChild(card);
   });
 }
@@ -1147,6 +1189,28 @@ function goToCheckout() {
     window.location.href = "checkout.html";
 }
 
+// WISHLIST LOGIC
+function updateWishlistCount() {
+    const countEl = document.getElementById('wishlist-count');
+    if (countEl) countEl.innerText = wishlist.length;
+}
+document.addEventListener("DOMContentLoaded", updateWishlistCount);
+
+function toggleWishlist(productId, event) {
+    event.stopPropagation(); 
+    const index = wishlist.indexOf(productId);
+    
+    if (index > -1) {
+        wishlist.splice(index, 1); 
+    } else {
+        wishlist.push(productId);
+    }
+    
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    updateWishlistCount();
+    handleFilters(); 
+}
+
 async function handleGoogleResponse(response) {
     const googleToken = response.credential;
     
@@ -1161,8 +1225,18 @@ async function handleGoogleResponse(response) {
         
         if (res.ok) {
             localStorage.setItem("token", data.token);
-            alert(data.message);
-            window.location.href = "index.html";
+            
+            if (data.role === 'admin') {
+                alert("Google Login successful! Welcome to Admin Dashboard.");
+                window.location.href = "admin.html";
+            } else if (data.role === 'shipper') {
+                alert("Google Login successful! Routing to Shipper Dashboard.");
+                window.location.href = "shipper.html";
+            } else {
+                alert("Google Login successful!");
+                window.location.href = "index.html";
+            }
+            
         } else {
             alert("Google Login Failed: " + data.error);
         }
