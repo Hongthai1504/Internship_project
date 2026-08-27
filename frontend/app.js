@@ -21,6 +21,56 @@ let currentPageProducts = [];
 let cart = [];
 let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 
+// MULTI-LANGUAGE (i18n) LOGIC
+let currentLang = localStorage.getItem('besttech_lang') || 'en';
+
+function applyLanguage(lang) {
+    if (typeof translations === 'undefined') {
+        console.warn("Chưa tìm thấy file translations.js");
+        return;
+    }
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            el.innerText = translations[lang][key];
+        }
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+            el.placeholder = translations[lang][key];
+        }
+    });
+
+    const langIcon = document.getElementById('current-lang-icon');
+    if (langIcon) {
+        if (lang === 'en') {
+            langIcon.innerHTML = `<img src="https://flagcdn.com/w20/us.png" srcset="https://flagcdn.com/w40/us.png 2x" alt="US" style="vertical-align: middle; margin-right: 5px; width: 20px; border-radius: 2px;"> EN`;
+        } else {
+            langIcon.innerHTML = `<img src="https://flagcdn.com/w20/vn.png" srcset="https://flagcdn.com/w40/vn.png 2x" alt="VN" style="vertical-align: middle; margin-right: 5px; width: 20px; border-radius: 2px;"> VI`;
+        }
+    }
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'vi' : 'en';
+    localStorage.setItem('besttech_lang', currentLang);
+    applyLanguage(currentLang);
+    
+    const productListEl = document.getElementById("product-list");
+    if (productListEl) {
+        productListEl.innerHTML = "<p style='text-align:center;'>Đang tải lại dữ liệu / Loading data...</p>";
+        allProducts = [];
+        fetchProducts(1);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    applyLanguage(currentLang);
+});
+
 // SMART SEARCH ALGORITHM
 function isProductMatch(product, searchKeyword) {
     const term = searchKeyword.toLowerCase().trim();
@@ -289,7 +339,7 @@ let totalCatalogPages = 1;
 
 async function fetchProducts(page = 1, isAppending = false) {
   try {
-    const response = await fetch(`${API_URL}?page=${page}&limit=12`);
+    const response = await fetch(`${API_URL}?page=${page}&limit=12&lang=${currentLang}`);
     const result = await response.json();
     
     if (!response.ok || result.error) throw new Error(result.error || "API Error");
@@ -320,6 +370,7 @@ async function fetchProducts(page = 1, isAppending = false) {
     handleFilters(); 
     
     renderLoadMoreButton();
+    renderWishlistPage();
 
   } catch (error) {
     const listEl = document.getElementById("product-list");
@@ -330,6 +381,9 @@ async function fetchProducts(page = 1, isAppending = false) {
 }
 
 function renderLoadMoreButton() {
+    const productListEl = document.getElementById("product-list");
+    if (!productListEl) return;
+
     let container = document.getElementById("load-more-container");
     
     if (!container) {
@@ -1244,6 +1298,59 @@ async function handleGoogleResponse(response) {
         alert("Server connection error.");
     }
 }
+
+// RENDER WISHLIST PAGE 
+async function renderWishlistPage() {
+    const container = document.getElementById("wishlist-page-container");
+    if (!container) return; 
+
+    if (wishlist.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 80px 20px; grid-column: 1/-1; background: #fff; border-radius: 8px; border: 1px dashed #c8c8c8;">
+                <svg width="60" height="60" fill="#c8c8c8" viewBox="0 0 24 24" style="margin-bottom: 15px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <h3 style="color: #040c13; font-size: 1.5rem;">Your Wishlist is Empty</h3>
+                <p style="color: #666; margin-bottom: 20px;">Explore our catalog and save your favorite tech items here.</p>
+                <a href="index.html" style="background: #0046be; color: white; padding: 12px 25px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block;">Start Shopping</a>
+            </div>`;
+        return;
+    }
+
+    try {
+        const lang = localStorage.getItem('besttech_lang') || 'en';
+        const res = await fetch(`http://localhost:3000/api/products?limit=1000&lang=${lang}`);
+        const result = await res.json();
+        const allProductsData = result.data || [];
+
+        const productsToDisplay = allProductsData.filter(p => wishlist.includes(p.id));
+        
+        container.innerHTML = "";
+        productsToDisplay.forEach(product => {
+            const safeName = product.name.replace(/'/g, "\\'");
+            const card = document.createElement("div");
+            card.className = "product-card";
+            
+            card.innerHTML = `
+                <div class="img-wrapper" style="position: relative;">
+                    <!-- Nút xóa khỏi Wishlist -->
+                    <button onclick="toggleWishlist(${product.id}, event); renderWishlistPage();" style="position: absolute; top: 10px; right: 10px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #ef4444; z-index: 2; transition: 0.2s;">
+                        <svg width="18" height="18" fill="#ef4444" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    </button>
+                    <img src="${product.image_url || "https://via.placeholder.com/300"}" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                    <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price}, '${product.image_url || ''}')">Add to Cart</div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-price">$${product.price}</p>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } catch (error) {
+        container.innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1/-1;">Connection error. Could not load wishlist items.</p>';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", renderWishlistPage);
 
 // Initialize Application
 fetchProducts();

@@ -64,6 +64,8 @@ app.get('/api/products', (req, res) => {
     const limit = parseInt(req.query.limit) || 12;
     const offset = (page - 1) * limit;
     
+    const lang = req.query.lang || 'en';
+    
     const sqlCount = "SELECT COUNT(id) as total FROM Products";
     
     const sqlData = `
@@ -88,6 +90,13 @@ app.get('/api/products', (req, res) => {
                 let images = [];
                 if (row.image_url) images.push(row.image_url);
                 if (row.gallery) images = images.concat(row.gallery.split(','));
+                
+                // --- LOGIC XỬ LÝ NGÔN NGỮ ĐỘNG ---
+                if (lang === 'vi') {
+                    row.name = row.name_vi || row.name;
+                    row.description = row.description_vi || row.description;
+                }
+
                 row.all_images = images;
                 return row;
             });

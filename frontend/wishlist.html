@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Wishlist | Best Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body style="background-color: #f4f6f9;">
+
+    <!-- MINIMAL HEADER -->
+    <header class="bb-header">
+      <div class="header-top">
+        <div class="logo">BestTech</div>
+
+        <div class="search-container">
+          <input type="text" id="search-input" data-i18n-placeholder="search_placeholder" placeholder="What are you looking for today?" />
+          <button class="search-btn">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+          </button>
+          
+          <!-- LIVE SEARCH SUGGESTIONS BOX -->
+          <div id="search-suggestions" class="search-suggestions-box"></div>
+        </div>
+
+        
+        <div class="nav-actions">
+          
+          <div class="nav-item lang-switch" style="cursor: pointer;" onclick="toggleLanguage()">
+            <span id="current-lang-icon" style="font-weight: bold;">🇺🇸 EN</span>
+          </div>
+
+          <!-- ACCOUNT WRAPPER -->
+          <div class="nav-item" style="position: relative;" id="account-wrapper">
+            <div id="login-trigger" style="display: flex; align-items: center; gap: 8px;">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+              </svg>
+              <span id="account-text" data-i18n="nav_account">Account</span>
+            </div>
+
+            <!-- USER MENU DROPDOWN -->
+            <div id="user-dropdown" class="user-dropdown-menu">
+              <div class="user-dropdown-header">
+                <p>Welcome back!</p>
+              </div>
+              <ul class="user-dropdown-list">
+                <li id="menu-profile">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  My Profile
+                </li>
+                <li id="menu-logout" style="color: #ef4444; border-top: 1px solid #eee;">
+                  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                  Log Out
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- BTN Order History -->
+          <div class="nav-item" id="order-history-trigger" style="display: none;">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+            </svg>
+            <span data-i18n="nav_orders">Orders</span>
+          </div>
+
+          <!-- WISHLIST TRIGGER -->
+          <div class="nav-item" id="wishlist-trigger" style="cursor: pointer;" onclick="window.location.href='wishlist.html'">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+            <span data-i18n="nav_saved">Saved</span>
+            <span class="badge" id="wishlist-count" style="background: #ef4444;">0</span>
+          </div>
+          
+          <!-- CART TRIGGER -->
+          <div class="cart-trigger" id="open-cart">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+            </svg>
+            <span data-i18n="nav_cart">Cart</span>
+            <span class="badge" id="cart-count">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="menu-overlay" class="menu-overlay"></div>
+
+      <nav class="header-bottom">
+        <div class="menu-pill-container">
+          <button class="menu-pill-btn" data-target="dropdown-shop"><span data-i18n="nav_shop">Shop</span> <span class="arrow">▼</span></button>
+          <button class="menu-pill-btn" data-target="dropdown-deals"><span data-i18n="nav_deals">Deals</span> <span class="arrow">▼</span></button>
+          <button class="menu-pill-btn" data-target="dropdown-support"><span data-i18n="nav_support">Support & Services</span> <span class="arrow">▼</span></button>
+          <button class="menu-pill-btn" data-target="dropdown-discover"><span data-i18n="nav_discover">Discover</span> <span class="arrow">▼</span></button>
+        </div>
+      </nav>
+    </header>
+
+    <main style="max-width: 1400px; margin: 40px auto; padding: 0 40px;">
+        <div style="margin-bottom: 30px; border-bottom: 2px solid #e0e6ef; padding-bottom: 15px;">
+            <h1 style="color: #040c13; margin: 0; font-size: 2rem;" data-i18n="nav_saved">My Wishlist</h1>
+        </div>
+
+<!-- MAIN SHOP LAYOUT -->
+    <div class="shop-layout">
+      <!-- SIDEBAR FILTER -->
+      <aside class="sidebar">
+        
+        <!-- SORT OPTIONS -->
+        <div class="filter-group">
+          <h3 class="filter-title" data-i18n="filter_sort">Sort By</h3>
+          <select id="sort-options" style="width: 100%; padding: 10px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 1rem; outline: none; cursor: pointer; color: #040c13;">
+            <option value="default">Featured (Default)</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+
+        <!-- DYNAMIC BRAND FILTER -->
+        <div class="filter-group">
+          <h3 class="filter-title" data-i18n="filter_brand">Brand</h3>
+          <ul class="filter-list" id="brand-filters">
+            <p style="color: #666; font-size: 0.9rem; font-style: italic;">Loading brands...</p>
+            <!-- JavaScript will automatically inject unique brands here -->
+          </ul>
+        </div>
+
+        <!-- STATIC PRICE FILTER -->
+        <div class="filter-group">
+          <h3 class="filter-title" data-i18n="filter_price">Price Range</h3>
+          <ul class="filter-list">
+            <li><label><input type="radio" name="price" value="all" checked /> All Prices</label></li>
+            <li><label><input type="radio" name="price" value="under500" /> Under $500</label></li>
+            <li><label><input type="radio" name="price" value="500to999" /> $500 - $999</label></li>
+            <li><label><input type="radio" name="price" value="over1000" /> $1000 & Above</label></li>
+          </ul>
+        </div>
+
+      </aside>
+
+      <!-- CONTENT AREA -->
+      <main class="content-area">          
+        <div id="wishlist-page-container" class="product-grid">
+            <p style="text-align: center; grid-column: 1/-1; color: #666; font-style: italic;">Loading your favorite items...</p>
+        </div>
+      </main>
+    </div>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
