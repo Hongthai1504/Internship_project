@@ -621,8 +621,9 @@ app.delete("/api/admin/media/folders/:id", authenticateToken, isAdmin, (req, res
 // API: PRODUCT REVIEWS
 app.get("/api/products/:id/reviews", (req, res) => {
     const productId = req.params.id;
+    // Bổ sung lấy cột r.image_url từ Database
     const sql = `
-        SELECT r.id, r.rating, r.comment, r.created_at, u.full_name 
+        SELECT r.id, r.rating, r.comment, r.image_url, r.created_at, u.full_name 
         FROM Reviews r 
         JOIN Users u ON r.user_id = u.id 
         WHERE r.product_id = ? 
@@ -634,6 +635,29 @@ app.get("/api/products/:id/reviews", (req, res) => {
             return res.status(500).json({ error: "Failed to load reviews." });
         }
         res.json(results);
+    });
+});
+
+app.post("/api/products/:id/reviews", authenticateToken, upload.single('image'), (req, res) => {
+    const productId = req.params.id;
+    const userId = req.user.id; 
+    const { rating, comment } = req.body;
+    let imageUrl = null;
+
+    if (req.file) {
+        imageUrl = `http://localhost:3000/images/${req.file.filename}`;
+    }
+
+    if (!rating) return res.status(400).json({ error: "Please select a star rating." });
+
+    const sql = `INSERT INTO Reviews (product_id, user_id, rating, comment, image_url) VALUES (?, ?, ?, ?, ?)`;
+    
+    db.query(sql, [productId, userId, rating, comment, imageUrl], (err, result) => {
+        if (err) {
+            console.error("Submit Review Error:", err);
+            return res.status(500).json({ error: "Failed to submit your review." });
+        }
+        res.status(201).json({ message: "Thank you for your review!" });
     });
 });
 
@@ -699,8 +723,10 @@ app.put("/api/shipper/orders/:id/status", authenticateToken, isShipper, (req, re
 
 // API: AI CHATBOT (GROQ - LLaMA 3)
 app.post("/api/chat", async (req, res) => {
-    const { message } = req.body;
+    const { message, lang } = req.body;
     if (!message) return res.status(400).json({ error: "Message is required." });
+
+    const language = lang === 'vi' ? 'Vietnamese' : 'English';
 
     db.query("SELECT name, brand, price, stock FROM Products LIMIT 20", async (err, products) => {
         if (err) return res.status(500).json({ error: "Database error." });
@@ -709,7 +735,8 @@ app.post("/api/chat", async (req, res) => {
         You are a helpful, concise, and professional customer support virtual assistant for "Best Tech", an electronics e-commerce store.
         Here is the list of our current available products (Name - Brand - Price - Stock):
         ${JSON.stringify(products)}
-        If a customer asks about a product not on this list, politely inform them that you need to check the full catalog or suggest similar available items. Always reply in English.
+        If a customer asks about a product not on this list, politely inform them that you need to check the full catalog or suggest similar available items. 
+        IMPORTANT: You MUST reply entirely in ${language}. Do not use any other language.
         `;
 
         try {
@@ -768,6 +795,47 @@ app.post("/api/auth/google", async (req, res) => {
     }
 });
 
+// API: AI PRODUCT COMPARISON
+app.post("/api/compare-ai", async (req, res) => {
+    const { products, lang } = req.body;
+    if (!products || products.length < 2) return res.status(400).json({ error: "Need at least 2 products." });
+
+    const language = lang === 'vi' ? 'Vietnamese' : 'English';
+    const productInfo = products.map(p => `${p.name} (Price: $${p.price})`).join(" vs ");
+    
+    const systemPrompt = `
+    You are a Senior Tech Reviewer for a premium e-commerce platform. The user is comparing: ${productInfo}.
+    Detailed specifications: ${JSON.stringify(products)}.
+
+    Provide a highly engaging, professional comparison STRICTLY in ${language}. 
+    You MUST format your response using standard HTML tags (<p>, <ul>, <li>). Do NOT use Markdown like ** or *.
+
+    Follow this exact HTML structure and do not deviate:
+    <p><strong>${lang === 'vi' ? 'Tổng quan:' : 'Overview:'}</strong> [1 short sentence summarizing the matchup]</p>
+    <ul>
+      <li>[Highlight key difference 1]. Wrap crucial specs, features, or prices in <strong style="color: #ef4444;">[text]</strong>.</li>
+      <li>[Highlight key difference 2]. Wrap crucial specs, features, or prices in <strong style="color: #ef4444;">[text]</strong>.</li>
+    </ul>
+    <p><strong>${lang === 'vi' ? 'Lời khuyên:' : 'Verdict:'}</strong> [1-2 sentences on who should buy which product. Wrap the target audience or winning feature in <strong style="color: #ef4444;">[text]</strong>]</p>
+
+    Remember: Your entire response, including explanations and evaluations, must be completely written in ${language}.
+    `;
+
+    try {
+        const completion = await groq.chat.completions.create({
+            model: "groq/compound-mini", // Giữ nguyên model đang hoạt động tốt của bạn
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: "Please evaluate these products." } // Đã sửa: Thay thế biến 'message' bị lỗi bằng chuỗi text
+            ],
+            temperature: 0.7
+        });
+        res.json({ evaluation: completion.choices[0].message.content });
+    } catch (error) {
+        console.error("AI Compare Error:", error);
+        res.status(500).json({ error: "AI comparison failed." });
+    }
+});
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => {

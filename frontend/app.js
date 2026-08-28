@@ -445,7 +445,10 @@ function handleFilters() {
   const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || 'all';
   const sortOption = document.getElementById("sort-options")?.value || "default";
 
-  let filteredProducts = currentPageProducts.filter((product) => {
+  const isWishlist = document.getElementById("wishlist-page-container") !== null;
+  let baseData = isWishlist ? (window.currentWishlistData || []) : currentPageProducts;
+
+  let filteredProducts = baseData.filter((product) => {
     const productBrand = (product.brand || "").toLowerCase();
     const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(productBrand);
 
@@ -468,7 +471,11 @@ function handleFilters() {
     if (shopLayout) shopLayout.style.display = "flex";
   }
 
-  renderProducts(filteredProducts);
+  if (isWishlist) {
+      drawWishlistCards(filteredProducts);
+  } else {
+      renderProducts(filteredProducts);
+  }
 }
 
 const staticPriceRadios = document.querySelectorAll('input[name="price"]');
@@ -557,11 +564,15 @@ function showProductDetail(product_id) {
 
   const stockElement = document.getElementById("detail-stock");
   if(stockElement) {
+      const inStockText = currentLang === 'vi' ? 'Còn hàng' : 'In Stock';
+      const unitText = currentLang === 'vi' ? 'sản phẩm' : 'units';
+      const outOfStockText = currentLang === 'vi' ? 'Hết hàng' : 'Out of Stock';
+
       if (product.stock > 0) {
-        stockElement.innerText = `In Stock (${product.stock} units)`;
+        stockElement.innerText = `${inStockText} (${product.stock} ${unitText})`;
         stockElement.style.color = "#059669";
       } else {
-        stockElement.innerText = "Out of Stock";
+        stockElement.innerText = outOfStockText;
         stockElement.style.color = "#ef4444";
       }
   }
@@ -981,21 +992,27 @@ async function fetchProductReviews(productId) {
     const listEl = document.getElementById("reviews-list");
     if (!listEl) return;
     
-    listEl.innerHTML = '<p style="color: #666; font-style: italic;">Loading reviews...</p>';
+    const loadingText = currentLang === 'vi' ? 'Đang tải đánh giá...' : 'Loading reviews...';
+    const noReviewsText = currentLang === 'vi' ? 'Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!' : 'No reviews yet. Be the first to review this product!';
+    const errorText = currentLang === 'vi' ? 'Không thể tải đánh giá.' : 'Failed to load reviews.';
+    const postedOnText = currentLang === 'vi' ? 'Đăng vào' : 'Posted on';
+
+    listEl.innerHTML = `<p style="color: #666; font-style: italic;">${loadingText}</p>`;
     
     try {
         const res = await fetch(`http://localhost:3000/api/products/${productId}/reviews`);
         const reviews = await res.json();
         
         if (reviews.length === 0) {
-            listEl.innerHTML = '<p style="color: #666; font-style: italic;">No reviews yet. Be the first to review this product!</p>';
+            listEl.innerHTML = `<p style="color: #666; font-style: italic;">${noReviewsText}</p>`;
             return;
         }
         
         listEl.innerHTML = reviews.map(r => {
-            // Render sao dựa trên điểm số
             const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
             const date = new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            
+            const imageHtml = r.image_url ? `<img src="${r.image_url}" style="max-width: 120px; max-height: 120px; border-radius: 8px; margin-top: 15px; border: 1px solid #e0e6ef; object-fit: cover; cursor: pointer;">` : '';
             
             return `
             <div style="border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
@@ -1005,16 +1022,17 @@ async function fetchProductReviews(productId) {
                     </div>
                     <div>
                         <div style="font-weight: bold; color: #040c13;">${r.full_name}</div>
-                        <div style="color: #888; font-size: 0.85rem;">Posted on ${date}</div>
+                        <div style="color: #888; font-size: 0.85rem;">${postedOnText} ${date}</div>
                     </div>
                 </div>
                 <div style="color: #eab308; font-size: 1.2rem; margin-bottom: 10px; letter-spacing: 2px;">${stars}</div>
                 <p style="color: #333; line-height: 1.5; margin: 0;">${r.comment || ''}</p>
+                ${imageHtml}
             </div>`;
         }).join('');
         
     } catch (err) {
-        listEl.innerHTML = '<p style="color: red;">Failed to load reviews.</p>';
+        listEl.innerHTML = `<p style="color: red;">${errorText}</p>`;
     }
 }
 
@@ -1025,6 +1043,7 @@ if (reviewForm) {
         
         const rating = document.getElementById("review-rating").value;
         const comment = document.getElementById("review-comment").value.trim();
+        const imageFile = document.getElementById("review-image").files[0]; // Lấy file ảnh
         const token = localStorage.getItem("token");
         
         const submitBtn = e.target.querySelector('button');
@@ -1032,14 +1051,20 @@ if (reviewForm) {
         submitBtn.innerText = "Submitting...";
         submitBtn.disabled = true;
 
+        const formData = new FormData();
+        formData.append("rating", rating);
+        formData.append("comment", comment);
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
+
         try {
             const res = await fetch(`http://localhost:3000/api/products/${currentDetailProductId}/reviews`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ rating, comment })
+                body: formData
             });
             
             const data = await res.json();
@@ -1119,7 +1144,7 @@ if (chatToggle && chatWindow) {
             const response = await fetch("http://localhost:3000/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userText })
+                body: JSON.stringify({ message: userText, lang: currentLang }) 
             });
             const data = await response.json();
             
@@ -1151,8 +1176,25 @@ function toggleCompare(productId, checkboxElem) {
     if (index > -1) {
         compareList.splice(index, 1);
     } else {
+        const productToAdd = allProducts.find(p => p.id === productId);
+        
+        if (compareList.length > 0) {
+            const firstProduct = allProducts.find(p => p.id === compareList[0]);
+            if (firstProduct && productToAdd && firstProduct.category_id !== productToAdd.category_id) {
+                const lang = localStorage.getItem('besttech_lang') || 'en';
+                const msg = lang === 'vi' 
+                    ? "Bạn chỉ có thể so sánh các sản phẩm CÙNG LOẠI (Ví dụ: Điện thoại với Điện thoại)."
+                    : "You can only compare products of the SAME CATEGORY.";
+                alert(msg);
+                checkboxElem.checked = false; 
+                return; 
+            }
+        }
+
         if (compareList.length >= MAX_COMPARE) {
-            alert("You can only compare up to 3 products at a time.");
+            const lang = localStorage.getItem('besttech_lang') || 'en';
+            const msg = lang === 'vi' ? "Bạn chỉ có thể so sánh tối đa 3 sản phẩm." : "You can only compare up to 3 products at a time.";
+            alert(msg);
             checkboxElem.checked = false; 
             return;
         }
@@ -1322,7 +1364,8 @@ async function renderWishlistPage() {
         const allProductsData = result.data || [];
 
         const productsToDisplay = allProductsData.filter(p => wishlist.includes(p.id));
-        
+        window.currentWishlistData = productsToDisplay;
+
         container.innerHTML = "";
         productsToDisplay.forEach(product => {
             const safeName = product.name.replace(/'/g, "\\'");
@@ -1345,9 +1388,42 @@ async function renderWishlistPage() {
             `;
             container.appendChild(card);
         });
+        renderDynamicBrands(productsToDisplay);
+        drawWishlistCards(productsToDisplay);
     } catch (error) {
         container.innerHTML = '<p style="text-align: center; color: #ef4444; grid-column: 1/-1;">Connection error. Could not load wishlist items.</p>';
     }
+}
+
+function drawWishlistCards(products) {
+    const container = document.getElementById("wishlist-page-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (products.length === 0) {
+        container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; font-size: 1.1rem; color: #666; margin-top: 20px;'>Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>";
+        return;
+    }
+
+    products.forEach(product => {
+        const safeName = product.name.replace(/'/g, "\\'");
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+            <div class="img-wrapper" style="position: relative;">
+                <button onclick="toggleWishlist(${product.id}, event); renderWishlistPage();" style="position: absolute; top: 10px; right: 10px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #ef4444; z-index: 2; transition: 0.2s;">
+                    <svg width="18" height="18" fill="#ef4444" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </button>
+                <img src="${product.image_url || "https://via.placeholder.com/300"}" style="cursor: pointer;" onclick="window.location.href='index.html'">
+                <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price}, '${product.image_url || ''}')">Add to Cart</div>
+            </div>
+            <div class="product-info">
+                <h3 class="product-name">${product.name}</h3>
+                <p class="product-price">$${product.price}</p>
+            </div>
+        `;
+        container.appendChild(card);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", renderWishlistPage);

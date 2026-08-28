@@ -259,3 +259,7 @@ INSERT INTO Products (category_id, name, brand, sku, price, stock, image_url, de
 (12, 'Garmin Fenix 7 Sapphire Solar', 'Garmin', 'GAR-F7SS', 899.00, 15, NULL, 'Multisport GPS watch with a Sapphire solar charging lens.', '[{"group":"Battery","name":"Solar","value":"Solar Charging Lens"},{"group":"Durability","name":"Material","value":"Titanium & Sapphire"}]'),
 (2, 'LG 65-inch C3 OLED Evo 4K', 'LG', 'LG-65C3-OLED', 1699.99, 20, NULL, 'Best selling OLED TV with perfect contrast and a 120Hz refresh rate.', '[{"group":"Display","name":"Panel","value":"OLED Evo"},{"group":"Display","name":"Refresh Rate","value":"120Hz Native"}]'),
 (2, 'Samsung 75-inch Neo QLED 8K', 'Samsung', 'SAM-75QN900C', 4999.00, 5, NULL, 'Ultra crisp 8K resolution powered by Quantum Matrix Pro technology.', '[{"group":"Display","name":"Resolution","value":"8K UHD (7680 x 4320)"},{"group":"Display","name":"Technology","value":"Quantum Mini LEDs"}]');
+
+ALTER TABLE Products 
+ADD COLUMN name_vi VARCHAR(255) DEFAULT NULL,
+ADD COLUMN description_vi TEXT DEFAULT NULL;

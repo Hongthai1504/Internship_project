@@ -101,7 +101,7 @@
       </nav>
     </header>
 
-   <!-- 1. SHOP DROPDOWN -->
+    <!-- 1. SHOP DROPDOWN -->
     <div id="dropdown-shop" class="dropdown-menu-box">
       <div class="dropdown-header">
         <h3>Shop</h3>
@@ -662,6 +662,7 @@
         <button
           id="back-to-shop"
           class="back-link"
+          data-i18n="btn_back_results"
           style="
             background: none;
             border: none;
@@ -759,6 +760,7 @@
                 />
                 <button
                   id="detail-add-btn"
+                  data-i18n="btn_add_cart"
                   style="
                     flex: 1;
                     background: #ffe000;
@@ -777,27 +779,27 @@
             </div>
 
             <div style="margin-top: 30px">
-              <h3 style="font-size: 1.2rem; margin-bottom: 10px">
+              <h3 data-i18n="detail_about" style="font-size: 1.2rem; margin-bottom: 10px">
                 About this item
               </h3>
               <p id="detail-desc" style="color: #555; line-height: 1.6"></p>
             </div>
             <div id="detail-specs-container" class="specs-table-wrapper" style="display: none;">
-                <h3 style="font-size: 1.5rem; margin-top: 40px; margin-bottom: 15px; color: #040c13; border-bottom: 2px solid #eee; padding-bottom: 10px;">Technical Specifications</h3>
+                <h3 data-i18n="detail_specs" style="font-size: 1.5rem; margin-top: 40px; margin-bottom: 15px; color: #040c13; border-bottom: 2px solid #eee; padding-bottom: 10px;">Technical Specifications</h3>
                 <div id="detail-specs-content"></div>
             </div>
           </div>
         </div>
         <div class="reviews-section" style="margin-top: 50px; background: #fff; padding: 40px; border-radius: 8px; border: 1px solid #c8c8c8;">
-            <h2 style="font-size: 1.8rem; color: #040c13; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Customer Reviews</h2>
-            
+            <h2 data-i18n="detail_reviews" style="font-size: 1.8rem; color: #040c13; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Customer Reviews</h2>
+
             <div id="review-form-container" style="background: #f4f6f9; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
-                <h3 style="margin-top: 0; font-size: 1.2rem; color: #0046be;">Write a Review</h3>
+                <h3 data-i18n="review_write" style="margin-top: 0; font-size: 1.2rem; color: #0046be;">Write a Review</h3>
                 <p id="review-login-prompt" style="color: #666; font-style: italic; margin-bottom: 0;">Please <a href="login.html" style="color: #0046be; font-weight: bold;">Sign In</a> to write a review.</p>
                 
                 <form id="product-review-form" style="display: none;">
                     <div style="margin-bottom: 15px;">
-                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Rating *</label>
+                        <label data-i18n="review_rating" style="font-weight: bold; display: block; margin-bottom: 5px;">Rating *</label>
                         <select id="review-rating" required style="padding: 10px; border-radius: 4px; border: 1px solid #c8c8c8; width: 180px; font-size: 1rem;">
                             <option value="">Select rating</option>
                             <option value="5">★★★★★ (5/5)</option>
@@ -808,10 +810,14 @@
                         </select>
                     </div>
                     <div style="margin-bottom: 15px;">
-                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Comment</label>
-                        <textarea id="review-comment" rows="3" placeholder="Share your experience with this product..." style="width: 100%; padding: 10px; border: 1px solid #c8c8c8; border-radius: 4px; font-family: inherit; font-size: 1rem; outline: none;"></textarea>
+                        <label data-i18n="review_comment" style="font-weight: bold; display: block; margin-bottom: 5px;">Comment</label>
+                        <textarea id="review-comment" rows="3" data-i18n-placeholder="review_placeholder" placeholder="Share your experience with this product..." style="width: 100%; padding: 10px; border: 1px solid #c8c8c8; border-radius: 4px; font-family: inherit; font-size: 1rem; outline: none;"></textarea>
                     </div>
-                    <button type="submit" style="background: #ffe000; color: #000; border: none; padding: 10px 20px; font-weight: bold; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background 0.2s;">Submit Review</button>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Upload Image (Optional)</label>
+                        <input type="file" id="review-image" accept="image/*" style="width: 100%; padding: 8px; border: 1px dashed #c8c8c8; border-radius: 4px; background: #fff; cursor: pointer; font-size: 0.95rem;">
+                    </div>
+                    <button type="submit" data-i18n="btn_submit_review" style="background: #ffe000; color: #000; border: none; padding: 10px 20px; font-weight: bold; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background 0.2s;">Submit Review</button>
                 </form>
             </div>
 
@@ -933,51 +939,52 @@
     </div>
 
     <!-- FOOTER -->
+    <!-- FOOTER -->
     <footer style="background: #001e50; color: #fff; padding: 60px 40px 30px; margin-top: 60px; font-size: 0.95rem;">
       <div style="max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px; margin-bottom: 20px;">
         
         <div>
-          <h3 style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">Customer Service</h3>
+          <h3 data-i18n="footer_customer_service" style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">Customer Service</h3>
           <ul style="list-style: none; padding: 0; line-height: 2;">
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Contact Us</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Help Center</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Returns & Exchanges</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Best Tech Financing</a></li>
+            <li><a href="#" data-i18n="footer_contact" style="color: #ccc; text-decoration: none;">Contact Us</a></li>
+            <li><a href="#" data-i18n="footer_help" style="color: #ccc; text-decoration: none;">Help Center</a></li>
+            <li><a href="#" data-i18n="footer_returns" style="color: #ccc; text-decoration: none;">Returns & Exchanges</a></li>
+            <li><a href="#" data-i18n="footer_financing" style="color: #ccc; text-decoration: none;">Best Tech Financing</a></li>
           </ul>
         </div>
 
         <div>
-          <h3 style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">Order & Purchases</h3>
+          <h3 data-i18n="footer_orders_purchases" style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">Order & Purchases</h3>
           <ul style="list-style: none; padding: 0; line-height: 2;">
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Check Order Status</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Shipping, Delivery & Pickup</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Returns & Exchanges</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Price Match Guarantee</a></li>
+            <li><a href="#" data-i18n="footer_check_order" style="color: #ccc; text-decoration: none;">Check Order Status</a></li>
+            <li><a href="#" data-i18n="footer_shipping" style="color: #ccc; text-decoration: none;">Shipping, Delivery & Pickup</a></li>
+            <li><a href="#" data-i18n="footer_returns" style="color: #ccc; text-decoration: none;">Returns & Exchanges</a></li>
+            <li><a href="#" data-i18n="footer_price_match" style="color: #ccc; text-decoration: none;">Price Match Guarantee</a></li>
           </ul>
         </div>
 
         <div>
-          <h3 style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">About Best Tech</h3>
+          <h3 data-i18n="footer_about" style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">About Best Tech</h3>
           <ul style="list-style: none; padding: 0; line-height: 2;">
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Corporate Information</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Careers</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Corporate Responsibility & Sustainability</a></li>
-            <li><a href="#" style="color: #ccc; text-decoration: none;">Discover & Learn</a></li>
+            <li><a href="#" data-i18n="footer_corporate" style="color: #ccc; text-decoration: none;">Corporate Information</a></li>
+            <li><a href="#" data-i18n="footer_careers" style="color: #ccc; text-decoration: none;">Careers</a></li>
+            <li><a href="#" data-i18n="footer_sustainability" style="color: #ccc; text-decoration: none;">Corporate Responsibility & Sustainability</a></li>
+            <li><a href="#" data-i18n="footer_discover" style="color: #ccc; text-decoration: none;">Discover & Learn</a></li>
           </ul>
         </div>
 
         <div>
-          <h3 style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">Get the latest deals</h3>
-          <p style="color: #ccc; margin-bottom: 15px;">Sign up for our newsletter to receive special offers and tech news.</p>
+          <h3 data-i18n="footer_latest_deals" style="color: var(--bb-yellow); margin-bottom: 20px; font-size: 1.2rem;">Get the latest deals</h3>
+          <p data-i18n="footer_newsletter_desc" style="color: #ccc; margin-bottom: 15px;">Sign up for our newsletter to receive special offers and tech news.</p>
           <div style="display: flex; gap: 10px;">
-            <input type="email" placeholder="Enter your email" style="padding: 10px; border-radius: 4px; border: none; flex: 1; outline: none;">
-            <button style="background: var(--bb-yellow); color: #000; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">Sign Up</button>
+            <input type="email" data-i18n-placeholder="footer_email_placeholder" placeholder="Enter your email" style="padding: 10px; border-radius: 4px; border: none; flex: 1; outline: none;">
+            <button data-i18n="footer_signup_btn" style="background: var(--bb-yellow); color: #000; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">Sign Up</button>
           </div>
         </div>
 
       </div>
       <div style="max-width: 1600px; margin: 0 auto; text-align: center; color: #888;">
-        <p>&copy; 2026 Best Tech. All rights reserved. This is an Internship Project.</p>
+        <p data-i18n="footer_copyright">&copy; 2026 Best Tech. All rights reserved. This is an Internship Project.</p>
       </div>
     </footer>
 

@@ -38,8 +38,11 @@
             }
 
             try {
-                const res = await fetch("http://localhost:3000/api/products");
-                const allProducts = await res.json();
+                const lang = localStorage.getItem('besttech_lang') || 'en';
+                const res = await fetch(`http://localhost:3000/api/products?limit=1000&lang=${lang}`);
+                
+                const result = await res.json();
+                const allProducts = result.data || [];
                 
                 const productsToCompare = compareIds.map(id => allProducts.find(p => p.id === id)).filter(p => p);
 
@@ -130,7 +133,20 @@
                 }
 
                 html += '</tbody></table></div>';
+                const aiTitle = lang === 'vi' ? '🤖 AI Đánh Giá Tổng Quan' : '🤖 AI Evaluation Summary';
+                const aiLoading = lang === 'vi' ? 'AI đang phân tích dữ liệu, vui lòng đợi...' : 'AI is analyzing data, please wait...';
+                
+                html += `
+                <div id="ai-evaluation-box" style="margin-top: 30px; padding: 25px; background: #f8faff; border: 2px solid #0046be; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,70,190,0.1);">
+                    <h3 style="color: #0046be; margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; display: flex; align-items: center; gap: 8px;">
+                        ${aiTitle}
+                    </h3>
+                    <div id="ai-evaluation-content" style="line-height: 1.6; color: #333; font-size: 1.05rem;">
+                        <span style="font-style: italic; color: #666;">${aiLoading}</span>
+                    </div>
+                </div>`;
                 contentDiv.innerHTML = html;
+                fetchAIComparison(productsToCompare, lang);
 
             } catch (error) {
                 contentDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 1.1rem;">Connection error to server.</p>';
@@ -153,6 +169,33 @@
         }
 
         initCompare();
+
+        async function fetchAIComparison(products, lang) {
+            try {
+                const res = await fetch("http://localhost:3000/api/compare-ai", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        products: products.map(p => ({ name: p.name, price: p.price, specs: p.specifications })), 
+                        lang: lang 
+                    })
+                });
+                
+                const aiContent = document.getElementById("ai-evaluation-content");
+                if (res.ok && aiContent) {
+                    const data = await res.json();
+                    aiContent.innerHTML = data.evaluation;
+                } else if (aiContent) {
+                    aiContent.innerHTML = '<span style="color: #ef4444;">Lỗi: AI Server đang bận hoặc chưa được thiết lập đúng.</span>';
+                }
+            } catch (e) {
+                console.error(e);
+                const aiContent = document.getElementById("ai-evaluation-content");
+                if (aiContent) {
+                    aiContent.innerHTML = '<span style="color: #ef4444;">Lỗi mất kết nối đến Backend Server. Vui lòng kiểm tra lại server.js</span>';
+                }
+            }
+        }
     </script>
 </body>
 </html>
