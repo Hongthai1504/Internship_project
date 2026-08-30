@@ -32,6 +32,14 @@ const storage = multer.diskStorage({
   }
 });
 
+const crypto = require("crypto");
+const qs = require("qs");
+
+const vnp_TmnCode = "8NDO5F5E"; 
+const vnp_HashSecret = "EIEIUNMNTJNGXJEDZFWWYYLWYTMTTTRQ"; 
+const vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+const vnp_ReturnUrl = "http://localhost:3000/api/vnpay_return"; 
+
 const upload = multer({ storage: storage });
 
 const JWT_SECRET = process.env.JWT_SECRET;

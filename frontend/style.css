@@ -2,31 +2,31 @@
    BEST TECH E-COMMERCE DESIGN SYSTEM
 ========================================= */
 :root {
-  /* Best Buy Signature Colors */
   --bb-blue: #0046be;
   --bb-blue-dark: #003399;
   --bb-yellow: #ffe000;
-  --bb-yellow-hover: #f5d700;
+  --bb-yellow-hover: #fcd500;
 
-  --bg-system: #f0f2f4;
+  --bg-system: #f8fafc;
   --bg-card: #ffffff;
 
-  /* Typography & Borders */
-  --text-main: #040c13;
-  --text-muted: #55555a;
-  --border-color: #c8c8c8;
-
-  font-family: "Roboto", Arial, sans-serif;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0; 
+  
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+  --shadow-md: 0 10px 25px rgba(0, 70, 190, 0.08);
+  --shadow-hover: 0 20px 40px rgba(0, 70, 190, 0.12);
+  
+  font-family: "Inter", "Roboto", sans-serif; /* Ưu tiên Inter cho Modern UI */
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 body {
   background: var(--bg-system);
   color: var(--text-main);
+  line-height: 1.6;
 }
 
 /* --- HEADER --- */
@@ -248,10 +248,26 @@ body {
 .shop-layout {
   display: flex;
   max-width: 1600px;
-  margin: 30px auto;
+  margin: 40px auto;
   padding: 0 40px;
   gap: 40px;
 }
+
+@media (max-width: 1024px) {
+  .shop-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+  }
+  .filter-group {
+    min-width: 250px;
+  }
+}
+
 .sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -314,73 +330,103 @@ body {
 }
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
 }
 
 /* Tech Product Card */
 .product-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 20px;
+  border: 1px solid transparent; 
+  border-radius: var(--radius-md);
+  padding: 25px;
   display: flex;
   flex-direction: column;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
+
 .product-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-  border-color: var(--bb-blue);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-color);
 }
 
 .img-wrapper {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   text-align: center;
+  position: relative;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
 }
+
 .product-card img {
   max-width: 100%;
-  height: 200px;
+  height: 180px;
   object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
 }
 
 .product-name {
   font-size: 1.1rem;
-  color: var(--bb-blue);
-  margin-bottom: 15px;
-  font-weight: 400;
-  line-height: 1.4;
-  flex-grow: 1;
-}
-.product-name:hover {
-  text-decoration: underline;
-}
-.product-price {
-  font-size: 1.6rem;
-  font-weight: 900;
   color: var(--text-main);
+  margin-bottom: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-name:hover {
+  color: var(--bb-blue);
+  text-decoration: none;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--bb-blue);
   margin-bottom: 20px;
 }
 
+/* =========================================
+   MODERN BUTTONS (Thay thế .quick-add cũ)
+========================================= */
 .quick-add {
   background: var(--bb-yellow);
   color: #000;
-  padding: 12px;
+  padding: 14px 20px;
   text-align: center;
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: 50px; /* Nút bo tròn dạng viên thuốc */
   cursor: pointer;
-  transition: background 0.2s;
-  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  font-size: 1.05rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 4px 10px rgba(255, 224, 0, 0.3);
 }
+
 .quick-add:hover {
   background: var(--bb-yellow-hover);
+  transform: scale(1.02);
+  box-shadow: 0 6px 15px rgba(255, 224, 0, 0.4);
+}
+
+.quick-add:active {
+  transform: scale(0.98);
 }
 .quick-add::before {
   content: "🛒";

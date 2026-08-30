@@ -7,18 +7,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <style>
-        .checkout-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: flex; gap: 40px; align-items: flex-start; }
-        .checkout-form { flex: 2; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e0e6ef; }
-        .order-summary { flex: 1; background: #f4f6f9; padding: 30px; border-radius: 8px; border: 1px solid #e0e6ef; position: sticky; top: 20px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #040c13; }
-        .address-select { width: 100%; padding: 12px; border: 1px solid #c8c8c8; border-radius: 4px; font-size: 1rem; outline: none; }
-        .payment-method { border: 1px solid #c8c8c8; padding: 15px; border-radius: 4px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .payment-method:hover { border-color: #0046be; background: #f0f4fc; }
-        .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.95rem; }
-        .summary-total { display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 900; color: #0046be; margin-top: 20px; border-top: 2px solid #e0e6ef; padding-top: 20px; }
-        .btn-place-order { width: 100%; background: #ffe000; color: #000; font-weight: bold; font-size: 1.2rem; padding: 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-        .btn-place-order:hover { background: #eab308; }
+        .checkout-container { max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 50px; align-items: flex-start; font-family: 'Inter', 'Roboto', sans-serif; color: #0f172a; }
+        .checkout-form { flex: 2; background: #fff; padding: 50px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 70, 190, 0.05); border: none; }
+        .order-summary { flex: 1; background: #f8fafc; padding: 40px; border-radius: 20px; border: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); position: sticky; top: 30px; }
+        
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        
+        .payment-method { border: 2px solid transparent; padding: 20px; border-radius: 16px; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; gap: 15px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: all 0.2s ease; }
+        .payment-method:hover { box-shadow: 0 8px 20px rgba(0, 70, 190, 0.08); transform: translateY(-2px); }
+        
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 18px; font-size: 1.05rem; font-weight: 500; }
+        .summary-total { display: flex; justify-content: space-between; font-size: 1.8rem; font-weight: 900; color: #0046be; margin-top: 25px; border-top: 2px solid #e2e8f0; padding-top: 25px; }
+        
+        .btn-place-order { width: 100%; background: #ffe000; color: #000; font-weight: 800; font-size: 1.15rem; padding: 18px; border: none; border-radius: 50px; cursor: pointer; margin-top: 25px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(255, 224, 0, 0.3); }
+        .btn-place-order:hover { background: #fcd500; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 224, 0, 0.4); }
+        .btn-place-order:disabled { opacity: 0.7; transform: none; cursor: not-allowed; }
     </style>
 </head>
 <body style="background-color: #f8f9fa;">
@@ -46,11 +50,11 @@
 
             <h2 style="margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #040c13;">2. Payment Method</h2>
             
-            <label class="payment-method" style="border: 2px solid #0046be; background: #f8faff;">
-                <input type="radio" name="payment" value="cod" checked style="margin-top: 2px;">
+            <label class="payment-method" style="background: #f9fafb;" onmouseover="this.style.boxShadow='0 8px 20px rgba(0, 70, 190, 0.08)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 2px 10px rgba(0,0,0,0.02)'; this.style.transform='none';">
+                <input type="radio" name="payment" value="vnpay" style="margin-top: 2px; transform: scale(1.2);">
                 <div style="flex: 1;">
-                    <strong style="display: block; font-size: 1.05rem; margin-bottom: 4px;">Cash on Delivery (COD)</strong>
-                    <span style="font-size: 0.85rem; color: #666;">Pay with cash upon delivery.</span>
+                    <strong style="display: block; font-size: 1.05rem; margin-bottom: 4px;">VNPAY / Digital Wallets</strong>
+                    <span style="font-size: 0.85rem; color: #666;">Scan QR code or use ATM/Credit card.</span>
                 </div>
             </label>
             <label class="payment-method" style="opacity: 0.6; background: #f9fafb;">
@@ -151,10 +155,10 @@
                 container.innerHTML = addresses.map((addr, index) => {
                     const isChecked = addr.is_default ? "checked" : (index === 0 ? "checked" : "");
                     const defaultBadge = addr.is_default ? `<span style="background: #ffe000; color: #000; font-size: 0.7rem; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-left: 10px; letter-spacing: 0.5px;">DEFAULT</span>` : "";
-                    const borderStyle = addr.is_default ? "border: 2px solid #0046be; background: #f8faff;" : "border: 1px solid #e0e6ef; background: #fff;";
+                    const borderStyle = addr.is_default ? "border: 2px solid #0046be; background: #f8faff; box-shadow: 0 4px 15px rgba(0, 70, 190, 0.1);" : "border: 1px solid #e2e8f0; background: #fff;";
                     
                     return `
-                    <label style="display: flex; align-items: flex-start; gap: 15px; padding: 18px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; transition: all 0.2s; ${borderStyle}" onmouseover="this.style.borderColor='#0046be'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e0e6ef'">
+                    <label style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; border-radius: 16px; margin-bottom: 15px; cursor: pointer; transition: all 0.2s; ${borderStyle}" onmouseover="if(!this.querySelector('input').checked) { this.style.borderColor='#cbd5e1'; this.style.transform='translateY(-2px)'; }" onmouseout="if(!this.querySelector('input').checked) { this.style.borderColor='#e2e8f0'; this.style.transform='none'; }">
                         <input type="radio" name="shipping_address" value="${addr.address}" ${isChecked} style="margin-top: 5px; cursor: pointer; transform: scale(1.2);">
                         <div style="flex: 1; line-height: 1.5;">
                             <div style="display: flex; align-items: center; color: #040c13;">

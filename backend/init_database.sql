@@ -263,3 +263,26 @@ INSERT INTO Products (category_id, name, brand, sku, price, stock, image_url, de
 ALTER TABLE Products 
 ADD COLUMN name_vi VARCHAR(255) DEFAULT NULL,
 ADD COLUMN description_vi TEXT DEFAULT NULL;
+
+UPDATE Products SET description_vi = 'Thiết kế Titanium viền siêu mỏng, trang bị chip A17 Pro mạnh mẽ.' WHERE sku = 'APP-IPH15PM-256';
+UPDATE Products SET description_vi = 'Tích hợp Galaxy AI thông minh, khung viền Titanium và bút S-Pen đi kèm.' WHERE sku = 'SAM-S24U-512';
+UPDATE Products SET description_vi = 'Điện thoại AI tốt nhất từ Google với hệ thống camera siêu thực.' WHERE sku = 'GOO-PXL8P-128';
+UPDATE Products SET description_vi = 'Điện thoại gaming mạnh nhất thế giới với hệ thống tản nhiệt chủ động.' WHERE sku = 'ASU-ROG8P';
+UPDATE Products SET description_vi = 'Trải nghiệm màn hình gập đỉnh cao với khả năng đa nhiệm mượt mà.' WHERE sku = 'SAM-ZF5-256';
+UPDATE Products SET description_vi = 'Laptop đồ họa và lập trình mạnh nhất với chip M3 Max 16 nhân.' WHERE sku = 'APP-MBP16-M3M';
+UPDATE Products SET description_vi = 'Thiết kế nhôm nguyên khối với màn hình OLED viền siêu mỏng.' WHERE sku = 'DEL-XPS15-9530';
+UPDATE Products SET description_vi = 'Laptop gaming mỏng nhẹ với màn hình LED ma trận độc đáo mặt lưng.' WHERE sku = 'ASU-G14-4070';
+UPDATE Products SET description_vi = 'Laptop doanh nhân siêu bền bỉ trang bị bàn phím gõ tốt nhất thế giới.' WHERE sku = 'LEN-X1C-G11';
+UPDATE Products SET description_vi = 'Sức mạnh ngang ngửa laptop kết hợp màn hình Mini-LED siêu sáng.' WHERE sku = 'APP-IPADP12-M2';
+UPDATE Products SET description_vi = 'Máy tính bảng màn hình khổng lồ với khả năng chống nước, bụi IP68.' WHERE sku = 'SAM-TABS9U';
+UPDATE Products SET description_vi = 'Tai nghe chống ồn chủ động hàng đầu hiện nay với thiết kế hoàn toàn mới.' WHERE sku = 'SON-WHXM5';
+UPDATE Products SET description_vi = 'Âm thanh không gian cá nhân hóa, hộp sạc tích hợp loa tìm kiếm.' WHERE sku = 'APP-AIRPODSP2';
+UPDATE Products SET description_vi = 'Trải nghiệm âm thanh không gian (Spatial Audio) đỉnh cao từ Bose.' WHERE sku = 'BOS-QCU';
+UPDATE Products SET description_vi = 'Tai nghe Audiophile với thời lượng pin khủng lên đến 60 giờ.' WHERE sku = 'SEN-M4';
+UPDATE Products SET description_vi = 'Thao tác chạm hai lần (Double Tap) ấn tượng, độ sáng màn hình lên đến 2000 nits.' WHERE sku = 'APP-AWS9-45';
+UPDATE Products SET description_vi = 'Thiết kế cổ điển với vòng xoay bezel vật lý đặc trưng.' WHERE sku = 'SAM-GW6C';
+UPDATE Products SET description_vi = 'Đồng hồ GPS đa thể thao, mặt kính Sapphire hỗ trợ sạc bằng năng lượng mặt trời.' WHERE sku = 'GAR-F7SS';
+UPDATE Products SET description_vi = 'TV OLED bán chạy nhất với độ tương phản hoàn hảo và tần số quét 120Hz.' WHERE sku = 'LG-65C3-OLED';
+UPDATE Products SET description_vi = 'Độ phân giải 8K cực nét được trang bị công nghệ Quantum Matrix Pro.' WHERE sku = 'SAM-75QN900C';
+
+ALTER TABLE Reviews ADD COLUMN image_url VARCHAR(255) NULL;
