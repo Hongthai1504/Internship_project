@@ -729,6 +729,78 @@ app.put("/api/shipper/orders/:id/status", authenticateToken, isShipper, (req, re
     });
 });
 
+// API: TẠO URL THANH TOÁN VNPAY
+app.post("/api/create_payment_url", authenticateToken, (req, res) => {
+    const { order_id, amount, bankCode } = req.body;
+    
+    let date = new Date();
+    let createDate = date.getFullYear() + ('0' + (date.getMonth() + 1)).slice(-2) + ('0' + date.getDate()).slice(-2) + ('0' + date.getHours()).slice(-2) + ('0' + date.getMinutes()).slice(-2) + ('0' + date.getSeconds()).slice(-2);
+    
+    let ipAddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
+
+    let vnp_Params = {};
+    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Command'] = 'pay';
+    vnp_Params['vnp_TmnCode'] = vnp_TmnCode;
+    vnp_Params['vnp_Locale'] = 'vn';
+    vnp_Params['vnp_CurrCode'] = 'VND';
+    vnp_Params['vnp_TxnRef'] = order_id;
+    vnp_Params['vnp_OrderInfo'] = 'Thanh toan don hang ' + order_id;
+    vnp_Params['vnp_OrderType'] = 'other';
+    vnp_Params['vnp_Amount'] = amount * 25000 * 100; 
+    vnp_Params['vnp_ReturnUrl'] = vnp_ReturnUrl;
+    vnp_Params['vnp_IpAddr'] = ipAddr;
+    vnp_Params['vnp_CreateDate'] = createDate;
+    if(bankCode) { vnp_Params['vnp_BankCode'] = bankCode; }
+
+    vnp_Params = sortObject(vnp_Params);
+    let signData = qs.stringify(vnp_Params, { encode: false });
+    let hmac = crypto.createHmac("sha512", vnp_HashSecret);
+    let signed = hmac.update(new Buffer.from(signData, 'utf-8')).digest("hex"); 
+    vnp_Params['vnp_SecureHash'] = signed;
+    
+    let paymentUrl = vnp_Url + '?' + qs.stringify(vnp_Params, { encode: false });
+    res.json({ paymentUrl: paymentUrl });
+});
+
+// API: XỬ LÝ KẾT QUẢ TỪ VNPAY TRẢ VỀ
+app.get("/api/vnpay_return", (req, res) => {
+    let vnp_Params = req.query;
+    let secureHash = vnp_Params['vnp_SecureHash'];
+    delete vnp_Params['vnp_SecureHash'];
+    delete vnp_Params['vnp_SecureHashType'];
+
+    vnp_Params = sortObject(vnp_Params);
+    let signData = qs.stringify(vnp_Params, { encode: false });
+    let hmac = crypto.createHmac("sha512", vnp_HashSecret);
+    let signed = hmac.update(new Buffer.from(signData, 'utf-8')).digest("hex");     
+
+    if(secureHash === signed){
+        if (vnp_Params['vnp_ResponseCode'] === '00') {
+           db.query("UPDATE Orders SET status = 'completed' WHERE id = ?", [vnp_Params['vnp_TxnRef']]);
+            res.redirect("http://localhost:3000/index.html?payment=success");
+        } else {
+            res.redirect("http://localhost:3000/index.html?payment=failed");
+        }
+    } else{
+        res.status(200).send('Chuỗi mã hóa không hợp lệ!');
+    }
+});
+
+function sortObject(obj) {
+    let sorted = {};
+    let str = [];
+    let key;
+    for (key in obj){
+        if (obj.hasOwnProperty(key)) { str.push(encodeURIComponent(key)); }
+    }
+    str.sort();
+    for (key = 0; key < str.length; key++) {
+        sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
+    }
+    return sorted;
+}
+
 // API: AI CHATBOT (GROQ - LLaMA 3)
 app.post("/api/chat", async (req, res) => {
     const { message, lang } = req.body;
