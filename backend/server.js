@@ -35,10 +35,10 @@ const storage = multer.diskStorage({
 const crypto = require("crypto");
 const qs = require("qs");
 
-const vnp_TmnCode = "8NDO5F5E"; 
-const vnp_HashSecret = "EIEIUNMNTJNGXJEDZFWWYYLWYTMTTTRQ"; 
+const vnp_TmnCode = "MÃ_TMNCODE_MỚI"; 
+const vnp_HashSecret = "CHUỖI_BÍ_MẬT_MỚI"; 
 const vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-const vnp_ReturnUrl = "http://localhost:3000/api/vnpay_return"; 
+const vnp_ReturnUrl = "http://localhost:3000/api/vnpay_return";
 
 const upload = multer({ storage: storage });
 
@@ -777,10 +777,11 @@ app.get("/api/vnpay_return", (req, res) => {
 
     if(secureHash === signed){
         if (vnp_Params['vnp_ResponseCode'] === '00') {
-           db.query("UPDATE Orders SET status = 'completed' WHERE id = ?", [vnp_Params['vnp_TxnRef']]);
-            res.redirect("http://localhost:3000/index.html?payment=success");
+            db.query("UPDATE Orders SET status = 'completed' WHERE id = ?", [vnp_Params['vnp_TxnRef']]);
+            
+            res.redirect("http://127.0.0.1:5500/index.html?payment=success");
         } else {
-            res.redirect("http://localhost:3000/index.html?payment=failed");
+            res.redirect("http://127.0.0.1:5500/index.html?payment=failed");
         }
     } else{
         res.status(200).send('Chuỗi mã hóa không hợp lệ!');

@@ -24,9 +24,9 @@
 }
 
 body {
-  background: var(--bg-system);
-  color: var(--text-main);
-  line-height: 1.6;
+    background-color: #f4f7fb; 
+    font-family: 'Nunito', 'Quicksand', 'Roboto', sans-serif; 
+    color: #1e293b;
 }
 
 /* --- HEADER --- */
@@ -246,11 +246,11 @@ body {
 
 /* --- MAIN LAYOUT --- */
 .shop-layout {
-  display: flex;
-  max-width: 1600px;
-  margin: 40px auto;
-  padding: 0 40px;
-  gap: 40px;
+    max-width: 1500px;
+    margin: 40px auto;
+    padding: 0 30px;
+    display: flex;
+    gap: 40px;
 }
 
 @media (max-width: 1024px) {
@@ -269,26 +269,43 @@ body {
 }
 
 .sidebar {
-  width: 280px;
-  flex-shrink: 0;
+    width: 280px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    padding: 30px;
+    position: sticky;
+    top: 30px;
+    height: fit-content;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
 }
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
 .content-area {
   flex-grow: 1;
 }
 
 /* Filter Sidebar */
 .filter-group {
-  background: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border-color);
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #e2e8f0;
 }
+.filter-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
 .filter-title {
-  font-size: 1.1rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
 }
 .filter-list {
   list-style: none;
@@ -336,42 +353,46 @@ body {
 
 /* Tech Product Card */
 .product-card {
-  background: var(--bg-card);
-  border: 1px solid transparent; 
-  border-radius: var(--radius-md);
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 15px; /* Ép viền gọn gàng */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Tăng bóng mờ nhẹ để tách biệt khỏi nền */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--border-color);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 70, 190, 0.08);
 }
 
-.img-wrapper {
-  margin-bottom: 25px;
-  text-align: center;
-  position: relative;
-  padding: 20px;
-  background: #f8fafc;
-  border-radius: 8px;
+.product-card .img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 220px; /* Khóa chết chiều cao khung ảnh */
+    background-color: #f8fafc; /* Màu xám nhạt tạo ranh giới viền cho ảnh */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; 
+    margin-bottom: 15px;
 }
 
-.product-card img {
-  max-width: 100%;
-  height: 180px;
-  object-fit: contain;
-  transition: transform 0.3s ease;
+.product-card .img-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; 
+    padding: 15px; 
+    transition: transform 0.3s ease;
+    mix-blend-mode: multiply; 
 }
 
-.product-card:hover img {
-  transform: scale(1.05);
+.product-card:hover .img-wrapper img {
+    transform: scale(1.08); 
 }
 
 .product-name {
@@ -399,24 +420,44 @@ body {
   margin-bottom: 20px;
 }
 
+.product-card .quick-add {
+    position: absolute;
+    bottom: -20px; /* Giấu một nửa ở dưới khung ảnh */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffe000;
+    color: #000;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 10px 25px;
+    border-radius: 50px;
+    white-space: nowrap;
+    opacity: 0;
+    box-shadow: 0 4px 15px rgba(255, 224, 0, 0.4);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.product-card:hover .quick-add {
+    bottom: 15px; /* Nổi lên khi hover */
+    opacity: 1;
+}
+
+.product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 /* =========================================
    MODERN BUTTONS (Thay thế .quick-add cũ)
 ========================================= */
 .quick-add {
-  background: var(--bb-yellow);
-  color: #000;
-  padding: 14px 20px;
-  text-align: center;
-  font-weight: 700;
-  border-radius: 50px; /* Nút bo tròn dạng viên thuốc */
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 1.05rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 10px rgba(255, 224, 0, 0.3);
+    border-radius: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .quick-add:hover {
@@ -626,12 +667,12 @@ body {
 
 /* Modern Hero Banner */
 .modern-hero {
-  background: linear-gradient(135deg, #001e50 0%, #0046be 100%);
-  padding: 60px 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 70, 190, 0.2);
-  display: flex;
-  align-items: center;
+    background: linear-gradient(135deg, #0046be 0%, #001e50 100%);
+    border-radius: 24px;
+    padding: 60px 40px;
+    box-shadow: 0 20px 40px rgba(0, 70, 190, 0.15);
+    position: relative;
+    overflow: hidden;
 }
 .badge-alert {
   background: #e11d48;

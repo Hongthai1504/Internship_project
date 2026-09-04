@@ -48,7 +48,23 @@ const translations = {
         "footer_copyright": "© 2026 Best Tech. All rights reserved. This is an Internship Project.",
         
         // REVIEW PLACEHOLDER
-        "review_placeholder": "Share your experience with this product..."
+        "review_placeholder": "Share your experience with this product...", 
+
+        // Add to the 'vi' block:
+nav_welcome: "Welcome back!",
+nav_profile: "My Profile",
+nav_orders: "My Orders",
+nav_logout: "Log Out",
+order_account: "Account",
+order_purchased: "Purchased Orders",
+order_title: "Order History",
+order_tab_all: "All",
+order_tab_pending: "Pending",
+order_tab_shipping: "Shipping",
+order_tab_completed: "Delivered",
+order_tab_cancelled: "Cancelled"
+
+// Remember to add the corresponding English entries to the 'en' block so the text doesn't appear blank when switching languages.
     },
     vi: {
         "nav_shop": "Cửa hàng",
@@ -99,6 +115,21 @@ const translations = {
         "footer_copyright": "© 2026 Best Tech. Bảo lưu mọi quyền. Đây là một dự án thực tập.",
         
         // REVIEW PLACEHOLDER
-        "review_placeholder": "Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+        "review_placeholder": "Chia sẻ trải nghiệm của bạn về sản phẩm này...",
+
+        nav_welcome: "Chào mừng trở lại!",
+        nav_profile: "Hồ sơ của tôi",
+        nav_orders: "Đơn hàng của tôi",
+        nav_logout: "Đăng xuất",
+        order_account: "Tài khoản",
+        order_purchased: "Đơn hàng đã mua",
+        order_title: "Lịch sử mua hàng",
+        order_tab_all: "Tất cả",
+        order_tab_pending: "Chờ xử lý",
+        order_tab_shipping: "Đang giao",
+        order_tab_completed: "Đã giao",
+        order_tab_cancelled: "Đã hủy"
+
+// Nhớ bổ sung mảng tiếng Anh tương ứng vào block 'en' để khi chuyển đổi không bị trống text nhé.
     }
 };

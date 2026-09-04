@@ -806,14 +806,29 @@ let userOrderHistoryCache = [];
 if (historyTrigger) {
     historyTrigger.addEventListener("click", async () => {
         if(historyModal) historyModal.style.display = "flex";
-        if(historyList) historyList.innerHTML = "<p style='text-align:center;'>Loading your orders...</p>";
+        
+        const loadingText = currentLang === 'vi' ? 'Đang tải dữ liệu...' : 'Loading your orders...';
+        if(historyList) historyList.innerHTML = `<p style='text-align:center;'>${loadingText}</p>`;
 
         const token = localStorage.getItem("token");
+        if (!token) {
+            alert(currentLang === 'vi' ? "Vui lòng đăng nhập lại!" : "Please log in again!");
+            window.location.href = "/pages/user/login.html";
+            return;
+        }
+
         try {
-            // 1. Fetch User Profile for Sidebar
             const profileRes = await fetch("http://localhost:3000/api/profile", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
+            
+            if (profileRes.status === 401 || profileRes.status === 403) {
+                localStorage.removeItem("token");
+                alert(currentLang === 'vi' ? "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!" : "Session expired. Please log in again!");
+                window.location.href = "/pages/user/login.html";
+                return;
+            }
+
             if (profileRes.ok) {
                 const profile = await profileRes.json();
                 const nameEl = document.getElementById("order-user-name");
@@ -822,17 +837,22 @@ if (historyTrigger) {
                 if (avatarEl) avatarEl.innerText = profile.full_name.charAt(0).toUpperCase();
             }
 
-            // 2. Fetch Orders
             const response = await fetch("http://localhost:3000/api/orders/history", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
-            userOrderHistoryCache = await response.json();
+            
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || "Failed to load orders");
+            }
 
-            // Render default Tab (All)
+            userOrderHistoryCache = await response.json();
             renderOrdersByStatus('all');
 
         } catch (error) {
-            if(historyList) historyList.innerHTML = "<p style='color: red; text-align: center;'>Connection error.</p>";
+            console.error("Order fetch error:", error);
+            const errText = currentLang === 'vi' ? 'Lỗi kết nối máy chủ:' : 'Connection error:';
+            if(historyList) historyList.innerHTML = `<p style='color: #ef4444; text-align: center;'>${errText} ${error.message}</p>`;
         }
     });
 }
@@ -1437,6 +1457,34 @@ function drawWishlistCards(products) {
 }
 
 document.addEventListener("DOMContentLoaded", renderWishlistPage);
+
+// --- VNPAY ---
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+
+    if (paymentStatus === 'success') {
+        const msg = currentLang === 'vi' 
+            ? "Thanh toán thành công! Cảm ơn bạn đã mua sắm tại Best Tech." 
+            : "Payment successful! Thank you for shopping with Best Tech.";
+        
+        setTimeout(() => {
+            alert(msg);
+            localStorage.removeItem("cart");
+            updateCart();
+        }, 500);
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } 
+    else if (paymentStatus === 'failed') {
+        const msg = currentLang === 'vi' 
+            ? "Thanh toán thất bại hoặc đã bị hủy." 
+            : "Payment failed or was cancelled.";
+        
+        setTimeout(() => alert(msg), 500);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
 
 // Initialize Application
 fetchProducts();

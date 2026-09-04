@@ -1,0 +1,17 @@
+<!-- PRODUCT COMPARE DOCK -->
+    <div id="compare-dock" style="display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 95%; max-width: 1100px; background: #fff; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); border-radius: 12px 12px 0 0; z-index: 9998; padding: 15px 25px; flex-direction: row; justify-content: space-between; align-items: center; border: 1px solid #e0e6ef;">
+        
+        <div style="display: flex; flex-direction: column; gap: 5px; flex-shrink: 0;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: #040c13;">Compare Products (<span id="compare-count">0</span>/3)</h3>
+            <span style="font-size: 0.85rem; color: #666;" id="compare-text-guide">Select at least 2 products</span>
+        </div>
+
+        <div id="compare-dock-items" style="display: flex; gap: 15px; flex: 1; margin: 0 20px; border-left: 2px solid #eee; border-right: 2px solid #eee; padding: 0 20px; overflow: hidden;">
+            <!-- JS will inject selected items here -->
+        </div>
+
+        <div style="display: flex; gap: 15px; align-items: center; flex-shrink: 0;">
+            <button onclick="clearCompare()" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.95rem; white-space: nowrap;">Clear All</button>
+            <button id="btn-compare-now" onclick="goToComparePage()" style="background: #ffe000; color: #000; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; white-space: nowrap;" disabled>Compare Now</button>
+        </div>
+    </div>
