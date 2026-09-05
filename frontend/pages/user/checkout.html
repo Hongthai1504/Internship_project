@@ -28,7 +28,7 @@
 <body style="background-color: #f8f9fa;">
 
     <header class="bb-header" style="padding: 20px 0; text-align: center; border-bottom: 4px solid #ffe000;">
-      <a href="index.html" style="text-decoration: none; color: white; font-size: 2.5rem; font-weight: 900;">BestTech <span style="font-size: 1.2rem; font-weight: normal;">| Secure Checkout</span></a>
+      <a href="/index.html" style="text-decoration: none; color: white; font-size: 2.5rem; font-weight: 900;">BestTech <span style="font-size: 1.2rem; font-weight: normal;">| Secure Checkout</span></a>
     </header>
 
     <div class="checkout-container">
@@ -84,7 +84,7 @@
 
     <script>
         const token = localStorage.getItem("token");
-        if (!token) window.location.href = "index.html";
+        if (!token) window.location.href = "/index.html";
 
         let cartData = [];
         let totalAmount = 0;
@@ -97,7 +97,7 @@
 
             if (cartData.length === 0) {
                 alert("Cart is empty.");
-                window.location.href = "index.html";
+                window.location.href = "/index.html";
                 return;
             }
 
@@ -227,7 +227,7 @@
                         window.location.href = vnpData.paymentUrl;
                     } else {
                         alert("Order placed successfully! Order ID: #" + data.order_id);
-                        window.location.href = "index.html"; 
+                        window.location.href = "/index.html"; 
                     }
                 } else {
                     alert("Failed to place order: " + data.error);

@@ -904,7 +904,7 @@ app.post("/api/compare-ai", async (req, res) => {
 
     try {
         const completion = await groq.chat.completions.create({
-            model: "groq/compound-mini", // Giữ nguyên model đang hoạt động tốt của bạn
+            model: "groq/compound-mini", 
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: "Please evaluate these products." } // Đã sửa: Thay thế biến 'message' bị lỗi bằng chuỗi text
@@ -917,6 +917,61 @@ app.post("/api/compare-ai", async (req, res) => {
         res.status(500).json({ error: "AI comparison failed." });
     }
 });
+
+// API: AI GENERATE PRODUCT DESCRIPTION
+app.post("/api/admin/ai/generate-description", authenticateToken, isAdmin, async (req, res) => {
+    const { name, brand, price, category, specs } = req.body;
+
+    if (!name) return res.status(400).json({ error: "Vui lòng nhập Tên sản phẩm." });
+
+    const systemPrompt = `You are a tech copywriter. Write a 150-word product description in Vietnamese using clean HTML tags (<p>, <ul>, <li>, <strong>). Do NOT use markdown.`;
+    const userPrompt = `Name: ${name}, Brand: ${brand}, Price: $${price}, Category: ${category}, Specs: ${JSON.stringify(specs)}. Please generate HTML.`;
+
+    try {
+        const completion = await groq.chat.completions.create({
+            model: "groq/compound-mini",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt }
+            ],
+            temperature: 0.7
+        });
+        res.json({ description: completion.choices[0].message.content });
+    } catch (error) {
+        res.status(500).json({ error: "Hệ thống AI đang quá tải." });
+    }
+});
+
+// API: FLASH SALE TIMER
+app.get("/api/settings/flash-sale", (req, res) => {
+    db.query("SELECT setting_value FROM Settings WHERE setting_key = 'flash_sale_end'", (err, results) => {
+        if (err) return res.status(500).json({ error: "Lỗi Server" });
+        
+        if (results.length === 0) {
+            return res.json({ end_time: new Date(Date.now() + 86400000).toISOString() });
+        }
+        res.json({ end_time: results[0].setting_value });
+    });
+});
+
+app.put("/api/admin/settings/flash-sale", authenticateToken, isAdmin, (req, res) => {
+    const { end_time } = req.body;
+    if (!end_time) return res.status(400).json({ error: "Thiếu dữ liệu thời gian" });
+    
+    const sql = `
+        INSERT INTO Settings (setting_key, setting_value) 
+        VALUES ('flash_sale_end', ?) 
+        ON DUPLICATE KEY UPDATE setting_value = ?
+    `;
+    db.query(sql, [end_time, end_time], (err, result) => {
+        if (err) {
+            console.error("Error updating flash sale:", err);
+            return res.status(500).json({ error: "Lỗi lưu cấu hình" });
+        }
+        res.json({ message: "Cập nhật thời gian Deal of the Day thành công!" });
+    });
+});
+
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => {

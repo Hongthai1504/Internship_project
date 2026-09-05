@@ -2,12 +2,12 @@ const token = localStorage.getItem("token");
 
 if (!token) {
   alert("Access Denied! Please log in first.");
-  window.location.href = "index.html"; 
+  window.location.href = "/index.html"; 
 }
 
 function logout() {
   localStorage.removeItem("token");
-  window.location.href = "index.html";
+  window.location.href = "/index.html";
 }
 
 let categoryMap = {};
@@ -767,6 +767,109 @@ function gatherSpecs(target) {
         }
     });
     return specs.length > 0 ? specs : null;
+}
+
+// Tải thời gian Sale hiện tại khi vừa vào trang Admin
+async function loadFlashSaleSettings() {
+    try {
+        const res = await fetch("http://localhost:3000/api/settings/flash-sale");
+        const data = await res.json();
+        if (data.end_time) {
+            const dateObj = new Date(data.end_time);
+            const localISO = new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            document.getElementById("admin-flash-sale-time").value = localISO;
+        }
+    } catch (e) {
+        console.error("Could not load Flash Sale time", e);
+    }
+}
+
+async function updateFlashSaleTime() {
+    const timeVal = document.getElementById("admin-flash-sale-time").value;
+    if (!timeVal) return alert("Please select a date and time!");
+
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch("http://localhost:3000/api/admin/settings/flash-sale", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ end_time: new Date(timeVal).toISOString() })
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+            alert("Success: " + data.message);
+        } else {
+            alert("Error: " + data.error);
+        }
+    } catch (e) {
+        alert("Server connection failed!");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("admin-flash-sale-time")) {
+        loadFlashSaleSettings();
+    }
+});
+
+// AI GENERATE DESCRIPTION LOGIC
+const btnAiGenerate = document.getElementById("btn-ai-generate");
+const descTextarea = document.getElementById("description");
+
+if (btnAiGenerate && descTextarea) {
+    btnAiGenerate.addEventListener("click", async () => {
+        const name = document.getElementById("name").value.trim();
+        
+        if (!name) {
+            alert("Vui lòng nhập ít nhất 'Tên sản phẩm' trước khi sử dụng AI.");
+            document.getElementById("name").focus();
+            return;
+        }
+
+        const brand = document.getElementById("brand").value.trim();
+        const price = document.getElementById("price").value;
+        const categorySelect = document.getElementById("category_id");
+        const category = categorySelect.options[categorySelect.selectedIndex]?.text || "";
+        
+        const specs = gatherSpecs('add'); 
+
+        const originalText = btnAiGenerate.innerHTML;
+        btnAiGenerate.innerHTML = "⏳ Generating...";
+        btnAiGenerate.disabled = true;
+        btnAiGenerate.style.opacity = "0.7";
+
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch("http://localhost:3000/api/admin/ai/generate-description", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ name, brand, price, category, specs })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                descTextarea.value = data.description;
+                descTextarea.style.border = "2px solid #ffe000";
+                setTimeout(() => descTextarea.style.border = "1px solid #c8c8c8", 2000);
+            } else {
+                alert("Lỗi: " + data.error);
+            }
+        } catch (err) {
+            alert("Lỗi kết nối đến máy chủ AI.");
+        } finally {
+            btnAiGenerate.innerHTML = originalText;
+            btnAiGenerate.disabled = false;
+            btnAiGenerate.style.opacity = "1";
+        }
+    });
 }
 
 if (adminOrderList) {

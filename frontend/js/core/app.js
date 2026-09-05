@@ -356,6 +356,8 @@ async function fetchProducts(page = 1, isAppending = false) {
 
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('q');
+    const catId = urlParams.get('id');
+    const catKey = urlParams.get('key');
 
     if (typeof PAGE_TITLE !== 'undefined') {
         const titleEl = document.getElementById("page-title");
@@ -368,7 +370,21 @@ async function fetchProducts(page = 1, isAppending = false) {
         if (titleEl) titleEl.innerText = `Search results for: "${searchQuery}"`;
         document.title = `Search: ${searchQuery} | Best Tech`;
         currentPageProducts = allProducts.filter(product => isProductMatch(product, searchQuery));
-    } 
+    }
+    else if (typeof PAGE_KEYWORD !== 'undefined' && PAGE_KEYWORD !== "" && PAGE_KEYWORD !== "all") {
+        currentPageProducts = allProducts.filter(product => isProductMatch(product, PAGE_KEYWORD));
+    }
+    else if (catId) {
+        const titleEl = document.getElementById("page-title");
+        if (titleEl && catKey) {
+            titleEl.setAttribute('data-i18n', catKey);
+            if (typeof translations !== 'undefined' && translations[currentLang] && translations[currentLang][catKey]) {
+                titleEl.innerText = translations[currentLang][catKey];
+                document.title = `${translations[currentLang][catKey]} | Best Tech`;
+            }
+        }
+        currentPageProducts = allProducts.filter(product => product.category_id === parseInt(catId));
+    }
     else if (typeof PAGE_KEYWORD !== 'undefined' && PAGE_KEYWORD !== "" && PAGE_KEYWORD !== "all") {
         currentPageProducts = allProducts.filter(product => isProductMatch(product, PAGE_KEYWORD));
     } 
@@ -699,6 +715,8 @@ function renderCart() {
     let total = 0;
     let count = 0;
 
+    const removeText = currentLang === 'vi' ? 'Xóa' : 'Remove';
+
     cart.forEach((item, index) => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
@@ -707,13 +725,18 @@ function renderCart() {
         const imgSrc = item.image_url || 'https://via.placeholder.com/50';
 
         cartItems.innerHTML += `
-            <li style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px;">
-                <img src="${imgSrc}" style="width: 50px; height: 50px; object-fit: contain; border: 1px solid #e0e6ef; border-radius: 4px; padding: 2px;">
-                <div style="flex: 1;">
-                    <div style="font-weight: bold; font-size: 0.9rem; color: #040c13; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.name}</div>
-                    <div style="color: #666; font-size: 0.85rem; margin-top: 4px;">$${item.price} x ${item.quantity}</div>
-                    <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #ef4444; font-size: 0.8rem; cursor: pointer; padding: 0; margin-top: 5px; text-decoration: underline;">Remove</button>
+            <li style="display: flex; align-items: center; gap: 15px; background: #fff; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; transition: transform 0.2s;">
+                <div style="width: 75px; height: 75px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 8px;">
+                    <img src="${imgSrc}" style="max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply;">
                 </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: #0f172a; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">${item.name}</div>
+                    <div style="color: #0046be; font-size: 1.1rem; font-weight: 900; margin-top: 5px;">$${item.price} <span style="color: #64748b; font-size: 0.85rem; font-weight: 600;">x ${item.quantity}</span></div>
+                </div>
+                <!-- Nút Xóa Icon Thùng Rác -->
+                <button onclick="removeFromCart(${index})" style="background: #fee2e2; border: none; color: #ef4444; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" title="${removeText}">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
             </li>
         `;
     });
@@ -1133,18 +1156,22 @@ if (chatToggle && chatWindow) {
 
     function appendMessage(sender, text) {
         const msgDiv = document.createElement('div');
-        msgDiv.style.padding = '10px 15px';
-        msgDiv.style.maxWidth = '80%';
+        msgDiv.style.padding = '14px 18px';
+        msgDiv.style.maxWidth = '85%';
+        msgDiv.style.fontSize = '0.95rem';
+        msgDiv.style.lineHeight = '1.5';
+        msgDiv.style.boxShadow = '0 4px 15px rgba(0,0,0,0.03)';
         
         if (sender === 'user') {
-            msgDiv.style.background = '#0046be';
+            msgDiv.style.background = 'linear-gradient(135deg, #0046be, #3b82f6)';
             msgDiv.style.color = 'white';
-            msgDiv.style.borderRadius = '15px 15px 0 15px';
+            msgDiv.style.borderRadius = '20px 20px 4px 20px';
             msgDiv.style.alignSelf = 'flex-end';
         } else {
-            msgDiv.style.background = '#eef2f7';
-            msgDiv.style.color = '#040c13';
-            msgDiv.style.borderRadius = '15px 15px 15px 0';
+            msgDiv.style.background = '#ffffff';
+            msgDiv.style.color = '#0f172a';
+            msgDiv.style.border = '1px solid #e2e8f0';
+            msgDiv.style.borderRadius = '20px 20px 20px 4px';
             msgDiv.style.alignSelf = 'flex-start';
         }
         
@@ -1484,6 +1511,51 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => alert(msg), 500);
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+});
+
+// --- FLASH SALE COUNTDOWN LOGIC ---
+let flashSaleInterval;
+
+async function initFlashSaleTimer() {
+    const timerEl = document.getElementById("flash-timer");
+    if (!timerEl) return;
+
+    try {
+        const res = await fetch("http://localhost:3000/api/settings/flash-sale");
+        const data = await res.json();
+        
+        const endTime = new Date(data.end_time).getTime();
+
+        if (flashSaleInterval) clearInterval(flashSaleInterval);
+
+        flashSaleInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                clearInterval(flashSaleInterval);
+                timerEl.innerHTML = "EXPIRED";
+                timerEl.style.color = "#ef4444"; 
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerEl.innerHTML = 
+                (hours < 10 ? "0" + hours : hours) + ":" + 
+                (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                (seconds < 10 ? "0" + seconds : seconds);
+        }, 1000);
+        
+    } catch (err) {
+        console.error("Lỗi tải Flash Sale timer:", err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initFlashSaleTimer();
 });
 
 // Initialize Application

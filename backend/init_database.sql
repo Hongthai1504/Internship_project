@@ -286,3 +286,12 @@ UPDATE Products SET description_vi = 'TV OLED bán chạy nhất với độ tư
 UPDATE Products SET description_vi = 'Độ phân giải 8K cực nét được trang bị công nghệ Quantum Matrix Pro.' WHERE sku = 'SAM-75QN900C';
 
 ALTER TABLE Reviews ADD COLUMN image_url VARCHAR(255) NULL;
+
+CREATE TABLE IF NOT EXISTS Settings (
+    setting_key VARCHAR(50) PRIMARY KEY,
+    setting_value VARCHAR(255)
+);
+
+-- Thêm sẵn một mốc thời gian mặc định ban đầu
+INSERT IGNORE INTO Settings (setting_key, setting_value) 
+VALUES ('flash_sale_end', '2026-12-31T23:59:59.000Z');
