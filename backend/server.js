@@ -972,6 +972,73 @@ app.put("/api/admin/settings/flash-sale", authenticateToken, isAdmin, (req, res)
     });
 });
 
+// API: AI SEMANTIC SEARCH 
+app.post("/api/search-ai", async (req, res) => {
+    const { query, lang } = req.body;
+    if (!query) return res.status(400).json({ error: "Empty query" });
+
+    const isVietnamese = lang === 'vi';
+    const languageContext = isVietnamese ? 'Vietnamese' : 'English';
+
+    const sql = `
+        SELECT p.id, p.name, p.name_vi, p.brand, p.specifications, p.description, p.description_vi,
+               (SELECT GROUP_CONCAT(r.comment SEPARATOR ' | ') FROM Reviews r WHERE r.product_id = p.id) AS reviews
+        FROM Products p
+    `;
+
+    db.query(sql, async (err, products) => {
+        if (err) return res.status(500).json({ error: "Database error." });
+
+        const catalog = products.map(p => ({
+            id: p.id,
+            name: isVietnamese ? (p.name_vi || p.name) : p.name,
+            brand: p.brand,
+            description: isVietnamese ? (p.description_vi || p.description) : p.description,
+            specs: p.specifications,
+            reviews: p.reviews || "No reviews"
+        }));
+
+        const systemPrompt = `You are the core Semantic Search Engine for a premium electronics e-commerce store.
+        The user is searching in ${languageContext}.
+        Your task is to analyze the User's Search Query and match it with the best products from the provided Catalog.
+        
+        CRITICAL RULES:
+        1. Understand human intent: Match the semantic meaning of the user's query to product specs, names, descriptions, brands, or reviews. 
+           - Example 1: If searching in English for "high performance" or Vietnamese for "hiệu năng cao", look for high RAM, strong CPUs, or "Pro/Ultra/Max" models in the specs.
+           - Example 2: If searching for "good for kids" or "tốt cho lứa trẻ", look at the 'reviews' or 'description' fields for matching sentiments.
+        2. Catalog Data: ${JSON.stringify(catalog)}
+        3. You MUST return ONLY a valid JSON array containing the integer IDs of the matching products. (e.g., [1, 5, 8]).
+        4. Do NOT output any markdown formatting like \`\`\`json. Just the raw array. If no products match, return [].`;
+
+        try {
+            const completion = await groq.chat.completions.create({
+                model: "groq/compound-mini", 
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: `User Search Query: "${query}"` }
+                ],
+                temperature: 0.1 
+            });
+
+            const aiResponse = completion.choices[0].message.content.trim();
+            
+            let matchedIds = [];
+            try {
+                const cleanedResponse = aiResponse.replace(/```json/g, "").replace(/```/g, "").trim();
+                matchedIds = JSON.parse(cleanedResponse);
+            } catch (parseError) {
+                console.error("Lỗi Parse JSON từ AI:", aiResponse);
+            }
+
+            res.json({ ids: Array.isArray(matchedIds) ? matchedIds : [] });
+
+        } catch (error) {
+            console.error("Lỗi AI Search:", error);
+            res.status(500).json({ error: "AI Engine Overloaded." });
+        }
+    });
+});
+
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => {

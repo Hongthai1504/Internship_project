@@ -53,11 +53,9 @@ if (mainCategorySelect && subCategorySelect) {
     }
   });
 }
-
-// ==========================================
+ 
 // NEW FEATURE: MEDIA LIBRARY MANAGER (WITH FOLDERS)
-// ==========================================
- let currentMediaTarget = null; 
+let currentMediaTarget = null; 
 let libraryMediaCache = [];    
 let temporarySelection = [];   
 
@@ -69,11 +67,11 @@ let formState = {
     edit: []
 };
 
-const mediaModal = document.getElementById("media-manager-modal");
+const mediaModal = document.getElementById("media-library-modal"); // Sửa lại ID theo HTML mới
 const mediaGrid = document.getElementById("media-grid");
-const mediaCountText = document.getElementById("media-selection-count");
-const folderList = document.getElementById("folder-list");
-const currentFolderLabel = document.getElementById("current-folder-label");
+const mediaCountText = document.getElementById("selected-count"); // Sửa lại ID theo HTML mới
+const folderList = document.getElementById("media-folder-list"); // Sửa lại ID theo HTML mới
+const currentFolderLabel = document.getElementById("current-folder-title"); // Sửa lại ID theo HTML mới
 
 function openMediaManager(target) {
     currentMediaTarget = target;
@@ -81,6 +79,7 @@ function openMediaManager(target) {
     if(mediaModal) mediaModal.style.display = "flex";
     
     currentFolderId = null; 
+    if(currentFolderLabel) currentFolderLabel.innerText = 'All Media';
     
     // Clear search box
     const searchInput = document.getElementById("media-search-input");
@@ -90,8 +89,11 @@ function openMediaManager(target) {
     fetchMediaLibrary();
 }
 
-function closeMediaManager() {
-    if(mediaModal) mediaModal.style.display = "none";
+const closeMediaBtn = document.getElementById("close-media-modal");
+if (closeMediaBtn) {
+    closeMediaBtn.addEventListener("click", () => {
+        if(mediaModal) mediaModal.style.display = "none";
+    });
 }
 
 // -- FOLDER LOGIC --
@@ -107,34 +109,37 @@ async function fetchFolders() {
     } catch (err) { console.error("Error fetching folders"); }
 }
 
-async function createFolder() {
-    const nameInput = document.getElementById("new-folder-name");
-    const name = nameInput.value.trim();
-    if(!name) return;
+const btnCreateFolder = document.getElementById('btn-create-folder');
+if (btnCreateFolder) {
+    btnCreateFolder.addEventListener('click', async () => {
+        const nameInput = document.getElementById("new-folder-name");
+        const name = nameInput.value.trim();
+        if(!name) return alert("Vui lòng nhập tên thư mục!");
 
-    let parent_id = null;
-    if (currentFolderId && currentFolderId !== 'unassigned') {
-        parent_id = currentFolderId;
-    }
-
-    try {
-        const res = await fetch("http://localhost:3000/api/admin/media/folders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ name, parent_id }) // Gửi kèm parent_id
-        });
-        if(res.ok) {
-            nameInput.value = "";
-            fetchFolders();
-        } else {
-            const data = await res.json(); alert(data.error);
+        let parent_id = null;
+        if (typeof currentFolderId === 'number') {
+            parent_id = currentFolderId;
         }
-    } catch (err) { alert("Error creating folder"); }
+
+        try {
+            const res = await fetch("http://localhost:3000/api/admin/media/folders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ name, parent_id })
+            });
+            if(res.ok) {
+                nameInput.value = "";
+                fetchFolders();
+            } else {
+                const data = await res.json(); alert(data.error);
+            }
+        } catch (err) { alert("Error creating folder"); }
+    });
 }
 
 async function deleteFolder(event, folderId, folderName) {
-    event.stopPropagation(); // Tránh kích hoạt sự kiện chọn thư mục
-    if (!confirm(`Are you sure you want to delete folder "${folderName}"?\nAll images inside will be moved to 'Unassigned'.`)) return;
+    event.stopPropagation(); 
+    if (!confirm(`Bạn có chắc muốn xóa thư mục "${folderName}"?\nToàn bộ ảnh bên trong sẽ bị đẩy ra 'Unassigned'.`)) return;
 
     try {
         const res = await fetch(`http://localhost:3000/api/admin/media/folders/${folderId}`, {
@@ -153,39 +158,39 @@ async function deleteFolder(event, folderId, folderName) {
 
 function selectFolder(id, name) {
     currentFolderId = id;
-    currentFolderLabel.innerText = name;
-    renderFolders(); // Update active class
-    fetchMediaLibrary(); // Refetch images for this folder
+    if(currentFolderLabel) currentFolderLabel.innerText = name;
+    renderFolders(); 
+    fetchMediaLibrary(); 
 }
 
 function renderFolders() {
+    if(!folderList) return;
+
     let html = `
-        <li class="folder-item ${currentFolderId === null ? 'active' : ''}" onclick="selectFolder(null, 'All Media')" style="padding: 10px;">
-            <span class="folder-icon">📁</span> All Media
+        <li class="folder-item" onclick="selectFolder(null, 'All Media')" style="padding: 14px 18px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: ${currentFolderId === null ? '800' : '600'}; background: ${currentFolderId === null ? '#e0e7ff' : 'transparent'}; color: ${currentFolderId === null ? '#0046be' : '#475569'}; transition: all 0.2s;">
+            <svg width="22" height="22" fill="#f59e0b" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+            All Media
         </li>
-        <li class="folder-item ${currentFolderId === 'unassigned' ? 'active' : ''}" onclick="selectFolder('unassigned', 'Unassigned')" style="padding: 10px;">
-            <span class="folder-icon">📂</span> Unassigned
+        <li class="folder-item" onclick="selectFolder('unassigned', 'Unassigned')" style="padding: 14px 18px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: ${currentFolderId === 'unassigned' ? '800' : '600'}; background: ${currentFolderId === 'unassigned' ? '#e0e7ff' : 'transparent'}; color: ${currentFolderId === 'unassigned' ? '#0046be' : '#475569'}; transition: all 0.2s;">
+            <svg width="22" height="22" fill="#f59e0b" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+            Unassigned
         </li>
+        <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 10px 0;">
     `;
 
     const buildTree = (parentId, level) => {
         const children = libraryFolders.filter(f => f.parent_id === parentId);
         children.forEach(f => {
-            const indent = level * 15;
-            const icon = level > 0 ? '↳ 📁' : '📁'; 
+            const isActive = currentFolderId === f.id;
+            const paddingLeft = 18 + (level * 25);
             
             html += `
-            <li class="folder-item ${currentFolderId === f.id ? 'active' : ''}" 
-                style="padding: 10px; padding-left: ${indent + 10}px; display: flex; justify-content: space-between; align-items: center;" 
-                onclick="selectFolder(${f.id}, '${f.name}')">
-                
-                <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    <span class="folder-icon">${icon}</span> ${f.name}
+            <li class="folder-item" onclick="selectFolder(${f.id}, '${f.name.replace(/'/g, "\\'")}')" style="padding: 10px 18px 10px ${paddingLeft}px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: ${isActive ? '800' : '600'}; background: ${isActive ? '#e0e7ff' : 'transparent'}; color: ${isActive ? '#0046be' : '#475569'}; transition: all 0.2s;">
+                <div style="display: flex; align-items: center; gap: 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                    <svg width="20" height="20" fill="${level > 0 ? '#fbbf24' : '#f59e0b'}" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                    ${f.name}
                 </div>
-                
-                <button onclick="deleteFolder(event, ${f.id}, '${f.name}')" 
-                        style="background: transparent; color: #ef4444; border: none; cursor: pointer; font-weight: bold; font-size: 1.1rem; padding: 0 5px;" 
-                        title="Delete Folder">×</button>
+                <button onclick="deleteFolder(event, ${f.id}, '${f.name}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem; display: ${isActive ? 'block' : 'none'};" title="Delete folder">&times;</button>
             </li>`;
             
             buildTree(f.id, level + 1); 
@@ -193,7 +198,7 @@ function renderFolders() {
     };
 
     buildTree(null, 0);
-    
+
     folderList.innerHTML = html;
 }
 
@@ -215,36 +220,60 @@ async function fetchMediaLibrary() {
     }
 }
 
-function filterMediaByName() {
-    const query = document.getElementById('media-search-input').value.toLowerCase();
-    renderMediaGrid(query);
+const searchInputEl = document.getElementById('media-search-input');
+if(searchInputEl) {
+    searchInputEl.addEventListener('input', () => {
+        renderMediaGrid(searchInputEl.value.toLowerCase());
+    });
 }
 
 function renderMediaGrid(searchQuery = '') {
     if (libraryMediaCache.length === 0) {
-        mediaGrid.innerHTML = `<p style="color: #666; width: 100%; text-align: center; margin-top: 50px;">This folder is empty.</p>`;
-        mediaCountText.innerText = `${temporarySelection.length} images selected`;
+        mediaGrid.innerHTML = `
+            <div style="text-align: center; color: #94a3b8; width: 100%;">
+                <svg width="100" height="100" fill="#cbd5e1" viewBox="0 0 24 24" style="margin-bottom: 20px;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                <h3 style="margin: 0 0 8px 0; color: #475569; font-size: 1.4rem; font-weight: 800;">This folder is empty.</h3>
+                <p style="margin: 0; font-size: 1.05rem;">Select files and click upload to get started.</p>
+            </div>`;
+        if(mediaCountText) mediaCountText.innerText = temporarySelection.length;
         return;
     }
 
     const filteredMedia = libraryMediaCache.filter(m => m.file_name.toLowerCase().includes(searchQuery));
 
     if (filteredMedia.length === 0) {
-        mediaGrid.innerHTML = `<p style="color: #666; width: 100%; text-align: center; margin-top: 50px;">No images match your search.</p>`;
+        mediaGrid.innerHTML = `<p style="color: #64748b; font-style: italic; width: 100%; text-align: center;">No images match your search.</p>`;
         return;
     }
+
+    // Grid CSS for Modern UI
+    mediaGrid.style.display = "grid";
+    mediaGrid.style.gridTemplateColumns = "repeat(auto-fill, minmax(150px, 1fr))";
+    mediaGrid.style.gap = "20px";
+    mediaGrid.style.alignItems = "start";
 
     mediaGrid.innerHTML = filteredMedia.map(media => {
         const isSelected = temporarySelection.includes(media.file_url);
         return `
-        <div class="media-item ${isSelected ? 'selected' : ''}" onclick="toggleMediaSelection('${media.file_url}')">
-            <button class="delete-media-btn" onclick="deleteMediaItem(event, ${media.id})" title="Delete image">✕</button>
-            <img src="${media.file_url}" alt="${media.file_name}" title="${media.file_name}">
-            <div class="media-item-name" title="${media.file_name}">${media.file_name}</div>
+        <div style="position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; border: 3px solid ${isSelected ? '#0046be' : 'transparent'}; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: transform 0.2s;" onclick="toggleMediaSelection('${media.file_url}')" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <button onclick="deleteMediaItem(event, ${media.id})" style="position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.9); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; z-index: 10; opacity: ${isSelected ? '1' : '0'}; transition: opacity 0.2s;" class="del-btn">&times;</button>
+            <div style="height: 120px; background: #fff; display: flex; justify-content: center; align-items: center; padding: 10px;">
+                <img src="${media.file_url}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <div style="background: #f1f5f9; padding: 10px; font-size: 0.8rem; color: #475569; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;">
+                ${media.file_name}
+            </div>
+            ${isSelected ? '<div style="position: absolute; top: 8px; left: 8px; background: #0046be; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">✓</div>' : ''}
         </div>`;
     }).join('');
 
-    mediaCountText.innerText = `${temporarySelection.length} images selected`;
+    // Hiển thị nút xóa khi hover vào ảnh
+    document.querySelectorAll('#media-grid > div').forEach(div => {
+        div.addEventListener('mouseenter', () => div.querySelector('.del-btn').style.opacity = '1');
+        div.addEventListener('mouseleave', () => { if(div.style.borderColor === 'transparent') div.querySelector('.del-btn').style.opacity = '0'; });
+    });
+
+    if(mediaCountText) mediaCountText.innerText = temporarySelection.length;
 }
 
 function toggleMediaSelection(url) {
@@ -254,10 +283,10 @@ function toggleMediaSelection(url) {
     } else {
         temporarySelection.splice(index, 1); 
     }
-    renderMediaGrid(); 
+    renderMediaGrid(document.getElementById('media-search-input').value.toLowerCase()); 
 }
 
- async function deleteMediaItem(event, mediaId) {
+async function deleteMediaItem(event, mediaId) {
     event.stopPropagation();
     if (!confirm("Are you sure you want to permanently delete this image from the Library?")) return;
     
@@ -272,61 +301,82 @@ function toggleMediaSelection(url) {
             const data = await res.json();
             alert("Error: " + data.error);
         }
-    } catch(err) {
-        alert("Failed to delete image.");
-    }
+    } catch(err) { alert("Failed to delete image."); }
 }
 
-function confirmMediaSelection() {
-    formState[currentMediaTarget] = [...temporarySelection];
-    
-    const container = document.getElementById(`${currentMediaTarget}-selected-images`);
-    if (formState[currentMediaTarget].length === 0) {
-        container.innerHTML = `<p style="color: #888; font-size: 0.9rem; margin: 0; font-style: italic;">No images selected.</p>`;
-    } else {
-        container.innerHTML = formState[currentMediaTarget].map((url, i) => `
-            <div style="position: relative;">
-                <img src="${url}" class="selected-image-preview">
-                ${i === 0 ? '<span style="position:absolute; bottom: 0; left: 0; background: #ffe000; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 2px;">MAIN</span>' : ''}
-            </div>
-        `).join('');
-    }
-    closeMediaManager();
-}
-
-async function uploadMediaToLibrary() {
-    const fileInput = document.getElementById("media-upload-input");
-    const files = fileInput.files;
-
-    if (files.length === 0) {
-        alert("Please select files to upload.");
-        return;
-    }
-
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-        formData.append("images", files[i]);
-    }
-    
-    // Append the current folder ID so the backend knows where to save it
-    if (currentFolderId && currentFolderId !== 'unassigned') {
-        formData.append("folder_id", currentFolderId);
-    }
-
-    try {
-        const res = await fetch("http://localhost:3000/api/admin/media", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData
-        });
-        const data = await res.json();
-        if (res.ok) {
-            fileInput.value = ""; 
-            fetchMediaLibrary(); // Refresh images
+const btnConfirmMedia = document.getElementById("btn-confirm-media");
+if (btnConfirmMedia) {
+    btnConfirmMedia.addEventListener("click", () => {
+        formState[currentMediaTarget] = [...temporarySelection];
+        
+        const container = document.getElementById(`${currentMediaTarget}-selected-images`);
+        if (formState[currentMediaTarget].length === 0) {
+            container.innerHTML = `<p style="color: #888; font-size: 0.9rem; margin: 0; font-style: italic;">No images selected.</p>`;
         } else {
-            alert(data.error);
+            container.innerHTML = formState[currentMediaTarget].map((url, i) => `
+                <div style="position: relative; display: inline-block; margin-right: 10px;">
+                    <img src="${url}" style="width: 80px; height: 80px; object-fit: contain; border: 1px solid #c8c8c8; border-radius: 8px; padding: 5px; background: #fff;">
+                    ${i === 0 ? '<span style="position:absolute; bottom: 5px; left: 5px; background: #ef4444; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 4px;">MAIN</span>' : ''}
+                </div>
+            `).join('');
         }
-    } catch (err) { alert("Upload failed."); }
+        if(mediaModal) mediaModal.style.display = "none";
+    });
+}
+
+// Fix logic Upload file để nhận đúng ID HTML
+const btnUploadMedia = document.getElementById("btn-upload-media");
+const mediaFileInput = document.getElementById("media-file-input");
+
+if (mediaFileInput) {
+    mediaFileInput.addEventListener('change', function() {
+        const textElement = document.getElementById('file-chosen-text');
+        if(textElement) {
+            textElement.innerText = this.files.length > 0 ? `${this.files.length} file(s) selected` : 'No files';
+            textElement.style.color = this.files.length > 0 ? '#0046be' : '#64748b';
+        }
+    });
+}
+
+if (btnUploadMedia) {
+    btnUploadMedia.addEventListener("click", async () => {
+        if (!mediaFileInput || mediaFileInput.files.length === 0) {
+            alert("Please select files to upload.");
+            return;
+        }
+
+        const formData = new FormData();
+        for (let i = 0; i < mediaFileInput.files.length; i++) {
+            formData.append("images", mediaFileInput.files[i]);
+        }
+        
+        if (currentFolderId && currentFolderId !== 'unassigned') {
+            formData.append("folder_id", currentFolderId);
+        }
+
+        btnUploadMedia.innerText = "Uploading...";
+        btnUploadMedia.disabled = true;
+
+        try {
+            const res = await fetch("http://localhost:3000/api/admin/media", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                mediaFileInput.value = ""; 
+                if(document.getElementById('file-chosen-text')) document.getElementById('file-chosen-text').innerText = "No files";
+                fetchMediaLibrary(); 
+            } else {
+                alert(data.error);
+            }
+        } catch (err) { alert("Upload failed."); }
+        finally {
+            btnUploadMedia.innerText = "Upload";
+            btnUploadMedia.disabled = false;
+        }
+    });
 }
 
 // ==========================================

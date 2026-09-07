@@ -359,20 +359,39 @@ async function fetchProducts(page = 1, isAppending = false) {
     const catId = urlParams.get('id');
     const catKey = urlParams.get('key');
 
-    if (typeof PAGE_TITLE !== 'undefined') {
-        const titleEl = document.getElementById("page-title");
-        if (titleEl) titleEl.innerText = PAGE_TITLE;
-        document.title = `${PAGE_TITLE} | Best Tech`;
-    }
-
+    // SEMANTIC SEARCH
     if (searchQuery) {
         const titleEl = document.getElementById("page-title");
-        if (titleEl) titleEl.innerText = `Search results for: "${searchQuery}"`;
-        document.title = `Search: ${searchQuery} | Best Tech`;
-        currentPageProducts = allProducts.filter(product => isProductMatch(product, searchQuery));
-    }
-    else if (typeof PAGE_KEYWORD !== 'undefined' && PAGE_KEYWORD !== "" && PAGE_KEYWORD !== "all") {
-        currentPageProducts = allProducts.filter(product => isProductMatch(product, PAGE_KEYWORD));
+        const listEl = document.getElementById("product-list");
+        
+        if (titleEl) titleEl.innerHTML = currentLang === 'vi' 
+            ? `✨ AI đang phân tích tìm kiếm: "<span style="color:#0046be;">${searchQuery}</span>"...`
+            : `✨ AI is analyzing query: "<span style="color:#0046be;">${searchQuery}</span>"...`;
+        
+        if (listEl) listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px;"><div style="font-size: 3rem; animation: spin 1s linear infinite;">⚙️</div><p style="color: #64748b; font-weight: bold; margin-top: 15px;">AI Semantic Engine is running...</p></div>`;
+
+        try {
+            const aiRes = await fetch("http://localhost:3000/api/search-ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: searchQuery, lang: currentLang })
+            });
+            const aiData = await aiRes.json();
+            
+            if (aiRes.ok && aiData.ids && aiData.ids.length > 0) {
+                currentPageProducts = allProducts.filter(p => aiData.ids.includes(p.id));
+            } else {
+                currentPageProducts = []; 
+            }
+            
+            if (titleEl) titleEl.innerText = currentLang === 'vi' 
+                ? `Kết quả tìm kiếm cho: "${searchQuery}"`
+                : `Search results for: "${searchQuery}"`;
+
+        } catch(e) {
+            console.error("AI Search Failed, fallback to standard search");
+            currentPageProducts = allProducts.filter(product => isProductMatch(product, searchQuery));
+        }
     }
     else if (catId) {
         const titleEl = document.getElementById("page-title");
@@ -385,16 +404,12 @@ async function fetchProducts(page = 1, isAppending = false) {
         }
         currentPageProducts = allProducts.filter(product => product.category_id === parseInt(catId));
     }
-    else if (typeof PAGE_KEYWORD !== 'undefined' && PAGE_KEYWORD !== "" && PAGE_KEYWORD !== "all") {
-        currentPageProducts = allProducts.filter(product => isProductMatch(product, PAGE_KEYWORD));
-    } 
     else {
         currentPageProducts = [...allProducts]; 
     }
 
     renderDynamicBrands(currentPageProducts);
     handleFilters();
-    
     renderLoadMoreButton();
     renderWishlistPage();
 
@@ -826,57 +841,65 @@ if (orderForm) {
 // --- HISTORY & PROFILE ---
 let userOrderHistoryCache = []; 
 
-if (historyTrigger) {
-    historyTrigger.addEventListener("click", async () => {
-        if(historyModal) historyModal.style.display = "flex";
-        
-        const loadingText = currentLang === 'vi' ? 'Đang tải dữ liệu...' : 'Loading your orders...';
-        if(historyList) historyList.innerHTML = `<p style='text-align:center;'>${loadingText}</p>`;
+const openOrderHistoryModal = async () => {
+    if(historyModal) {
+        historyModal.style.display = "flex";
+        historyModal.style.animation = "fadeIn 0.3s ease-out forwards";
+    }
+    
+    const loadingText = currentLang === 'vi' ? 'Đang tải dữ liệu...' : 'Loading your orders...';
+    if(historyList) historyList.innerHTML = `<div style="text-align: center; padding: 50px;"><div style="font-size: 2rem; animation: spin 1s linear infinite;">⚙️</div><p style="color: #64748b; margin-top: 10px; font-weight: bold;">${loadingText}</p></div>`;
 
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert(currentLang === 'vi' ? "Vui lòng đăng nhập lại!" : "Please log in again!");
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert(currentLang === 'vi' ? "Vui lòng đăng nhập lại!" : "Please log in again!");
+        window.location.href = "/pages/user/login.html";
+        return;
+    }
+
+    try {
+        const profileRes = await fetch("http://localhost:3000/api/profile", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (profileRes.status === 401 || profileRes.status === 403) {
+            localStorage.removeItem("token");
+            alert(currentLang === 'vi' ? "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!" : "Session expired. Please log in again!");
             window.location.href = "/pages/user/login.html";
             return;
         }
 
-        try {
-            const profileRes = await fetch("http://localhost:3000/api/profile", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            
-            if (profileRes.status === 401 || profileRes.status === 403) {
-                localStorage.removeItem("token");
-                alert(currentLang === 'vi' ? "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!" : "Session expired. Please log in again!");
-                window.location.href = "/pages/user/login.html";
-                return;
-            }
-
-            if (profileRes.ok) {
-                const profile = await profileRes.json();
-                const nameEl = document.getElementById("order-user-name");
-                const avatarEl = document.getElementById("order-user-avatar");
-                if (nameEl) nameEl.innerText = profile.full_name;
-                if (avatarEl) avatarEl.innerText = profile.full_name.charAt(0).toUpperCase();
-            }
-
-            const response = await fetch("http://localhost:3000/api/orders/history", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || "Failed to load orders");
-            }
-
-            userOrderHistoryCache = await response.json();
-            renderOrdersByStatus('all');
-
-        } catch (error) {
-            console.error("Order fetch error:", error);
-            const errText = currentLang === 'vi' ? 'Lỗi kết nối máy chủ:' : 'Connection error:';
-            if(historyList) historyList.innerHTML = `<p style='color: #ef4444; text-align: center;'>${errText} ${error.message}</p>`;
+        if (profileRes.ok) {
+            const profile = await profileRes.json();
+            const nameEl = document.getElementById("order-user-name");
+            const avatarEl = document.getElementById("order-user-avatar");
+            if (nameEl) nameEl.innerText = profile.full_name;
+            if (avatarEl) avatarEl.innerText = profile.full_name.charAt(0).toUpperCase();
         }
+
+        const response = await fetch("http://localhost:3000/api/orders/history", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        
+        if (!response.ok) throw new Error("Failed to load orders");
+
+        userOrderHistoryCache = await response.json();
+        renderOrdersByStatus('all');
+
+    } catch (error) {
+        console.error("Order fetch error:", error);
+        const errText = currentLang === 'vi' ? 'Lỗi kết nối máy chủ:' : 'Connection error:';
+        if(historyList) historyList.innerHTML = `<p style='color: #ef4444; text-align: center; font-weight: bold;'>${errText} ${error.message}</p>`;
+    }
+};
+
+if (historyTrigger) historyTrigger.addEventListener("click", openOrderHistoryModal);
+
+if (btnMyOrders) {
+    btnMyOrders.addEventListener("click", (e) => {
+        e.preventDefault();
+        closeAllMenus(); // Tự động đóng Dropdown lại cho gọn
+        openOrderHistoryModal();
     });
 }
 
@@ -886,7 +909,6 @@ if (closeHistoryModal) {
     });
 }
 
-// Tab Click Logic
 const orderTabs = document.querySelectorAll('.order-tab');
 orderTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
@@ -901,103 +923,130 @@ function renderOrdersByStatus(statusFilter) {
     if(!historyList) return;
     let filteredOrders = userOrderHistoryCache;
 
-    // Filter logic
     if (statusFilter !== 'all') {
         filteredOrders = userOrderHistoryCache.filter(o => o.status.toLowerCase() === statusFilter.toLowerCase());
     }
 
-    // Empty State
     if (filteredOrders.length === 0) {
         historyList.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px;">
-            <svg width="60" height="60" fill="#c8c8c8" viewBox="0 0 24 24" style="margin-bottom: 15px;"><path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 18.5c-.82 0-1.5-.67-1.5-1.5s.68-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 8.5c-.82 0-1.5-.67-1.5-1.5S6.18 5.5 7 5.5s1.5.68 1.5 1.5S7.83 8.5 7 8.5z"/></svg>
-            <p style="color: #666; font-size: 1.1rem;">No orders found in this category.</p>
+        <div style="text-align: center; padding: 60px 20px; background: rgba(255,255,255,0.5); border-radius: 16px; border: 1px dashed #cbd5e1;">
+            <svg width="60" height="60" fill="#94a3b8" viewBox="0 0 24 24" style="margin-bottom: 15px;"><path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 18.5c-.82 0-1.5-.67-1.5-1.5s.68-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 8.5c-.82 0-1.5-.67-1.5-1.5S6.18 5.5 7 5.5s1.5.68 1.5 1.5S7.83 8.5 7 8.5z"/></svg>
+            <p style="color: #64748b; font-size: 1.1rem; font-weight: bold;">No orders found in this category.</p>
         </div>`;
         return;
     }
 
-    // Status Color Helper
-    const getStatusColor = (status) => {
+    const getStatusStyle = (status) => {
         switch(status.toLowerCase()) {
-            case 'completed': return '#10b981'; // Green
-            case 'pending': return '#f59e0b'; // Yellow
-            case 'shipping': return '#3b82f6'; // Blue
-            case 'cancelled': return '#ef4444'; // Red
-            default: return '#6b7280'; // Gray
+            case 'completed': return { color: '#10b981', bg: '#d1fae5' }; 
+            case 'pending': return { color: '#d97706', bg: '#fef3c7' }; 
+            case 'shipping': return { color: '#2563eb', bg: '#dbeafe' }; 
+            case 'cancelled': return { color: '#e11d48', bg: '#fee2e2' }; 
+            default: return { color: '#475569', bg: '#f1f5f9' }; 
         }
     };
 
-    // Render Orders
-    historyList.innerHTML = filteredOrders.map(order => `
-        <div style="background: #fff; border: 1px solid #e0e6ef; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow: hidden;">
+    historyList.innerHTML = filteredOrders.map(order => {
+        const style = getStatusStyle(order.status);
+        return `
+        <div style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 20px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow: hidden; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
             
-            <!-- Order Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #fafafa; border-bottom: 1px solid #e0e6ef; padding: 15px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(248, 250, 252, 0.8); border-bottom: 1px solid rgba(226, 232, 240, 0.6); padding: 18px 25px;">
                 <div>
-                    <strong style="font-size: 1.1rem; color: #040c13;">Order #${order.order_id}</strong>
-                    <span style="color: #666; margin-left: 10px; font-size: 0.9rem;">
+                    <strong style="font-size: 1.15rem; color: #0f172a; font-weight: 900;">Order #${order.order_id}</strong>
+                    <span style="color: #64748b; margin-left: 12px; font-size: 0.9rem; font-weight: 600;">
                         ${new Date(order.create_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </div>
-                <span style="color: ${getStatusColor(order.status)}; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 6px; font-size: 0.95rem;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: ${getStatusColor(order.status)};"></span>
+                <span style="background: ${style.bg}; color: ${style.color}; font-weight: 800; text-transform: uppercase; padding: 6px 14px; border-radius: 50px; font-size: 0.85rem; letter-spacing: 0.5px; display: inline-block;">
                     ${order.status}
                 </span>
             </div>
 
-            <!-- Order Items -->
-            <div style="padding: 20px;">
+            <div style="padding: 25px;">
                 ${order.items.map(item => `
-                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee;">
-                        <img src="${item.image_url || 'https://via.placeholder.com/60'}" style="width: 70px; height: 70px; object-fit: contain; border: 1px solid #eee; border-radius: 8px; padding: 5px;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 500; font-size: 1.1rem; color: #040c13; margin-bottom: 5px;">${item.product_name}</div>
-                            <div style="color: #666;">Quantity: <strong>${item.quantity}</strong></div>
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #e2e8f0;">
+                        <div style="width: 80px; height: 80px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: center; align-items: center; padding: 10px;">
+                            <img src="${item.image_url || 'https://via.placeholder.com/60'}" style="max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply;">
                         </div>
-                        <div style="font-weight: 900; color: #0046be; font-size: 1.1rem;">$${item.price}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 800; font-size: 1.05rem; color: #0f172a; margin-bottom: 6px;">${item.product_name}</div>
+                            <div style="color: #64748b; font-weight: 600;">Quantity: <span style="color: #0f172a;">${item.quantity}</span></div>
+                        </div>
+                        <div style="font-weight: 900; color: #0046be; font-size: 1.2rem;">$${item.price}</div>
                     </div>
                 `).join('')}
                 
-                <!-- Order Footer -->
-                <div style="text-align: right; margin-top: 15px;">
-                    <span style="color: #666; font-size: 1.1rem; margin-right: 15px;">Total Amount:</span>
-                    <strong style="color: #ef4444; font-size: 1.6rem;">$${order.total_amount}</strong>
+                <div style="text-align: right; margin-top: 20px;">
+                    <span style="color: #64748b; font-size: 1.1rem; font-weight: 700; margin-right: 15px;">Total Amount:</span>
+                    <strong style="color: #ef4444; font-size: 1.8rem; font-weight: 900;">$${order.total_amount}</strong>
                 </div>
             </div>
         </div>
-    `).join('');
-}
-
-if (btnProfile) {
-  btnProfile.addEventListener("click", () => {
-    window.location.href = "/pages/user/profile.html";
-  });
+    `}).join('');
 }
 
 // --- LIVE SEARCH ---
+let searchTimeout; 
+
 if (searchInput && searchSuggestions) {
     searchInput.addEventListener("input", function() {
-        const searchTerm = this.value.trim().toLowerCase();
-        if (searchTerm.length < 2) { searchSuggestions.style.display = "none"; return; }
-
-        const filtered = allProducts.filter(product => isProductMatch(product, searchTerm)).slice(0, 5); 
-
-        if (filtered.length === 0) {
-            searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #666; font-style: italic;">No products found for "${searchTerm}"</div>`;
-        } else {
-            searchSuggestions.innerHTML = filtered.map(p => {
-                const safeName = p.name.replace(/'/g, "\\'"); 
-                return `
-                <div class="suggestion-item" onclick="goToSearch('${safeName}')">
-                    <img src="${p.image_url || 'https://via.placeholder.com/50'}" class="suggestion-img">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">${p.name}</div>
-                        <div class="suggestion-price">$${p.price}</div>
-                    </div>
-                </div>`;
-            }).join("");
+        const searchTerm = this.value.trim();
+        
+        if (searchTerm.length < 2) { 
+            searchSuggestions.style.display = "none"; 
+            return; 
         }
+
+        const thinkingText = currentLang === 'vi' ? '✨ AI đang suy nghĩ...' : '✨ AI is thinking...';
+        searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #0046be; font-style: italic; font-weight: 800; display: flex; align-items: center; gap: 8px;"><span style="animation: spin 1s linear infinite;">⚙️</span> ${thinkingText}</div>`;
         searchSuggestions.style.display = "block";
+
+        clearTimeout(searchTimeout);
+
+        searchTimeout = setTimeout(async () => {
+            try {
+                // Gọi API AI Search
+                const aiRes = await fetch("http://localhost:3000/api/search-ai", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: searchTerm, lang: currentLang }) 
+                });
+                
+                const aiData = await aiRes.json();
+                let filtered = [];
+
+                if (aiRes.ok && aiData.ids && aiData.ids.length > 0) {
+                    filtered = allProducts.filter(p => aiData.ids.includes(p.id)).slice(0, 5);
+                } else {
+                    filtered = allProducts.filter(product => isProductMatch(product, searchTerm)).slice(0, 5);
+                }
+
+                // Render kết quả ra màn hình
+                if (filtered.length === 0) {
+                    const noResultText = currentLang === 'vi' ? 'Không tìm thấy sản phẩm cho' : 'No products found for';
+                    searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #64748b; font-style: italic;">${noResultText} "${searchTerm}"</div>`;
+                } else {
+                    searchSuggestions.innerHTML = filtered.map(p => {
+                        const safeName = p.name.replace(/'/g, "\\'"); 
+                        return `
+                        <div class="suggestion-item" onclick="goToSearch('${safeName}')" style="display: flex; align-items: center; gap: 15px; padding: 12px 20px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                            <div style="width: 45px; height: 45px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; padding: 4px;">
+                                <img src="${p.image_url || 'https://via.placeholder.com/50'}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                            </div>
+                            <div class="suggestion-info" style="flex: 1;">
+                                <div class="suggestion-name" style="font-weight: 700; color: #0f172a; font-size: 0.95rem; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${p.name}</div>
+                                <div class="suggestion-price" style="color: #0046be; font-weight: 900; font-size: 0.95rem;">$${p.price}</div>
+                            </div>
+                        </div>`;
+                    }).join("");
+                }
+            } catch (error) {
+                console.error("Live search AI error:", error);
+                const errorText = currentLang === 'vi' ? 'Hệ thống AI đang bận.' : 'AI System busy.';
+                searchSuggestions.innerHTML = `<div style="padding: 15px 20px; color: #ef4444; font-style: italic;">${errorText}</div>`;
+            }
+        }, 1000); // 1000ms = Độ trễ chờ người dùng gõ xong
     });
 
     document.addEventListener("click", function(e) {

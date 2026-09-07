@@ -251,42 +251,49 @@
     <!-- CART DRAWER -->
     <div id="cart-placeholder"></div>
 
-    <!-- ORDER HISTORY MODAL -->
-    <div id="order-history-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center;">
-      <div class="modal-content" style="background: #f4f6f9; width: 1100px; max-width: 95vw; height: 85vh; border-radius: 8px; position: relative; display: flex; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+    <!-- ORDER HISTORY MODAL (MODERN GLASSMORPHISM) -->
+    <div id="order-history-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center;">
+      <div class="modal-content" style="background: #f4f7fb; width: 1100px; max-width: 95vw; height: 85vh; border-radius: 24px; position: relative; display: flex; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.5);">
         
-        <button id="close-history-modal" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2rem; cursor: pointer; color: #555; z-index: 10; line-height: 1;">&times;</button>
+        <button id="close-history-modal" style="position: absolute; top: 20px; right: 20px; background: #e2e8f0; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; color: #475569; z-index: 10; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff'">&times;</button>
 
         <!-- LEFT SIDEBAR -->
-        <div style="width: 280px; background: #fff; border-right: 1px solid #e0e6ef; padding: 30px 20px; display: flex; flex-direction: column;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                <div id="order-user-avatar" style="width: 50px; height: 50px; background: #e0e6ef; color: #0046be; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem;">U</div>
+        <div style="width: 300px; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-right: 1px solid rgba(226, 232, 240, 0.8); padding: 40px 25px; display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 40px;">
+                <div id="order-user-avatar" style="width: 60px; height: 60px; background: linear-gradient(135deg, #0046be, #3b82f6); color: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.6rem; box-shadow: 0 8px 15px rgba(0,70,190,0.2);">U</div>
                 <div>
-                    <div style="color: #666; font-size: 0.9rem;" data-i18n="order_account">Account</div>
-                    <div id="order-user-name" style="font-weight: bold; color: #040c13; font-size: 1.1rem;" data-i18n="order_loading">Loading...</div>
+                    <div style="color: #64748b; font-size: 0.9rem; font-weight: 600;" data-i18n="order_account">Account</div>
+                    <div id="order-user-name" style="font-weight: 900; color: #0f172a; font-size: 1.2rem;" data-i18n="order_loading">Loading...</div>
                 </div>
             </div>
-            <div style="background: #eef2f7; color: #0046be; padding: 12px 15px; border-radius: 4px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">...</svg>
-            <span data-i18n="order_purchased">Purchased Orders</span>
+            <div style="background: #f0f4fc; color: #0046be; padding: 15px 20px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 18.5c-.82 0-1.5-.67-1.5-1.5s.68-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 8.5c-.82 0-1.5-.67-1.5-1.5S6.18 5.5 7 5.5s1.5.68 1.5 1.5S7.83 8.5 7 8.5z"/></svg>
+                <span data-i18n="order_purchased">Purchased Orders</span>
             </div>
         </div>
 
         <!-- RIGHT CONTENT -->
-        <div style="flex: 1; display: flex; flex-direction: column; padding: 30px; overflow: hidden; background: #f4f6f9;">
-            <h2 style="margin-top: 0; color: #040c13; margin-bottom: 20px;" data-i18n="order_title">Order History</h2>
+        <div style="flex: 1; display: flex; flex-direction: column; padding: 40px; overflow: hidden; background: transparent;">
+            <h2 style="margin-top: 0; color: #0f172a; font-size: 2rem; font-weight: 900; margin-bottom: 25px;" data-i18n="order_title">Order History</h2>
 
             <!-- STATUS TABS -->
-            <div id="order-tabs" style="display: flex; gap: 10px; border-bottom: 2px solid #e0e6ef; padding-bottom: 15px; margin-bottom: 20px; overflow-x: auto;">
-                <button class="order-tab active" data-status="all" data-i18n="order_tab_all">All Orders</button>
-                <button class="order-tab" data-status="pending" data-i18n="order_tab_pending">Pending</button>
-                <button class="order-tab" data-status="shipping" data-i18n="order_tab_shipping">Shipping</button>
-                <button class="order-tab" data-status="completed" data-i18n="order_tab_completed">Completed</button>
-                <button class="order-tab" data-status="cancelled" data-i18n="order_tab_cancelled">Cancelled</button>
+            <div id="order-tabs" style="display: flex; gap: 12px; border-bottom: 2px solid rgba(226, 232, 240, 0.6); padding-bottom: 20px; margin-bottom: 30px; overflow-x: auto;">
+                <button class="order-tab active" data-status="all" style="padding: 10px 20px; border-radius: 50px; font-weight: 800; border: none; cursor: pointer; background: #0046be; color: white;" data-i18n="order_tab_all">All Orders</button>
+                <button class="order-tab" data-status="pending" style="padding: 10px 20px; border-radius: 50px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; background: white; color: #64748b;" data-i18n="order_tab_pending">Pending</button>
+                <button class="order-tab" data-status="shipping" style="padding: 10px 20px; border-radius: 50px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; background: white; color: #64748b;" data-i18n="order_tab_shipping">Shipping</button>
+                <button class="order-tab" data-status="completed" style="padding: 10px 20px; border-radius: 50px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; background: white; color: #64748b;" data-i18n="order_tab_completed">Completed</button>
+                <button class="order-tab" data-status="cancelled" style="padding: 10px 20px; border-radius: 50px; font-weight: 700; border: 1px solid #cbd5e1; cursor: pointer; background: white; color: #64748b;" data-i18n="order_tab_cancelled">Cancelled</button>
             </div>
 
+            <style>
+                /* CSS nhỏ để xử lý màu nền Tabs khi đổi */
+                .order-tab:not(.active):hover { background: #f1f5f9 !important; }
+                .order-tab.active { background: #0046be !important; color: white !important; border-color: #0046be !important; }
+                @keyframes spin { 100% { transform: rotate(360deg); } }
+            </style>
+
             <!-- ORDER LIST CONTAINER -->
-            <div id="order-history-list" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+            <div id="order-history-list" style="flex: 1; overflow-y: auto; padding-right: 15px;">
                 <!-- JS will inject orders here -->
             </div>
         </div>

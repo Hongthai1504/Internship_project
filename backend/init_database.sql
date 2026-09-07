@@ -12,12 +12,6 @@ CREATE TABLE USERS (
     role ENUM('customer', 'admin') DEFAULT 'customer'
 );
 
--- 2. Categories table
-CREATE TABLE Categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
-
 -- 3. Products table
 CREATE TABLE Products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -91,6 +85,9 @@ CREATE TABLE Categories (
     parent_id INT DEFAULT NULL,
     FOREIGN KEY (parent_id) REFERENCES Categories(id) ON DELETE CASCADE
 );
+
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE Categories;
 
 INSERT INTO Categories (id, name, parent_id) VALUES
 (1, 'Shop by Brand', NULL),
