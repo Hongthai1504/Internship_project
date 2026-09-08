@@ -521,39 +521,90 @@ if (adminCustomerList) {
       if (!res.ok) throw new Error("Unable to load the customer list.");
       const customers = await res.json();
 
-      let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
                             <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
                                 <th style="padding: 15px;">ID</th>
                                 <th style="padding: 15px;">Full Name</th>
                                 <th style="padding: 15px;">Email</th>
                                 <th style="padding: 15px;">Phone Number</th>
                                 <th style="padding: 15px;">Role</th>
+                                <th style="padding: 15px; text-align: center;">Action</th>
                             </tr>`;
 
       customers.forEach((c) => {
-        const roleColor = c.role === "admin" ? "#bfdbfe" : "#e5e7eb";
+        const getRoleBgColor = (role) => {
+            switch(role.toLowerCase()) {
+                case 'admin': return '#bfdbfe';   // Xanh nhạt
+                case 'shipper': return '#fef08a'; // Vàng nhạt
+                default: return '#f1f5f9';        // Xám nhạt (User)
+            }
+        };
 
-        html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                            <td style="padding: 15px; font-weight: bold;">${c.id}</td>
-                            <td style="padding: 15px; font-weight: bold; color: #040c13;">${c.full_name}</td>
-                            <td style="padding: 15px; color: #555;">${c.email}</td>
-                            <td style="padding: 15px;">${c.phone || "Not yet updated"}</td>
-                            <td style="padding: 15px;">
-                                <span style="padding: 5px 10px; border-radius: 4px; background: ${roleColor}; color: #000; font-size: 0.85rem; font-weight: bold;">
-                                    ${c.role.toUpperCase()}
-                                </span>
-                            </td>
-                         </tr>`;
+        const roles = ['user', 'shipper', 'admin'];
+        let roleDropdown = `<select id="role-${c.id}" style="padding: 8px 12px; border-radius: 6px; font-weight: bold; border: 1px solid #cbd5e1; outline: none; background-color: ${getRoleBgColor(c.role)}; cursor: pointer;">`;
+        
+        roles.forEach(r => {
+            const isSelected = c.role.toLowerCase() === r ? "selected" : "";
+            roleDropdown += `<option value="${r}" ${isSelected} style="background: #fff; color: #0f172a;">${r.toUpperCase()}</option>`;
+        });
+        roleDropdown += `</select>`;
+
+        html += `<tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 15px; font-weight: bold; color: #64748b;">#${c.id}</td>
+                    <td style="padding: 15px; font-weight: 800; color: #0f172a;">${c.full_name}</td>
+                    <td style="padding: 15px; color: #475569;">${c.email}</td>
+                    <td style="padding: 15px; color: #475569; font-weight: 600;">${c.phone || "Not yet updated"}</td>
+                    <td style="padding: 15px;">
+                        ${roleDropdown}
+                    </td>
+                    <td style="padding: 15px; text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center;">
+                        <button onclick="updateUserRole(${c.id})" style="background: #0046be; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,70,190,0.2);" onmouseover="this.style.background='#003699'" onmouseout="this.style.background='#0046be'" title="Lưu Quyền">Save</button>
+                        <button onclick="deleteUserAccount(${c.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(239,68,68,0.2);" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="Xóa Tài khoản">Delete</button>
+                    </td>
+                 </tr>`;
       });
       html += `</table>`;
       adminCustomerList.innerHTML = html;
     } catch (error) {
-      adminCustomerList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
+      adminCustomerList.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">Data loading error: ${error.message}</p>`;
     }
   }
+
   fetchAdminCustomers();
 }
 
+async function updateUserRole(userId) {
+    const selectElement = document.getElementById(`role-${userId}`);
+    const newRole = selectElement.value;
+
+    if (!confirm(`Bạn có chắc chắn muốn thay đổi quyền của tài khoản #${userId} thành ${newRole.toUpperCase()} không?`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/customers/${userId}/role`, {
+            method: "PUT",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` 
+            },
+            body: JSON.stringify({ role: newRole })
+        });
+
+        const data = await res.json();
+        
+        if (res.ok) {
+            alert("✅ Cập nhật quyền thành công!");
+            if (newRole === 'admin') selectElement.style.backgroundColor = '#bfdbfe';
+            else if (newRole === 'shipper') selectElement.style.backgroundColor = '#fef08a';
+            else selectElement.style.backgroundColor = '#f1f5f9';
+        } else {
+            alert("❌ Lỗi: " + data.error);
+        }
+    } catch (error) {
+        alert("❌ Lỗi kết nối đến máy chủ.");
+    }
+}
 
 async function saveOrderUpdates(orderId) {
   const status = document.getElementById(`status-${orderId}`).value;
@@ -920,6 +971,34 @@ if (btnAiGenerate && descTextarea) {
             btnAiGenerate.style.opacity = "1";
         }
     });
+}
+
+// Hàm gửi API Xóa Tài khoản
+async function deleteUserAccount(userId) {
+    // Hỏi xác nhận kỹ càng vì đây là hành động nguy hiểm
+    if (!confirm(`⚠️ CẢNH BÁO: Bạn có CHẮC CHẮN muốn XÓA VĨNH VIỄN tài khoản #${userId} không?\nHành động này không thể hoàn tác!`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/admin/customers/${userId}`, {
+            method: "DELETE",
+            headers: { 
+                "Authorization": `Bearer ${token}` 
+            }
+        });
+
+        const data = await res.json();
+        
+        if (res.ok) {
+            alert("✅ " + data.message);
+            fetchAdminCustomers(); // Tải lại bảng ngay lập tức để dòng đó biến mất
+        } else {
+            alert("❌ Lỗi: " + data.error);
+        }
+    } catch (error) {
+        alert("❌ Lỗi kết nối đến máy chủ.");
+    }
 }
 
 if (adminOrderList) {

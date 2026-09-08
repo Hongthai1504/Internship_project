@@ -1,162 +1,290 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shipper Dashboard | Best Tech</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
-    <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #040c13; }
-        .header { background: #001e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; font-size: 1.2rem; font-weight: 900; color: #ffe000; }
-        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        
-        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-        .page-title { margin-bottom: 20px; border-bottom: 2px solid #e0e6ef; padding-bottom: 10px; }
-        
-        .order-card { background: #fff; border-radius: 8px; border: 1px solid #e0e6ef; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .order-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-        .order-id { font-size: 1.2rem; font-weight: 900; color: #0046be; }
-        .order-status { font-weight: bold; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; text-transform: uppercase; }
-        .status-shipping { background: #dbeafe; color: #1d4ed8; }
-        
-        .order-info { margin-bottom: 20px; line-height: 1.6; }
-        .info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
-        .info-icon { font-size: 1.2rem; }
-        .cod-amount { font-size: 1.4rem; font-weight: 900; color: #ef4444; }
-        
-        .action-buttons { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-success:hover { background: #059669; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-danger:hover { background: #dc2626; }
-        
-        .empty-state { text-align: center; padding: 50px 20px; color: #666; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shipper Dashboard | Best Tech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-color: #f4f7fb;
+      --primary: #0046be;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+    body {
+      margin: 0; font-family: 'Nunito', sans-serif; background-color: var(--bg-color); color: var(--text-main);
+      padding-bottom: 80px;
+    }
+    /* HEADER KÍNH MỜ */
+    .header {
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    }
+    .header h1 { margin: 0; font-size: 1.3rem; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 8px;}
+    .header-actions { display: flex; align-items: center; gap: 15px; }
+    
+    .btn-lang { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 50px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; color: var(--text-main); }
+    .btn-logout { background: #fee2e2; color: var(--danger); border: none; padding: 8px 16px; border-radius: 50px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+    
+    /* CONTAINER & TABS */
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .page-title { font-size: 1.5rem; font-weight: 900; margin-bottom: 20px; color: var(--text-main); }
+    
+    /* TASK CARD GLASSMORPHISM */
+    .task-card {
+      background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+      border-radius: 20px; padding: 20px; margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.8);
+      transition: transform 0.2s;
+    }
+    .task-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; }
+    .task-id { font-size: 1.2rem; font-weight: 900; color: var(--primary); }
+    .badge { padding: 6px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; }
+    .badge.shipping { background: #dbeafe; color: #2563eb; }
+    .badge.completed { background: #d1fae5; color: #10b981; }
+    .badge.cancelled { background: #fee2e2; color: #ef4444; }
+    
+    /* TASK DETAILS */
+    .detail-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+    .detail-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+    .detail-content { flex: 1; }
+    .detail-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+    .detail-value { font-size: 1rem; font-weight: 800; color: var(--text-main); line-height: 1.4; }
+    .phone-link { color: var(--primary); text-decoration: none; font-weight: 900; }
+    
+    .cod-amount { text-align: right; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; }
+    .cod-amount span { display: block; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    .cod-amount strong { font-size: 1.6rem; color: var(--danger); font-weight: 900; }
+
+    /* ACTION BUTTONS */
+    .actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn { flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 900; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-success { background: var(--success); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+  </style>
 </head>
 <body>
 
-    <header class="header">
-        <h1>BestTech | Shipper App</h1>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-    </header>
-
-    <div class="container">
-        <h2 class="page-title">My Delivery Tasks</h2>
-        <div id="shipper-orders-list">
-            <p style="text-align: center;">Loading assigned orders...</p>
-        </div>
+  <header class="header">
+    <h1>🚀 <span id="app-logo-text">Shipper</span></h1>
+    <div class="header-actions">
+        <!-- NÚT CHUYỂN NGÔN NGỮ -->
+        <button id="lang-toggle" class="btn-lang" onclick="toggleLanguage()">
+            <img id="lang-icon" src="https://flagcdn.com/w20/us.png" width="20" style="border-radius: 2px;"> 
+            <span id="lang-text">EN</span>
+        </button>
+        <button class="btn-logout" onclick="logout()" id="btn-logout-text">Logout</button>
     </div>
+  </header>
 
-    <script>
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("Access Denied. Please log in.");
-            window.location.href = "login.html";
+  <div class="container">
+    <h2 class="page-title" id="page-title-text">My Delivery Tasks</h2>
+    <div id="task-list">
+      <p style="text-align: center; color: #64748b; font-weight: bold; margin-top: 50px;" id="loading-text">Loading tasks...</p>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // LOGIC ĐA NGÔN NGỮ (i18n) ĐỘC LẬP
+    // ==========================================
+    let currentLang = localStorage.getItem('besttech_lang') || 'en';
+
+    const shipperDict = {
+        en: {
+            app_logo: "Shipper",
+            logout: "Logout",
+            page_title: "My Delivery Tasks",
+            loading: "Loading tasks...",
+            empty_title: "No orders assigned",
+            empty_desc: "You have successfully completed all tasks!",
+            lbl_customer: "Customer Name",
+            lbl_phone: "Phone Number",
+            lbl_address: "Delivery Address",
+            lbl_cod: "Total COD Amount:",
+            btn_delivered: "✓ Delivered",
+            btn_failed: "✕ Failed",
+            confirm_msg: "Confirm changing status of order",
+            alert_login: "Please log in!",
+            err_load: "Error loading tasks.",
+            err_server: "Server connection error."
+        },
+        vi: {
+            app_logo: "Giao Hàng",
+            logout: "Đăng xuất",
+            page_title: "Nhiệm Vụ Của Tôi",
+            loading: "Đang tải dữ liệu...",
+            empty_title: "Không có đơn hàng",
+            empty_desc: "Bạn đã hoàn thành xuất sắc công việc!",
+            lbl_customer: "Tên khách hàng",
+            lbl_phone: "Số điện thoại",
+            lbl_address: "Địa chỉ giao hàng",
+            lbl_cod: "Tổng tiền thu hộ (COD):",
+            btn_delivered: "✓ Đã giao",
+            btn_failed: "✕ Thất bại",
+            confirm_msg: "Xác nhận chuyển trạng thái đơn hàng",
+            alert_login: "Vui lòng đăng nhập!",
+            err_load: "Lỗi tải danh sách đơn hàng.",
+            err_server: "Lỗi kết nối đến máy chủ."
+        }
+    };
+
+    function applyLanguage() {
+        const t = shipperDict[currentLang];
+        
+        // Cập nhật text tĩnh
+        document.getElementById('app-logo-text').innerText = t.app_logo;
+        document.getElementById('btn-logout-text').innerText = t.logout;
+        document.getElementById('page-title-text').innerText = t.page_title;
+        
+        const loadingEl = document.getElementById('loading-text');
+        if(loadingEl) loadingEl.innerText = t.loading;
+
+        // Cập nhật nút Toggle
+        const langIcon = document.getElementById('lang-icon');
+        const langText = document.getElementById('lang-text');
+        if (currentLang === 'vi') {
+            langIcon.src = "https://flagcdn.com/w20/vn.png";
+            langText.innerText = "VI";
+        } else {
+            langIcon.src = "https://flagcdn.com/w20/us.png";
+            langText.innerText = "EN";
         }
 
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "/index.html";
-        }
+        // Tải lại danh sách đơn hàng để áp dụng ngôn ngữ mới
+        fetchTasks();
+    }
 
-        async function fetchShipperOrders() {
-            const listEl = document.getElementById("shipper-orders-list");
-            try {
-                const res = await fetch("http://localhost:3000/api/shipper/orders", {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-                
-                if (!res.ok) {
-                    listEl.innerHTML = `<p style="color: red; text-align: center;">Error: Unauthorized or Session expired.</p>`;
-                    return;
-                }
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'vi' : 'en';
+        localStorage.setItem('besttech_lang', currentLang);
+        applyLanguage();
+    }
 
-                const orders = await res.json();
-                
-                const activeOrders = orders.filter(o => o.status === 'shipping');
+    // ==========================================
+    // LOGIC QUẢN LÝ ĐƠN HÀNG
+    // ==========================================
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert(shipperDict[currentLang].alert_login);
+        window.location.href = "/pages/user/login.html";
+    }
 
-                if (activeOrders.length === 0) {
-                    listEl.innerHTML = `
-                        <div class="empty-state">
-                            <h2 style="margin-bottom: 10px;">🎉 Great Job!</h2>
-                            <p>You have no pending deliveries right now.</p>
-                        </div>`;
-                    return;
-                }
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/pages/user/login.html";
+    }
 
-                listEl.innerHTML = activeOrders.map(order => {
-                    const date = new Date(order.create_at).toLocaleString();
-                    return `
-                        <div class="order-card">
-                            <div class="order-header">
-                                <div class="order-id">#${order.id}</div>
-                                <div class="order-status status-shipping">Delivering</div>
-                            </div>
-                            
-                            <div class="order-info">
-                                <div class="info-row">
-                                    <span class="info-icon">👤</span>
-                                    <div>
-                                        <strong>${order.full_name}</strong><br>
-                                        <a href="tel:${order.phone}" style="color: #0046be; font-weight: bold; text-decoration: none;">📞 ${order.phone || 'No phone number'}</a>
-                                    </div>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-icon">📍</span>
-                                    <div><strong>Address:</strong><br> ${order.shipping_address}</div>
-                                </div>
-                                <div class="info-row" style="margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;">
-                                    <span class="info-icon">💰</span>
-                                    <div><strong>COD Amount:</strong><br> <span class="cod-amount">$${order.total_amount}</span></div>
-                                </div>
-                            </div>
+    async function fetchTasks() {
+        const listEl = document.getElementById("task-list");
+        const t = shipperDict[currentLang];
 
-                            <div class="action-buttons">
-                                <button class="btn btn-success" onclick="updateStatus(${order.id}, 'completed')">
-                                    ✓ Delivered
-                                </button>
-                                <button class="btn btn-danger" onclick="updateStatus(${order.id}, 'cancelled')">
-                                    ✕ Failed
-                                </button>
-                            </div>
+        try {
+            const res = await fetch("http://localhost:3000/api/shipper/orders", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error("Failed to load tasks");
+            
+            const orders = await res.json();
+            
+            if (orders.length === 0) {
+                listEl.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.6); border-radius: 20px; border: 2px dashed #cbd5e1;">
+                    <span style="font-size: 3rem;">📦</span>
+                    <h3 style="color: #475569; margin: 15px 0 5px 0;">${t.empty_title}</h3>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">${t.empty_desc}</p>
+                </div>`;
+                return;
+            }
+
+            listEl.innerHTML = orders.map(order => {
+                const isShipping = order.status === 'shipping';
+                return `
+                <div class="task-card">
+                    <div class="task-header">
+                        <span class="task-id">#${order.id}</span>
+                        <span class="badge ${order.status}">${order.status}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon">👤</div>
+                        <div class="detail-content">
+                            <div class="detail-label">${t.lbl_customer}</div>
+                            <div class="detail-value">${order.full_name}</div>
                         </div>
-                    `;
-                }).join('');
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-icon">📞</div>
+                        <div class="detail-content">
+                            <div class="detail-label">${t.lbl_phone}</div>
+                            <a href="tel:${order.phone}" class="detail-value phone-link">${order.phone}</a>
+                        </div>
+                    </div>
 
-            } catch (err) {
-                listEl.innerHTML = `<p style="color: red; text-align: center;">Connection error.</p>`;
-            }
+                    <div class="detail-row">
+                        <div class="detail-icon">📍</div>
+                        <div class="detail-content">
+                            <div class="detail-label">${t.lbl_address}</div>
+                            <div class="detail-value">${order.shipping_address}</div>
+                        </div>
+                    </div>
+
+                    <div class="cod-amount">
+                        <span>${t.lbl_cod}</span>
+                        <strong>$${order.total_amount}</strong>
+                    </div>
+
+                    ${isShipping ? `
+                    <div class="actions">
+                        <button class="btn btn-success" onclick="updateStatus(${order.id}, 'completed')">
+                            ${t.btn_delivered}
+                        </button>
+                        <button class="btn btn-danger" onclick="updateStatus(${order.id}, 'cancelled')">
+                            ${t.btn_failed}
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
+        } catch (error) {
+            listEl.innerHTML = `<p style="color: red; text-align: center; font-weight: bold;">${t.err_load}</p>`;
         }
+    }
 
-        async function updateStatus(orderId, newStatus) {
-            const actionText = newStatus === 'completed' ? 'DELIVERED SUCCESSFULLY' : 'DELIVERY FAILED';
-            if (!confirm(`Are you sure you want to mark Order #${orderId} as ${actionText}?`)) return;
-
-            try {
-                const res = await fetch(`http://localhost:3000/api/shipper/orders/${orderId}/status`, {
-                    method: "PUT",
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}` 
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                if (res.ok) {
-                    alert("Order status updated!");
-                    fetchShipperOrders(); // Refresh the list
-                } else {
-                    const data = await res.json();
-                    alert("Error: " + data.error);
-                }
-            } catch (err) {
-                alert("Server error.");
+    async function updateStatus(orderId, newStatus) {
+        const t = shipperDict[currentLang];
+        if (!confirm(`${t.confirm_msg} #${orderId} ➔ ${newStatus.toUpperCase()}?`)) return;
+        
+        try {
+            const res = await fetch(`http://localhost:3000/api/shipper/orders/${orderId}/status`, {
+                method: "PUT",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` 
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            const data = await res.json();
+            if (res.ok) {
+                fetchTasks(); 
+            } else {
+                alert("Error: " + data.error);
             }
+        } catch (error) {
+            alert(t.err_server);
         }
+    }
 
-        fetchShipperOrders();
-    </script>
+    // Khởi chạy khi load trang
+    applyLanguage();
+  </script>
 </body>
 </html>

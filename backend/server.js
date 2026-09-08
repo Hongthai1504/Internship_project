@@ -1039,6 +1039,58 @@ app.post("/api/search-ai", async (req, res) => {
     });
 });
 
+// API for Admin: Update User Role
+app.put("/api/admin/customers/:id/role", authenticateToken, isAdmin, (req, res) => {
+    const userId = req.params.id;
+    const { role } = req.body;
+
+    if (!['user', 'shipper', 'admin'].includes(role)) {
+        return res.status(400).json({ error: "Quyền không hợp lệ!" });
+    }
+
+    const sql = "UPDATE Users SET role = ? WHERE id = ?";
+    db.query(sql, [role, userId], (err, result) => {
+        if (err) {
+            console.error("Error updating user role:", err);
+            return res.status(500).json({ error: "Lỗi Server khi cập nhật quyền." });
+        }
+        
+        if (result.affectedRows === 0) {
+             return res.status(404).json({ error: "Không tìm thấy tài khoản này." });
+        }
+
+        res.json({ message: "Cập nhật quyền tài khoản thành công!" });
+    });
+});
+
+// API for Admin: Delete User Account
+app.delete("/api/admin/customers/:id", authenticateToken, isAdmin, (req, res) => {
+    const userId = req.params.id;
+
+    // Ngăn Admin tự bấm nút tự xóa chính mình (Tránh trường hợp hệ thống mất Admin)
+    if (req.user.id == userId) {
+        return res.status(400).json({ error: "Bạn không thể tự xóa tài khoản của chính mình!" });
+    }
+
+    const sql = "DELETE FROM Users WHERE id = ?";
+    db.query(sql, [userId], (err, result) => {
+        if (err) {
+            console.error("Error deleting user:", err);
+            // Bắt lỗi nếu tài khoản này đã có dữ liệu ràng buộc (đã từng mua hàng)
+            if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+                return res.status(400).json({ error: "Không thể xóa vì tài khoản này đã có lịch sử đặt hàng. Vui lòng khóa tài khoản thay vì xóa!" });
+            }
+            return res.status(500).json({ error: "Lỗi Server khi xóa tài khoản." });
+        }
+        
+        if (result.affectedRows === 0) {
+             return res.status(404).json({ error: "Không tìm thấy tài khoản này." });
+        }
+
+        res.json({ message: "Đã xóa vĩnh viễn tài khoản khỏi hệ thống!" });
+    });
+});
+
 // Start the server on port 3000
 const PORT = 3000;
 app.listen(PORT, () => {
