@@ -41,6 +41,7 @@ The project operates in a local web application workflow:
 - MySQL stores the system’s durable data
 - users interact through browser-based shopping flows and admin/shipper dashboards
 - the repository includes both English and Vietnamese product/content handling and role-based access paths
+- the confirmed deployment target is local development only, with no production hosting target recorded in the repository
 
 ## Capabilities and Constraints
 

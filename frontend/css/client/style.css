@@ -25,8 +25,12 @@
 
 body {
     background-color: #f4f7fb; 
-    font-family: 'Nunito', 'Quicksand', 'Roboto', sans-serif; 
+    font-family: 'Nunito', sans-serif !important;
     color: #1e293b;
+}
+
+h1, h2, h3, h4, h5, h6, button, input, select, textarea {
+    font-family: 'Nunito', sans-serif;
 }
 
 /* --- HEADER --- */

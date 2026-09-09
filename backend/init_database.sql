@@ -292,3 +292,8 @@ CREATE TABLE IF NOT EXISTS Settings (
 -- Thêm sẵn một mốc thời gian mặc định ban đầu
 INSERT IGNORE INTO Settings (setting_key, setting_value) 
 VALUES ('flash_sale_end', '2026-12-31T23:59:59.000Z');
+
+CREATE TABLE IF NOT EXISTS Settings (
+    setting_key VARCHAR(50) PRIMARY KEY,
+    setting_value VARCHAR(255) NOT NULL
+);

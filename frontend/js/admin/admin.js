@@ -875,39 +875,49 @@ async function loadFlashSaleSettings() {
     try {
         const res = await fetch("http://localhost:3000/api/settings/flash-sale");
         const data = await res.json();
+        
         if (data.end_time) {
             const dateObj = new Date(data.end_time);
             const localISO = new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
             document.getElementById("admin-flash-sale-time").value = localISO;
         }
-    } catch (e) {
-        console.error("Could not load Flash Sale time", e);
-    }
+        
+        const activeCheckbox = document.getElementById("admin-flash-sale-active");
+        if (activeCheckbox) activeCheckbox.checked = (data.is_active === 'true');
+        
+    } catch (e) { console.error(e); }
 }
 
 async function updateFlashSaleTime() {
-    const timeVal = document.getElementById("admin-flash-sale-time").value;
-    if (!timeVal) return alert("Please select a date and time!");
+    const timeInput = document.getElementById("admin-flash-sale-time");
+    const activeInput = document.getElementById("admin-flash-sale-active");
+
+    if (!timeInput) return alert("Lỗi: Không tìm thấy ô nhập thời gian trong HTML!");
+
+    const timeVal = timeInput.value;
+    // Bắt trạng thái của nút Checkbox (đã tick hay chưa)
+    const isActive = activeInput ? activeInput.checked : false;
+
+    if (!timeVal) return alert("Vui lòng chọn ngày giờ kết thúc!");
 
     const token = localStorage.getItem("token");
     try {
+        const btnSave = document.querySelector("button[onclick='updateFlashSaleTime()']");
+        if(btnSave) btnSave.innerText = "Saving...";
+
         const res = await fetch("http://localhost:3000/api/admin/settings/flash-sale", {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ end_time: new Date(timeVal).toISOString() })
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ end_time: new Date(timeVal).toISOString(), is_active: isActive })
         });
-        
+
         const data = await res.json();
-        if (res.ok) {
-            alert("Success: " + data.message);
-        } else {
-            alert("Error: " + data.error);
-        }
-    } catch (e) {
-        alert("Server connection failed!");
+        if (res.ok) alert("✅ " + data.message);
+        else alert("❌ Lỗi: " + data.error);
+        
+        if(btnSave) btnSave.innerText = "Save Changes";
+    } catch (e) { 
+        alert("❌ Lỗi kết nối tới máy chủ Database!"); 
     }
 }
 

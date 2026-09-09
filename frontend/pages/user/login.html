@@ -1,98 +1,291 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In or Create Account | Best Tech</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="/css/client/style.css" />
-  </head>
-  <body style="background-color: #f4f6f9;">
-    
-    <!-- MINIMAL HEADER FOR AUTH PAGE -->
-    <header class="bb-header" style="padding: 20px 0; text-align: center; border-bottom: 4px solid #ffe000;">
-      <a href="/index.html" class="logo" style="text-decoration: none; color: white; font-size: 2.5rem;">BestTech</a>
-      <script src="https://accounts.google.com/gsi/client" async defer></script>
-    </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | BestTech</title>
+    <!-- ĐỒNG BỘ FONT NUNITO -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================== */
+        /* LOGIN & REGISTER - GLASSMORPHISM UI        */
+        /* ========================================== */
+        :root {
+            --primary: #0046be;
+            --primary-hover: #003699;
+            --bg-color: #f4f7fb;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 20px 40px rgba(0, 70, 190, 0.08);
+        }
 
-    <!-- AUTHENTICATION WRAPPER -->
-    <main class="auth-page-wrapper">
-      
-      <!-- SIGN IN VIEW -->
-      <div class="auth-card" id="login-view">
-        <h1>Sign In to BestTech</h1>
-        <form id="login-form">
-          <div class="form-group">
-            <input type="text" id="login-email" class="auth-input" required placeholder="Email Address or Mobile Phone Number" />
-          </div>
-          <div class="form-group">
-            <input type="password" id="login-password" class="auth-input" required placeholder="Password" />
-          </div>
-          
-          <button type="submit" class="btn-auth-primary">Sign In</button>
-          
-          <div class="auth-divider" style="margin: 25px 0;"><span>OR</span></div>
+        body {
+            margin: 0;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #e2e8f0 0%, #f4f7fb 100%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-          <div id="g_id_onload"
-              data-client_id="MÃ_CLIENT_ID_CỦA_BẠN.apps.googleusercontent.com"
-              data-context="signin"
-              data-ux_mode="popup"
-              data-callback="handleGoogleResponse"
-              data-auto_prompt="false">
-          </div>
-          
-          <div class="g_id_signin"
-              data-type="standard"
-              data-shape="rectangular"
-              data-theme="outline"
-              data-text="signin_with"
-              data-size="large"
-              data-logo_alignment="center"
-              style="display: flex; justify-content: center; margin-bottom: 15px;">
-          </div>
-          <button type="button" class="btn-social">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" width="18" style="margin-bottom: 2px;">
-            Sign in with Apple
-          </button>
-        </form>
+        .auth-wrapper {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-        <div class="auth-switch" style="margin-top: 25px;">
-          Don't have an account? <a href="javascript:void(0)" id="go-to-register">Create an account</a>
+        /* LOGO */
+        .logo-container {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+            cursor: pointer;
+        }
+        .logo-container .text-primary { color: var(--primary); }
+        .logo-container .text-main { color: var(--text-main); }
+
+        /* GLASS CARD */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: var(--glass-shadow);
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card h2 {
+            margin: 0 0 30px 0;
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--text-main);
+        }
+
+        /* INPUT FIELDS */
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        .input-group input {
+            width: 100%;
+            padding: 15px 18px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            box-sizing: border-box;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .input-group input::placeholder { color: #94a3b8; font-weight: 400; }
+        .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 70, 190, 0.1);
+            background: #fff;
+        }
+
+        /* PRIMARY BUTTON */
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 70, 190, 0.25);
+            font-family: 'Nunito', sans-serif;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 70, 190, 0.35);
+        }
+
+        /* DIVIDER */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .divider span {
+            padding: 0 15px;
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        /* SOCIAL BUTTONS */
+        .social-login { display: flex; flex-direction: column; gap: 15px; }
+        .btn-social {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            background: white;
+            border: 1px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-main);
+        }
+        .btn-social:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            border-color: #94a3b8;
+        }
+
+        /* SWITCH TEXT */
+        .switch-form {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .switch-form a {
+            color: var(--primary);
+            font-weight: 900;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .switch-form a:hover { text-decoration: underline; }
+
+        .footer {
+            text-align: center;
+            margin-top: 35px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+    </style>
+    <!-- THƯ VIỆN GOOGLE LOGIN (Bạn hãy thay src bằng thẻ thật nếu có) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <!-- LOGO -->
+        <div class="logo-container" onclick="window.location.href='/index.html'">
+            <span class="text-primary">Best</span><span class="text-main">Tech</span>
         </div>
-      </div>
 
-      <!-- REGISTER VIEW (Hidden by default) -->
-      <div class="auth-card" id="register-view" style="display: none;">
-        <h1>Create an Account</h1>
-        <p style="color: #555; margin-bottom: 25px; text-align: center;">Join BestTech to track orders, save items, and more.</p>
-        <form id="register-form">
-          <div class="form-group">
-            <input type="text" id="reg-name" class="auth-input" required placeholder="Full Name" />
-          </div>
-          <div class="form-group">
-            <input type="tel" id="reg-phone" class="auth-input" placeholder="Mobile Phone Number (Optional)" />
-          </div>
-          <div class="form-group">
-            <input type="email" id="reg-email" class="auth-input" required placeholder="Email Address" />
-          </div>
-          <div class="form-group">
-            <input type="password" id="reg-password" class="auth-input" required placeholder="Password (min 6 chars)" minlength="6" />
-          </div>
-          <button type="submit" class="btn-auth-primary" style="background: #ffe000; color: #000;">Create Account</button>
-        </form>
+        <!-- ============================== -->
+        <!-- FORM ĐĂNG NHẬP (LOGIN)         -->
+        <!-- ============================== -->
+        <div class="glass-card" id="login-view">
+            <h2>Sign In</h2>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="shipper@besttech.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
 
-        <div class="auth-switch" style="margin-top: 30px;">
-          Already have an account? <a href="javascript:void(0)" id="go-to-login">Sign In</a>
+            <div class="divider"><span>OR</span></div>
+
+            <div class="social-login">
+                <!-- Chỗ này để nhúng API Google Login chuẩn -->
+                <div id="g_id_onload"
+                    data-client_id="DÁN_MÃ_CLIENT_ID_THẬT_CỦA_BẠN_VÀO_ĐÂY.apps.googleusercontent.com"
+                    data-context="signin"
+                    data-ux_mode="popup"
+                    data-callback="handleGoogleResponse"
+                    data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" style="width: 100%; display: flex; justify-content: center;"></div>
+              
+            </div>
+
+            <div class="switch-form">
+                Don't have an account? <a href="#" id="go-to-register">Create an account</a>
+            </div>
         </div>
-      </div>
 
-    </main>
+        <!-- ============================== -->
+        <!-- FORM ĐĂNG KÝ (REGISTER)        -->
+        <!-- ============================== -->
+        <div class="glass-card" id="register-view" style="display: none;">
+            <h2>Create Account</h2>
+            <form id="register-form">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="reg-name" placeholder="John Doe" required>
+                </div>
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="reg-phone" placeholder="0987654321" required>
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" placeholder="name@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" placeholder="Min. 6 characters" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary">Sign Up</button>
+            </form>
 
-    <!-- MINIMAL FOOTER -->
-    <footer style="text-align: center; padding: 40px 20px; color: #666; font-size: 0.9rem;">
-      <p>&copy; 2026 Best Tech. All rights reserved. Secure Authentication System.</p>
-    </footer>
+            <div class="switch-form">
+                Already have an account? <a href="#" id="go-to-login">Sign In</a>
+            </div>
+        </div>
 
+        <!-- FOOTER -->
+        <div class="footer">
+            &copy; 2026 Best Tech. All rights reserved.<br>Secure Authentication System.
+        </div>
+    </div>
+
+    <!-- Nạp file logic chính của hệ thống -->
     <script src="/js/core/app.js"></script>
-  </body>
+</body>
 </html>

@@ -944,31 +944,36 @@ app.post("/api/admin/ai/generate-description", authenticateToken, isAdmin, async
 
 // API: FLASH SALE TIMER
 app.get("/api/settings/flash-sale", (req, res) => {
-    db.query("SELECT setting_value FROM Settings WHERE setting_key = 'flash_sale_end'", (err, results) => {
+    db.query("SELECT setting_key, setting_value FROM Settings WHERE setting_key IN ('flash_sale_end', 'flash_sale_active')", (err, results) => {
         if (err) return res.status(500).json({ error: "Lỗi Server" });
         
-        if (results.length === 0) {
-            return res.json({ end_time: new Date(Date.now() + 86400000).toISOString() });
-        }
-        res.json({ end_time: results[0].setting_value });
+        let settings = { 
+            end_time: new Date(Date.now() + 86400000).toISOString(), 
+            is_active: 'false' 
+        };
+        
+        results.forEach(row => {
+            if (row.setting_key === 'flash_sale_end') settings.end_time = row.setting_value;
+            if (row.setting_key === 'flash_sale_active') settings.is_active = row.setting_value;
+        });
+        
+        res.json(settings);
     });
 });
 
+// API: Lưu cấu hình bật/tắt Flash Sale
 app.put("/api/admin/settings/flash-sale", authenticateToken, isAdmin, (req, res) => {
-    const { end_time } = req.body;
+    const { end_time, is_active } = req.body;
     if (!end_time) return res.status(400).json({ error: "Thiếu dữ liệu thời gian" });
     
     const sql = `
         INSERT INTO Settings (setting_key, setting_value) 
-        VALUES ('flash_sale_end', ?) 
-        ON DUPLICATE KEY UPDATE setting_value = ?
+        VALUES ('flash_sale_end', ?), ('flash_sale_active', ?)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
     `;
-    db.query(sql, [end_time, end_time], (err, result) => {
-        if (err) {
-            console.error("Error updating flash sale:", err);
-            return res.status(500).json({ error: "Lỗi lưu cấu hình" });
-        }
-        res.json({ message: "Cập nhật thời gian Deal of the Day thành công!" });
+    db.query(sql, [end_time, is_active ? 'true' : 'false'], (err, result) => {
+        if (err) return res.status(500).json({ error: "Lỗi lưu cấu hình" });
+        res.json({ message: "Cập nhật Flash Sale thành công!" });
     });
 });
 

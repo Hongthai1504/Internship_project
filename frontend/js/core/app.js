@@ -256,29 +256,45 @@ if (registerForm) {
   });
 }
 
-// --- AUTH STATE CHECKS ---
+// --- AUTH STATE CHECKS & ROLE ROUTING ---
 const token = localStorage.getItem("token");
+const adminQuickLink = document.getElementById("admin-quick-link");
 
 if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
-  if (accountText) accountText.innerText = "My Account";
-  if (loginTrigger && loginTrigger.querySelector("span")) {
-      loginTrigger.querySelector("span").innerText = "My Account";
-  }
-  if (historyTrigger) historyTrigger.style.display = "flex";
+    if (accountText) accountText.innerText = "My Account";
+    if (loginTrigger && loginTrigger.querySelector("span")) {
+        loginTrigger.querySelector("span").innerText = "My Account";
+    }
+    if (historyTrigger) historyTrigger.style.display = "flex";
+
+    try {
+        const payloadBase64 = token.split('.')[1];
+        const decodedPayload = JSON.parse(atob(payloadBase64)); 
+        
+        if (decodedPayload.role === 'admin') {
+            if (adminQuickLink) {
+                adminQuickLink.style.display = "inline-flex";
+            }
+        }
+    } catch (e) {
+        console.error("Lỗi đọc Token hệ thống", e);
+    }
+
 } else {
-  if (accountText) accountText.innerText = "Account";
-  if (loginTrigger && loginTrigger.querySelector("span")) {
-      loginTrigger.querySelector("span").innerText = "Account";
-  }
-  if (historyTrigger) historyTrigger.style.display = "none";
+    if (accountText) accountText.innerText = "Account";
+    if (loginTrigger && loginTrigger.querySelector("span")) {
+        loginTrigger.querySelector("span").innerText = "Account";
+    }
+    if (historyTrigger) historyTrigger.style.display = "none";
+    if (adminQuickLink) adminQuickLink.style.display = "none";
 }
 
 if (btnLogout) {
-  btnLogout.addEventListener("click", () => {
-    localStorage.removeItem("token");
-    alert("Logged out successfully.");
-    window.location.reload(); 
-  });
+    btnLogout.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        alert(currentLang === 'vi' ? "Đăng xuất thành công." : "Logged out successfully.");
+        window.location.reload(); 
+    });
 }
 
 // --- MENU DROPDOWNS ---
@@ -358,8 +374,9 @@ async function fetchProducts(page = 1, isAppending = false) {
     const searchQuery = urlParams.get('q');
     const catId = urlParams.get('id');
     const catKey = urlParams.get('key');
+    const isDeals = urlParams.get('deals');
 
-    // SEMANTIC SEARCH
+    // 1. XỬ LÝ TÌM KIẾM AI
     if (searchQuery) {
         const titleEl = document.getElementById("page-title");
         const listEl = document.getElementById("product-list");
@@ -384,15 +401,13 @@ async function fetchProducts(page = 1, isAppending = false) {
                 currentPageProducts = []; 
             }
             
-            if (titleEl) titleEl.innerText = currentLang === 'vi' 
-                ? `Kết quả tìm kiếm cho: "${searchQuery}"`
-                : `Search results for: "${searchQuery}"`;
+            if (titleEl) titleEl.innerText = currentLang === 'vi' ? `Kết quả tìm kiếm cho: "${searchQuery}"` : `Search results for: "${searchQuery}"`;
 
         } catch(e) {
-            console.error("AI Search Failed, fallback to standard search");
             currentPageProducts = allProducts.filter(product => isProductMatch(product, searchQuery));
         }
-    }
+    } 
+    // 2. XỬ LÝ LỌC THEO DANH MỤC (CATEGORY)
     else if (catId) {
         const titleEl = document.getElementById("page-title");
         if (titleEl && catKey) {
@@ -400,10 +415,24 @@ async function fetchProducts(page = 1, isAppending = false) {
             if (typeof translations !== 'undefined' && translations[currentLang] && translations[currentLang][catKey]) {
                 titleEl.innerText = translations[currentLang][catKey];
                 document.title = `${translations[currentLang][catKey]} | Best Tech`;
+            } else {
+                const catName = urlParams.get('name');
+                if(catName) titleEl.innerText = decodeURIComponent(catName);
             }
         }
         currentPageProducts = allProducts.filter(product => product.category_id === parseInt(catId));
+    } 
+    // 3. XỬ LÝ TRANG KHUYẾN MÃI (DEALS) - MỚI THÊM VÀO
+    else if (isDeals === 'true') {
+        const titleEl = document.getElementById("page-title");
+        if (titleEl) {
+            titleEl.removeAttribute('data-i18n'); // Gỡ thuộc tính dịch tự động để tự set tên
+            titleEl.innerHTML = currentLang === 'vi' ? '⚡ Khuyến mãi cực HOT' : '⚡ Top Hot Deals';
+            document.title = currentLang === 'vi' ? 'Khuyến mãi | Best Tech' : 'Hot Deals | Best Tech';
+        }
+        currentPageProducts = allProducts.filter(p => parseFloat(p.price) <= 1000).sort((a, b) => a.price - b.price);
     }
+    // 4. XỬ LÝ TRANG CHỦ MẶC ĐỊNH
     else {
         currentPageProducts = [...allProducts]; 
     }
@@ -1567,13 +1596,36 @@ let flashSaleInterval;
 
 async function initFlashSaleTimer() {
     const timerEl = document.getElementById("flash-timer");
-    if (!timerEl) return;
+    const timerContainer = timerEl ? timerEl.parentElement : null; // Tự động tìm thẻ cha bọc bộ đếm
+    
+    let sectionTitle = document.getElementById("section-deal-title");
+    if (!sectionTitle) {
+        const dealSection = document.querySelector(".deal-of-the-day-section");
+        if (dealSection) sectionTitle = dealSection.querySelector("h2");
+    }
+    
+    if (!timerEl || !timerContainer || !sectionTitle) return;
 
     try {
         const res = await fetch("http://localhost:3000/api/settings/flash-sale");
         const data = await res.json();
         
         const endTime = new Date(data.end_time).getTime();
+        const isActive = data.is_active === 'true';
+
+        const disableFlashSaleUI = () => {
+            if (flashSaleInterval) clearInterval(flashSaleInterval);
+            timerContainer.style.display = "none"; 
+            
+            const lang = localStorage.getItem('besttech_lang') || 'en';
+            sectionTitle.innerHTML = lang === 'vi' ? 'Sản phẩm' : 'Products';
+            sectionTitle.removeAttribute("data-i18n"); 
+        };
+
+        if (!isActive) {
+            disableFlashSaleUI();
+            return;
+        }
 
         if (flashSaleInterval) clearInterval(flashSaleInterval);
 
@@ -1582,12 +1634,12 @@ async function initFlashSaleTimer() {
             const distance = endTime - now;
 
             if (distance < 0) {
-                clearInterval(flashSaleInterval);
-                timerEl.innerHTML = "EXPIRED";
-                timerEl.style.color = "#ef4444"; 
+                disableFlashSaleUI();
                 return;
             }
 
+            timerContainer.style.display = "inline-block";
+            
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
@@ -1599,15 +1651,13 @@ async function initFlashSaleTimer() {
         }, 1000);
         
     } catch (err) {
-        console.error("Lỗi tải Flash Sale timer:", err);
+        console.error("Lỗi tải Flash Sale:", err);
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    initFlashSaleTimer();
-});
 
 // Initialize Application
 fetchProducts();
 renderCartUI();
+updateWishlistCount();
+initFlashSaleTimer(); 
 console.log("App.js loaded successfully.");
