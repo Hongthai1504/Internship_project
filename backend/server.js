@@ -44,10 +44,12 @@ const upload = multer({ storage: storage });
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
+const frontendPath = path.join(__dirname, '../frontend');
 
 app.use(cors());
 app.use(express.json()); // To read JSON data
 
+app.use(express.static(frontendPath));
 app.use('/images', express.static('images'));
 
 // 1. Connect to internship_project Database

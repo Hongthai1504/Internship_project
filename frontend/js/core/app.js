@@ -1655,6 +1655,70 @@ async function initFlashSaleTimer() {
     }
 }
 
+// --- SHIPPER MAP LOGIC ---
+const mapInstances = {}; 
+
+async function toggleMap(orderId, address) {
+    const t = shipperDict[currentLang];
+    const mapContainer = document.getElementById(`map-container-${orderId}`);
+    const btn = mapContainer.previousElementSibling.querySelector('button') || mapContainer.previousElementSibling.lastElementChild;
+
+    if (mapContainer.style.height === "220px") {
+        mapContainer.style.height = "0px";
+        mapContainer.style.border = "none";
+        btn.innerHTML = t.btn_view_map;
+        return;
+    }
+
+    mapContainer.style.height = "220px";
+    mapContainer.style.border = "2px solid #cbd5e1";
+    btn.innerHTML = "⏳...";
+
+    if (mapInstances[orderId]) {
+        setTimeout(() => mapInstances[orderId].invalidateSize(), 300); // Sửa lỗi bể layout của Leaflet khi nằm trong thẻ ẩn
+        btn.innerHTML = t.btn_close_map;
+        return;
+    }
+
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+        const data = await res.json();
+
+        if (data && data.length > 0) {
+            const lat = data[0].lat;
+            const lon = data[0].lon;
+
+            const map = L.map(`map-container-${orderId}`).setView([lat, lon], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // Cắm cờ vị trí
+            L.marker([lat, lon]).addTo(map)
+                .bindPopup(`<strong style="color:#0046be;">Giao đến:</strong><br>${address}`).openPopup();
+
+            mapInstances[orderId] = map;
+            btn.innerHTML = t.btn_close_map;
+        } else {
+            mapContainer.style.height = "auto";
+            mapContainer.style.padding = "15px";
+            mapContainer.innerHTML = `<p style='color: #ef4444; font-size: 0.9rem; margin:0; font-weight: bold;'>${t.err_map_not_found}</p>`;
+            btn.innerHTML = t.btn_close_map;
+        }
+    } catch (err) {
+        mapContainer.style.height = "0px";
+        alert(t.err_server);
+        btn.innerHTML = t.btn_view_map;
+    }
+}
+
+if (btnProfile) {
+    btnProfile.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = "/pages/user/profile.html";
+    });
+}
+
 // Initialize Application
 fetchProducts();
 renderCartUI();

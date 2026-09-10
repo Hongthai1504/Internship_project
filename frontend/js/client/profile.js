@@ -1,148 +1,290 @@
-const token = localStorage.getItem("token");
-if (!token) {
-    alert("Please sign in first.");
-    window.location.href = "login.html";
+// ĐÃ ĐỔI TÊN THÀNH profileToken ĐỂ KHÔNG ĐỤNG ĐỘ VỚI app.js
+const profileToken = localStorage.getItem("token");
+if (!profileToken) {
+    alert("Vui lòng đăng nhập trước!");
+    window.location.href = "/pages/user/login.html";
 }
 
-// Tabs Logic
-const tabInfo = document.getElementById("tab-info");
-const tabAddress = document.getElementById("tab-address");
+// ==========================================
+// 1. LOGIC CHUYỂN TAB & LAZY LOAD MAP
+// ==========================================
+const tabInfo = document.getElementById("tab-info-btn");
+const tabAddr = document.getElementById("tab-address-btn");
 const secInfo = document.getElementById("section-info");
-const secAddress = document.getElementById("section-address");
+const secAddr = document.getElementById("section-address");
 
-tabInfo.addEventListener("click", () => {
-    tabInfo.style.background = "#eef2f7"; tabInfo.style.color = "#0046be";
-    tabAddress.style.background = "transparent"; tabAddress.style.color = "#555";
-    secInfo.style.display = "block";
-    secAddress.style.display = "none";
-});
+if (tabInfo && tabAddr) {
+    tabInfo.addEventListener("click", () => {
+        tabInfo.classList.add("active");
+        tabAddr.classList.remove("active");
+        secInfo.style.display = "block";
+        secAddr.style.display = "none";
+    });
 
-tabAddress.addEventListener("click", () => {
-    tabAddress.style.background = "#eef2f7"; tabAddress.style.color = "#0046be";
-    tabInfo.style.background = "transparent"; tabInfo.style.color = "#555";
-    secInfo.style.display = "none";
-    secAddress.style.display = "block";
-    loadAddresses();
-});
+    tabAddr.addEventListener("click", () => {
+        tabAddr.classList.add("active");
+        tabInfo.classList.remove("active");
+        secInfo.style.display = "none";
+        secAddr.style.display = "block";
+        fetchAddresses(); 
+        
+        // LAZY LOAD BẢN ĐỒ: Chờ tab mở ra hoàn toàn (100ms) rồi mới vẽ
+        setTimeout(() => {
+            if (!map) {
+                initMap(); 
+            } else {
+                map.invalidateSize(); 
+            }
+        }, 100);
+    });
+}
 
-// Load Profile Info
+// ==========================================
+// 2. THÔNG TIN CÁ NHÂN (INFO)
+// ==========================================
 async function loadProfile() {
     try {
         const res = await fetch("http://localhost:3000/api/profile", {
-            headers: { "Authorization": `Bearer ${token}` }
+            headers: { "Authorization": `Bearer ${profileToken}` }
         });
-        const data = await res.json();
+        
         if (res.ok) {
-            document.getElementById("profile-email").value = data.email;
-            document.getElementById("profile-name").value = data.full_name;
-            document.getElementById("profile-phone").value = data.phone || "";
-            document.getElementById("sidebar-name").innerText = data.full_name;
-            document.getElementById("avatar-icon").innerText = data.full_name.charAt(0).toUpperCase();
+            const data = await res.json();
+            document.getElementById("prof-email").value = data.email;
+            document.getElementById("prof-name").value = data.full_name;
+            document.getElementById("prof-phone").value = data.phone || '';
+            document.getElementById("prof-name-display").innerText = data.full_name;
+            document.getElementById("prof-avatar").innerText = data.full_name.charAt(0).toUpperCase();
+        } else if (res.status === 401 || res.status === 403) {
+            const profileLang = localStorage.getItem('besttech_lang') || 'en';
+            alert(profileLang === 'vi' ? "Phiên đăng nhập đã hết hạn!" : "Session expired!");
+            localStorage.removeItem("token");
+            window.location.href = "/pages/user/login.html";
         }
-    } catch (err) { console.error("Error loading profile"); }
+    } catch (error) { 
+        document.getElementById("prof-name-display").innerText = "Lỗi kết nối";
+    }
 }
 loadProfile();
 
-// Update Profile Info
-document.getElementById("profile-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector("button");
-    btn.innerText = "Saving...";
-    
-    const full_name = document.getElementById("profile-name").value.trim();
-    const phone = document.getElementById("profile-phone").value.trim();
-    
-    try {
-        const res = await fetch("http://localhost:3000/api/profile", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-            body: JSON.stringify({ full_name, phone })
-        });
-        const data = await res.json();
-        alert(res.ok ? data.message : data.error);
-        if(res.ok) loadProfile();
-    } catch(err) { alert("Server error."); }
-    btn.innerText = "Save Changes";
-});
-
-// --- ADDRESS BOOK LOGIC ---
-const addAddressContainer = document.getElementById("add-address-container");
-document.getElementById("btn-show-add-address").addEventListener("click", () => {
-    addAddressContainer.style.display = "block";
-});
-document.getElementById("btn-cancel-address").addEventListener("click", () => {
-    addAddressContainer.style.display = "none";
-    document.getElementById("add-address-form").reset();
-});
-
-async function loadAddresses() {
-    const listEl = document.getElementById("address-list");
-    try {
-        const res = await fetch("http://localhost:3000/api/profile/addresses", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        const addresses = await res.json();
+const profileUpdateForm = document.getElementById("profile-update-form");
+if (profileUpdateForm) {
+    profileUpdateForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const full_name = document.getElementById("prof-name").value.trim();
+        const phone = document.getElementById("prof-phone").value.trim();
+        const submitBtn = document.getElementById("btn-save");
         
-        if (addresses.length === 0) {
-            listEl.innerHTML = `<p style="color: #666; font-style: italic;">You haven't saved any addresses yet.</p>`;
-            return;
-        }
+        const profileLang = localStorage.getItem('besttech_lang') || 'en';
+        submitBtn.disabled = true;
+        submitBtn.innerText = profileLang === 'vi' ? "Đang lưu..." : "Saving...";
 
-        listEl.innerHTML = addresses.map(addr => `
-            <div style="border: 1px solid ${addr.is_default ? '#0046be' : '#e0e6ef'}; padding: 20px; border-radius: 8px; background: ${addr.is_default ? '#f8faff' : '#fff'}; position: relative;">
-                ${addr.is_default ? '<span style="position: absolute; top: 20px; right: 20px; background: #ffe000; color: #000; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">DEFAULT</span>' : ''}
-                <div style="display: flex; align-items: flex-start; gap: 15px;">
-                    <svg width="24" height="24" fill="${addr.is_default ? '#0046be' : '#888'}" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                    <div style="flex: 1;">
-                        <p style="margin: 0 0 15px 0; color: #333; line-height: 1.5; font-size: 1.05rem;">${addr.address}</p>
-                        <div style="display: flex; gap: 15px;">
-                            ${!addr.is_default ? `<button onclick="setDefaultAddress(${addr.id})" style="background: none; border: none; color: #0046be; font-weight: bold; cursor: pointer; padding: 0;">Set as Default</button>` : ''}
-                            <button onclick="deleteAddress(${addr.id})" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0;">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    } catch(err) { listEl.innerHTML = `<p style="color: red;">Error loading addresses.</p>`; }
+        try {
+            const res = await fetch("http://localhost:3000/api/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${profileToken}` },
+                body: JSON.stringify({ full_name, phone })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                alert(result.message || (profileLang === 'vi' ? "Cập nhật thành công!" : "Updated successfully!"));
+                document.getElementById("prof-name-display").innerText = full_name;
+                document.getElementById("prof-avatar").innerText = full_name.charAt(0).toUpperCase();
+            } else {
+                alert("Lỗi: " + result.error);
+            }
+        } catch (err) { 
+            alert(profileLang === 'vi' ? "Lỗi kết nối máy chủ" : "Server connection error"); 
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = profileLang === 'vi' ? "Lưu thay đổi" : "Save Changes";
+        }
+    });
 }
 
-document.getElementById("add-address-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const address = document.getElementById("new-address-text").value.trim();
-    const is_default = document.getElementById("new-address-default").checked;
+// ==========================================
+// 3. ĐỊA CHỈ (ADDRESS BOOK)
+// ==========================================
+async function fetchAddresses() {
+    const listEl = document.getElementById("address-list");
+    if (!listEl) return;
+    
+    const profileLang = localStorage.getItem('besttech_lang') || 'en';
+    const loadingText = profileLang === 'vi' ? 'Đang tải danh sách địa chỉ...' : 'Loading addresses...';
+    
+    listEl.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center;">${loadingText}</p>`;
     
     try {
         const res = await fetch("http://localhost:3000/api/profile/addresses", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-            body: JSON.stringify({ address, is_default })
+            headers: { "Authorization": `Bearer ${profileToken}` }
         });
         if (res.ok) {
-            document.getElementById("btn-cancel-address").click();
-            loadAddresses();
-        } else {
-            const data = await res.json(); alert(data.error);
+            const addresses = await res.json();
+            if (addresses.length === 0) {
+                const emptyText = profileLang === 'vi' ? 'Bạn chưa có địa chỉ nào. Hãy thêm ở bên dưới!' : 'No addresses found. Add one below!';
+                listEl.innerHTML = `<p style="color: #64748b; font-style: italic; background: #fff; padding: 20px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">${emptyText}</p>`;
+                return;
+            }
+            
+            const defaultBadge = profileLang === 'vi' ? 'Mặc định' : 'Default';
+            const btnSetDefault = profileLang === 'vi' ? 'Đặt Mặc định' : 'Set Default';
+            const btnDelete = profileLang === 'vi' ? 'Xóa' : 'Delete';
+
+            listEl.innerHTML = addresses.map(addr => `
+                <div style="border: ${addr.is_default ? '2px solid #0046be' : '1px solid #e2e8f0'}; background: ${addr.is_default ? 'linear-gradient(to right, #f0f4fc, #ffffff)' : '#fff'}; padding: 25px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                    <div style="flex: 1; padding-right: 20px;">
+                        <p style="margin: 0 0 10px 0; color: #0f172a; font-size: 1.1rem; font-weight: 600;">${addr.address}</p>
+                        ${addr.is_default ? `<span style="background: #0046be; color: white; font-size: 0.75rem; padding: 5px 10px; border-radius: 6px; font-weight: 800;">${defaultBadge}</span>` : ''}
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        ${!addr.is_default ? `<button onclick="setDefaultAddress(${addr.id})" style="background: #eef2f7; color: #0046be; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.85rem;">${btnSetDefault}</button>` : ''}
+                        <button onclick="deleteAddress(${addr.id})" style="background: #fee2e2; color: #ef4444; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.85rem;">${btnDelete}</button>
+                    </div>
+                </div>
+            `).join('');
         }
-    } catch(err) { alert("Server error."); }
-});
+    } catch (err) { 
+        const errText = profileLang === 'vi' ? 'Không thể tải danh sách địa chỉ.' : 'Failed to load addresses.';
+        listEl.innerHTML = `<p style="color: red; text-align: center;">${errText}</p>`;
+    }
+}
 
 async function setDefaultAddress(id) {
     try {
-        const res = await fetch(`http://localhost:3000/api/profile/addresses/${id}/default`, {
-            method: "PUT",
-            headers: { "Authorization": `Bearer ${token}` }
+        await fetch(`http://localhost:3000/api/profile/addresses/${id}/default`, {
+            method: "PUT", headers: { "Authorization": `Bearer ${profileToken}` }
         });
-        if(res.ok) loadAddresses();
-    } catch(err) { alert("Error setting default address."); }
+        fetchAddresses();
+    } catch (err) { console.error("Error setting default"); }
 }
 
 async function deleteAddress(id) {
-    if(!confirm("Are you sure you want to delete this address?")) return;
+    const profileLang = localStorage.getItem('besttech_lang') || 'en';
+    const confirmMsg = profileLang === 'vi' ? "Bạn có chắc chắn muốn xóa địa chỉ này?" : "Are you sure you want to delete this address?";
+    
+    if(!confirm(confirmMsg)) return;
     try {
-        const res = await fetch(`http://localhost:3000/api/profile/addresses/${id}`, {
-            method: "DELETE",
-            headers: { "Authorization": `Bearer ${token}` }
+        await fetch(`http://localhost:3000/api/profile/addresses/${id}`, {
+            method: "DELETE", headers: { "Authorization": `Bearer ${profileToken}` }
         });
-        if(res.ok) loadAddresses();
-    } catch(err) { alert("Error deleting address."); }
+        fetchAddresses();
+    } catch (err) { console.error("Error deleting address"); }
+}
+
+// ==========================================
+// 4. BẢN ĐỒ (MAP)
+// ==========================================
+let map, marker;
+
+function initMap() {
+    const mapEl = document.getElementById('address-map');
+    if (!mapEl) return; 
+
+    const defaultLocation = [21.0382, 105.7827]; 
+    map = L.map('address-map').setView(defaultLocation, 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    marker = L.marker(defaultLocation, {draggable: true}).addTo(map);
+
+    marker.on('dragend', async function() {
+        const pos = marker.getLatLng();
+        await reverseGeocode(pos.lat, pos.lng);
+    });
+}
+
+async function reverseGeocode(lat, lng) {
+    const profileLang = localStorage.getItem('besttech_lang') || 'en';
+    const finalInput = document.getElementById('final-validated-address');
+    if (!finalInput) return;
+    
+    finalInput.value = profileLang === 'vi' ? "Đang xác thực..." : "Validating...";
+    
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        const data = await res.json();
+        
+        if (data && data.display_name) {
+            finalInput.value = data.display_name; 
+        } else {
+            finalInput.value = "";
+            alert(profileLang === 'vi' ? "Không thể xác định địa chỉ tại vị trí này." : "Cannot determine address at this location.");
+        }
+    } catch(err) {
+        finalInput.value = "";
+        alert(profileLang === 'vi' ? "Lỗi kết nối bản đồ." : "Map connection error.");
+    }
+}
+
+const btnFindMap = document.getElementById('btn-find-map');
+if (btnFindMap) {
+    btnFindMap.addEventListener('click', async () => {
+        const profileLang = localStorage.getItem('besttech_lang') || 'en';
+        const query = document.getElementById('map-search-input').value.trim();
+        
+        if (!query) {
+            return alert(profileLang === 'vi' ? "Vui lòng nhập địa chỉ cần tìm!" : "Please enter an address to search!");
+        }
+
+        btnFindMap.innerHTML = "⏳...";
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            const data = await res.json();
+
+            if (data && data.length > 0) {
+                const lat = data[0].lat;
+                const lon = data[0].lon;
+                
+                map.flyTo([lat, lon], 16);
+                marker.setLatLng([lat, lon]);
+                
+                document.getElementById('final-validated-address').value = data[0].display_name;
+            } else {
+                alert(profileLang === 'vi' ? "Bản đồ không tìm thấy địa chỉ này! Vui lòng nhập rõ Phường, Quận, Thành phố." : "Address not found! Please be more specific (Ward, District, City).");
+                document.getElementById('final-validated-address').value = "";
+            }
+        } catch (err) {
+            alert(profileLang === 'vi' ? "Lỗi tìm kiếm." : "Search error.");
+        } finally {
+            btnFindMap.innerHTML = profileLang === 'vi' ? "🔍 Tìm Bản Đồ" : "🔍 Find on Map";
+        }
+    });
+}
+
+const btnSaveAddress = document.getElementById('btn-save-address');
+if (btnSaveAddress) {
+    btnSaveAddress.addEventListener('click', async () => {
+        const profileLang = localStorage.getItem('besttech_lang') || 'en';
+        const finalAddress = document.getElementById('final-validated-address').value;
+        
+        if (!finalAddress || finalAddress === "Đang xác thực..." || finalAddress === "Validating...") {
+            return alert(profileLang === 'vi' ? "Vui lòng sử dụng bản đồ để ghim một địa chỉ hợp lệ!" : "Please use the map to pin a valid address!");
+        }
+
+        try {
+            const res = await fetch("http://localhost:3000/api/profile/addresses", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${profileToken}` // Đã sửa triệt để
+                },
+                body: JSON.stringify({ address: finalAddress, is_default: false })
+            });
+            
+            if (res.ok) {
+                alert(profileLang === 'vi' ? "Lưu địa chỉ thành công!" : "Address saved successfully!");
+                document.getElementById('map-search-input').value = "";
+                document.getElementById('final-validated-address').value = "";
+                fetchAddresses();
+            } else {
+                const data = await res.json();
+                alert("Error: " + data.error);
+            }
+        } catch (err) {
+            alert(profileLang === 'vi' ? "Lỗi kết nối máy chủ." : "Server connection error.");
+        }
+    });
 }

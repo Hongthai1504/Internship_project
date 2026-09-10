@@ -24,6 +24,9 @@
         .btn-place-order:hover { background: #fcd500; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 224, 0, 0.4); }
         .btn-place-order:disabled { opacity: 0.7; transform: none; cursor: not-allowed; }
     </style>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body style="background-color: #f8f9fa;">
 
@@ -45,7 +48,9 @@
             </div>
             
             <div style="margin-bottom: 35px; text-align: right;">
-                <a href="profile.html" style="color: #0046be; font-weight: bold; text-decoration: none; font-size: 0.95rem;">+ Manage Addresses in Profile</a>
+                <a href="#" onclick="openAddressModal(); return false;" style="color: #0046be; font-weight: bold; text-decoration: none; font-size: 0.9rem;">
+                    + Manage Addresses In Profile
+                </a>
             </div>
 
             <h2 style="margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #040c13;">2. Payment Method</h2>
@@ -243,5 +248,159 @@
         loadCheckoutCart();
         loadAddresses();
     </script>
+
+    <!-- POP-UP QUẢN LÝ ĐỊA CHỈ TRỰC TIẾP (OVERLAY) -->
+    <div id="checkout-address-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
+        
+        <div style="background: #ffffff; width: 90%; max-width: 600px; padding: 30px; border-radius: 20px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+            <!-- Nút Đóng Pop-up -->
+            <button onclick="closeAddressModal()" style="position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; cursor: pointer; color: #64748b; transition: 0.2s;" onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444'">&times;</button>
+            
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 1.4rem; border-bottom: 2px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
+                📍 Thêm địa chỉ nhận hàng
+            </h3>
+
+            <!-- 1. Thanh tìm kiếm -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="modal-map-search" placeholder="Nhập địa chỉ (VD: 144 Xuân Thủy...)" style="flex: 1; padding: 12px 15px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; font-family: inherit;">
+                <button type="button" id="btn-modal-find" style="background: #facc15; color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: 900; cursor: pointer;">🔍 Tìm</button>
+            </div>
+
+            <!-- 2. Bản đồ hiển thị -->
+            <div id="modal-map-container" style="height: 220px; width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; z-index: 1;"></div>
+
+            <!-- 3. Ô kết quả và Nút Lưu -->
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="modal-final-address" readonly placeholder="Kéo thả ghim trên bản đồ để xác thực..." style="flex: 1; padding: 12px 15px; border-radius: 10px; border: 2px solid #10b981; background: #ecfdf5; color: #065f46; font-weight: bold; outline: none;">
+                <button type="button" id="btn-modal-save" style="background: #0046be; color: white; border: none; padding: 0 25px; border-radius: 10px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 10px rgba(0,70,190,0.2);">LƯU</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkout-address-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: #ffffff; width: 90%; max-width: 600px; padding: 30px; border-radius: 20px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+            <button onclick="closeAddressModal()" style="position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; cursor: pointer; color: #64748b; transition: 0.2s;" onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444'">&times;</button>
+            
+            <h3 style="margin-top: 0; color: #0f172a; font-size: 1.4rem; border-bottom: 2px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
+                📍 Thêm địa chỉ nhận hàng
+            </h3>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="modal-map-search" placeholder="Nhập địa chỉ (VD: 144 Xuân Thủy...)" style="flex: 1; padding: 12px 15px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; font-family: inherit;">
+                <button type="button" id="btn-modal-find" style="background: #facc15; color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: 900; cursor: pointer;">🔍 Tìm</button>
+            </div>
+
+            <div id="modal-map-container" style="height: 220px; width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; z-index: 1;"></div>
+
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="modal-final-address" readonly placeholder="Kéo thả ghim trên bản đồ để xác thực..." style="flex: 1; padding: 12px 15px; border-radius: 10px; border: 2px solid #10b981; background: #ecfdf5; color: #065f46; font-weight: bold; outline: none;">
+                <button type="button" id="btn-modal-save" style="background: #0046be; color: white; border: none; padding: 0 25px; border-radius: 10px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 10px rgba(0,70,190,0.2);">LƯU</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let modalMap, modalMarker;
+
+        function openAddressModal() {
+            document.getElementById('checkout-address-modal').style.display = 'flex';
+            
+            setTimeout(() => {
+                if (!modalMap) {
+                    const defaultLoc = [21.0382, 105.7827]; 
+                    modalMap = L.map('modal-map-container').setView(defaultLoc, 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(modalMap);
+
+                    modalMarker = L.marker(defaultLoc, {draggable: true}).addTo(modalMap);
+
+                    modalMarker.on('dragend', async function() {
+                        const pos = modalMarker.getLatLng();
+                        const finalInput = document.getElementById('modal-final-address');
+                        finalInput.value = "Đang xác thực...";
+                        
+                        try {
+                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.lat}&lon=${pos.lng}&zoom=18&addressdetails=1`);
+                            const data = await res.json();
+                            finalInput.value = (data && data.display_name) ? data.display_name : "";
+                        } catch(err) {
+                            finalInput.value = ""; alert("Lỗi kết nối bản đồ!");
+                        }
+                    });
+                } else {
+                    modalMap.invalidateSize();
+                }
+            }, 150);
+        }
+
+        function closeAddressModal() {
+            document.getElementById('checkout-address-modal').style.display = 'none';
+        }
+
+        document.getElementById('btn-modal-find').addEventListener('click', async () => {
+            const query = document.getElementById('modal-map-search').value.trim();
+            if (!query) return alert("Vui lòng nhập địa chỉ!");
+
+            const btn = document.getElementById('btn-modal-find');
+            btn.innerText = "⏳";
+
+            try {
+                // Thêm email=admin@besttech.com để OpenStreetMap không coi chúng ta là bot spam
+                const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&email=admin@besttech.com`;
+                
+                const res = await fetch(apiUrl, {
+                    headers: { 'Accept-Language': 'vi-VN,vi;q=0.9' } // Ưu tiên trả về tiếng Việt
+                });
+                
+                // Bắt lỗi nếu OpenStreetMap khóa IP
+                if (!res.ok) throw new Error("API_LIMIT");
+
+                const data = await res.json();
+
+                if (data && data.length > 0) {
+                    modalMap.flyTo([data[0].lat, data[0].lon], 16);
+                    modalMarker.setLatLng([data[0].lat, data[0].lon]);
+                    document.getElementById('modal-final-address').value = data[0].display_name;
+                } else {
+                    alert("Bản đồ không tìm thấy địa chỉ này!");
+                }
+            } catch (err) { 
+                console.error("Lỗi bản đồ OSM:", err);
+                if (err.message === "API_LIMIT") {
+                    alert("Bản đồ đang bị quá tải yêu cầu. Vui lòng đợi 30 giây rồi thử lại!");
+                } else {
+                    alert("Lỗi kết nối đến máy chủ bản đồ thế giới!"); 
+                }
+            } 
+            finally { btn.innerText = "🔍 Tìm"; }
+        });
+
+        // 4. Lưu địa chỉ
+        document.getElementById('btn-modal-save').addEventListener('click', async () => {
+            const finalAddress = document.getElementById('modal-final-address').value;
+            if (!finalAddress || finalAddress.includes("Đang xác thực")) {
+                return alert("Vui lòng ghim vị trí chuẩn xác trên bản đồ!");
+            }
+
+            const token = localStorage.getItem("token");
+            try {
+                const res = await fetch("http://localhost:3000/api/profile/addresses", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                    body: JSON.stringify({ address: finalAddress, is_default: true }) 
+                });
+                
+                if (res.ok) {
+                    alert("Thêm địa chỉ thành công!");
+                    closeAddressModal();
+                    window.location.reload();
+                } else {
+                    alert("Lỗi khi thêm địa chỉ!");
+                }
+            } catch (err) { alert("Mất kết nối máy chủ!"); }
+        });
+    </script>
+
 </body>
 </html>
