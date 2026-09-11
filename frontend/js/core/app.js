@@ -18,6 +18,7 @@ let currentDetailProductId = null;
 // Global Variables
 let allProducts = [];
 let currentPageProducts = [];
+let globalCategories = [];
 let cart = [];
 let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 
@@ -355,7 +356,20 @@ let totalCatalogPages = 1;
 
 async function fetchProducts(page = 1, isAppending = false) {
   try {
-    const response = await fetch(`${API_URL}?page=${page}&limit=12&lang=${currentLang}`);
+
+    if (globalCategories.length === 0) {
+        try {
+            const catRes = await fetch("http://localhost:3000/api/categories");
+            globalCategories = await catRes.json();
+        } catch (e) { console.warn("Lỗi tải danh mục"); }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isHomePage = !urlParams.get('q') && !urlParams.get('id') && !urlParams.get('deals') && !document.getElementById("wishlist-page-container");
+
+    let fetchLimit = isHomePage ? 100 : 12;
+
+    const response = await fetch(`${API_URL}?page=${page}&limit=${fetchLimit}&lang=${currentLang}`);
     const result = await response.json();
     
     if (!response.ok || result.error) throw new Error(result.error || "API Error");
@@ -370,7 +384,6 @@ async function fetchProducts(page = 1, isAppending = false) {
         allProducts = [...productsData];
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('q');
     const catId = urlParams.get('id');
     const catKey = urlParams.get('key');
@@ -455,6 +468,15 @@ function renderLoadMoreButton() {
     if (!productListEl) return;
 
     let container = document.getElementById("load-more-container");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isHomePage = !urlParams.get('q') && !urlParams.get('id') && !urlParams.get('deals') && !document.getElementById("wishlist-page-container");
+
+    if (isHomePage) {
+        if(container) container.style.display = "none";
+        return;
+    }
+    if(container) container.style.display = "block";
     
     if (!container) {
         container = document.createElement("div");
@@ -465,7 +487,8 @@ function renderLoadMoreButton() {
         container.style.marginBottom = "20px";
         const productListEl = document.getElementById("product-list");
         if(productListEl) productListEl.after(container);
-    }
+    } 
+
 
     if (currentCatalogPage < totalCatalogPages) {
         container.innerHTML = `
@@ -489,18 +512,26 @@ function renderDynamicBrands(products) {
     const brandFiltersEl = document.getElementById("brand-filters");
     if (!brandFiltersEl) return;
 
+    brandFiltersEl.style.maxHeight = "280px"; 
+    brandFiltersEl.style.overflowY = "auto";
+    brandFiltersEl.style.overflowX = "hidden";
+    brandFiltersEl.style.paddingRight = "8px"; 
+    
+    brandFiltersEl.style.scrollbarWidth = "thin";
+    brandFiltersEl.style.scrollbarColor = "#cbd5e1 transparent";
+
     const uniqueBrands = [...new Set(products.map(p => p.brand).filter(b => b && b.trim() !== ""))].sort();
 
     if (uniqueBrands.length === 0) {
-        brandFiltersEl.innerHTML = "<li style='color: #666; font-size: 0.9rem;'>No brands available</li>";
+        brandFiltersEl.innerHTML = "<li style='color: #64748b; font-size: 0.9rem; font-style: italic;'>No brands available</li>";
         return;
     }
 
     brandFiltersEl.innerHTML = uniqueBrands.map(brand => `
-        <li>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" value="${brand}" class="dynamic-brand-checkbox"> 
-                ${brand}
+        <li style="margin-bottom: 12px; list-style: none;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #475569; transition: color 0.2s ease;" onmouseover="this.style.color='#0046be'" onmouseout="this.style.color='#475569'">
+                <input type="checkbox" value="${brand}" class="dynamic-brand-checkbox" style="accent-color: #0046be; width: 16px; height: 16px; cursor: pointer; margin: 0;"> 
+                <span style="font-weight: 600;">${brand}</span>
             </label>
         </li>
     `).join('');
@@ -541,10 +572,15 @@ function handleFilters() {
     if (shopLayout) shopLayout.style.display = "flex";
   }
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const isHomePage = !urlParams.get('q') && !urlParams.get('id') && !urlParams.get('deals') && !isWishlist;
+
   if (isWishlist) {
       drawWishlistCards(filteredProducts);
+  } else if (isHomePage) {
+      renderGroupedProducts(filteredProducts); 
   } else {
-      renderProducts(filteredProducts);
+      renderProducts(filteredProducts); 
   }
 }
 
@@ -597,6 +633,91 @@ function renderProducts(productsToDisplay) {
     `;
     productListEl.appendChild(card);
   });
+}
+
+function renderGroupedProducts(productsToDisplay) {
+    const productListEl = document.getElementById("product-list");
+    if (!productListEl) return;
+    
+    productListEl.innerHTML = "";
+    productListEl.style.display = "block"; 
+
+    if (productsToDisplay.length === 0) {
+        productListEl.innerHTML = "<p style='text-align: center; font-size: 1.2rem; margin-top: 50px;'>We couldn't find any products matching your filter.</p>";
+        return;
+    }
+
+    const categoryMap = {};
+    globalCategories.forEach(c => { categoryMap[c.id] = currentLang === 'vi' ? (c.name_vi || c.name) : c.name; });
+
+    const grouped = {};
+    productsToDisplay.forEach(p => {
+        const catName = categoryMap[p.category_id] || "Featured Electronics";
+        if (!grouped[catName]) grouped[catName] = [];
+        grouped[catName].push(p);
+    });
+
+    for (const [catName, prods] of Object.entries(grouped)) {
+        if (prods.length === 0) continue;
+
+        const section = document.createElement("div");
+        section.style.marginBottom = "50px";
+        section.style.background = "#ffffff";
+        section.style.padding = "25px";
+        section.style.borderRadius = "20px";
+        section.style.boxShadow = "0 4px 20px rgba(0,0,0,0.03)";
+        section.style.border = "1px solid #f1f5f9";
+
+        const viewAllText = currentLang === 'vi' ? 'Xem tất cả' : 'View All';
+
+        section.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px;">
+                <h2 style="margin: 0; font-size: 1.6rem; color: #0f172a; font-weight: 900; display: flex; align-items: center; gap: 12px;">
+                    <span style="background: linear-gradient(135deg, #0046be, #3b82f6); width: 8px; height: 28px; border-radius: 4px;"></span>
+                    ${catName}
+                </h2>
+                <a href="/pages/shop/category.html?name=${encodeURIComponent(catName)}" style="color: #0046be; font-weight: 800; text-decoration: none; font-size: 0.95rem; background: #f0f4fc; padding: 8px 18px; border-radius: 50px; transition: all 0.2s ease;">${viewAllText} ❯</a>
+            </div>
+            <div class="grouped-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+            </div>
+        `;
+
+        const gridEl = section.querySelector(".grouped-grid");
+        
+        prods.slice(0, 4).forEach(product => {
+            const card = createProductCardHTML(product);
+            gridEl.appendChild(card);
+        });
+
+        productListEl.appendChild(section);
+    }
+}
+
+function createProductCardHTML(product) {
+    const safeName = product.name.replace(/'/g, "\\'");
+    const isWished = wishlist.includes(product.id);
+    const heartFill = isWished ? '#ef4444' : 'none';
+    const heartColor = isWished ? '#ef4444' : '#666';
+
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+        <div class="img-wrapper" style="position: relative;">
+            <button class="wishlist-btn" onclick="toggleWishlist(${product.id}, event)" style="position: absolute; top: 10px; right: 10px; background: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: ${heartColor}; z-index: 2; transition: 0.2s;">
+                <svg width="18" height="18" fill="${heartFill}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            </button>
+            <img src="${product.image_url || "https://via.placeholder.com/300"}" alt="${product.name}" onclick="showProductDetail(${product.id})" style="cursor: pointer;">
+            <div class="quick-add" onclick="addToCart(${product.id}, '${safeName}', ${product.price}, '${product.image_url || ''}')">Add to Cart</div>
+        </div>
+        <div class="product-info">
+            <h3 class="product-name" onclick="showProductDetail(${product.id})" style="cursor: pointer;">${product.name}</h3>
+            <p class="product-price">$${product.price}</p>
+            <label style="font-size: 0.85rem; color: #555; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px 8px; border: 1px solid #e0e6ef; border-radius: 4px; background: #f9fafb;">
+                <input type="checkbox" value="${product.id}" onchange="toggleCompare(${product.id}, this)" class="compare-cb-${product.id}"> Compare
+            </label>
+        </div>
+    `;
+    return card;
 }
 
 function showProductDetail(product_id) {
