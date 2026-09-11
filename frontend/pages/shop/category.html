@@ -1,100 +1,227 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Category | Best Tech</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="/css/client/style.css" />
-</head>
-<body style="background-color: #f4f7fb;">
-  <div id="header-placeholder"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category | Best Tech</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/client/style.css" />
+  </head>
+  <body style="background-color: #f4f7fb">
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
 
-  <!-- MAIN SHOP LAYOUT -->
-  <div class="shop-layout">
-    
-    <!-- KẾ THỪA SIDEBAR KÍNH MỜ TỪ TRANG CHỦ -->
-    <aside class="sidebar glass-card" style="background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-radius: 24px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.5);">
-      <!-- SORT OPTIONS -->
-      <div class="filter-group" style="margin-bottom: 25px;">
-        <h3 class="filter-title" data-i18n="filter_sort" style="color: #0f172a; font-weight: 800; margin-bottom: 15px;">Sort By</h3>
-        <select id="sort-options" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; outline: none; background: #f8fafc; font-family: inherit;">
-          <option value="default" data-i18n="sort_default">Featured (Default)</option>
-          <option value="price-asc" data-i18n="sort_low_high">Price: Low to High</option>
-          <option value="price-desc" data-i18n="sort_high_low">Price: High to Low</option>
-        </select>
-      </div>
+    <!-- MAIN SHOP LAYOUT -->
+    <div class="shop-layout">
+      <!-- SIDEBAR (KÍNH MỜ) -->
+      <aside
+        class="sidebar glass-card"
+        style="
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(12px);
+          border-radius: 24px;
+          padding: 30px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.5);
+        "
+      >
+        <!-- SORT OPTIONS -->
+        <div class="filter-group" style="margin-bottom: 25px">
+          <h3
+            class="filter-title"
+            data-i18n="filter_sort"
+            style="color: #0f172a; font-weight: 800; margin-bottom: 15px"
+          >
+            Sort By
+          </h3>
+          <select
+            id="sort-options"
+            style="
+              width: 100%;
+              padding: 12px;
+              border: 1px solid #e2e8f0;
+              border-radius: 12px;
+              outline: none;
+              background: #f8fafc;
+              font-family: inherit;
+            "
+          >
+            <option value="default" data-i18n="sort_default">
+              Featured (Default)
+            </option>
+            <option value="price-asc" data-i18n="sort_low_high">
+              Price: Low to High
+            </option>
+            <option value="price-desc" data-i18n="sort_high_low">
+              Price: High to Low
+            </option>
+          </select>
+        </div>
 
-      <!-- DYNAMIC BRAND FILTER -->
-      <div class="filter-group" style="margin-bottom: 25px;">
-        <h3 class="filter-title" data-i18n="filter_brand" style="color: #0f172a; font-weight: 800; margin-bottom: 15px;">Brand</h3>
-        <ul class="filter-list" id="brand-filters" style="list-style: none; padding: 0; line-height: 2;">
-          <p style="color: #64748b; font-size: 0.9rem; font-style: italic;" data-i18n="filter_loading_brands">Loading brands...</p>
-        </ul>
-      </div>
+        <!-- DYNAMIC BRAND FILTER -->
+        <div class="filter-group" style="margin-bottom: 25px">
+          <h3
+            class="filter-title"
+            data-i18n="filter_brand"
+            style="color: #0f172a; font-weight: 800; margin-bottom: 15px"
+          >
+            Brand
+          </h3>
+          <ul
+            class="filter-list"
+            id="brand-filters"
+            style="list-style: none; padding: 0; line-height: 2"
+          >
+            <p
+              style="color: #64748b; font-size: 0.9rem; font-style: italic"
+              data-i18n="filter_loading_brands"
+            >
+              Loading brands...
+            </p>
+          </ul>
+        </div>
 
-      <!-- STATIC PRICE FILTER -->
-      <div class="filter-group">
-        <h3 class="filter-title" data-i18n="filter_price" style="color: #0f172a; font-weight: 800; margin-bottom: 15px;">Price Range</h3>
-        <ul class="filter-list" style="list-style: none; padding: 0; line-height: 2;">
-          <li><label><input type="radio" name="price" value="all" checked /> <span data-i18n="price_all">All Prices</span></label></li>
-          <li><label><input type="radio" name="price" value="under500" /> <span data-i18n="price_under500">Under $500</span></label></li>
-          <li><label><input type="radio" name="price" value="500to999" /> <span data-i18n="price_500to999">$500 - $999</span></label></li>
-          <li><label><input type="radio" name="price" value="over1000" /> <span data-i18n="price_over1000">$1000 & Above</span></label></li>
-        </ul>
-      </div>
-    </aside>
+        <!-- STATIC PRICE FILTER -->
+        <div class="filter-group">
+          <h3
+            class="filter-title"
+            data-i18n="filter_price"
+            style="color: #0f172a; font-weight: 800; margin-bottom: 15px"
+          >
+            Price Range
+          </h3>
+          <ul
+            class="filter-list"
+            style="list-style: none; padding: 0; line-height: 2"
+          >
+            <li>
+              <label>
+                <input type="radio" name="price" value="all" checked />
+                <span data-i18n="price_all">All Prices</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="price" value="under500" />
+                <span data-i18n="price_under500">Under $500</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="price" value="500to999" />
+                <span data-i18n="price_500to999">$500 - $999</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="price" value="over1000" />
+                <span data-i18n="price_over1000">$1000 & Above</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </aside>
 
-    <!-- CONTENT AREA -->
-    <main class="content-area">
-      <!-- TIÊU ĐỀ DANH MỤC ĐỘNG -->
-      <div style="padding: 20px 0; margin-bottom: 20px;">
-          <h1 id="page-title" style="color: #0046be; margin: 0; font-size: 2rem; font-weight: 900;">Loading Category...</h1>
-      </div>
+      <!-- CONTENT AREA -->
+      <!-- CONTENT AREA -->
+      <main class="content-area">
+        <!-- TIÊU ĐỀ DANH MỤC ĐỘNG -->
+        <div style="padding: 20px 0; margin-bottom: 20px">
+          <h1
+            id="page-title"
+            style="color: #0046be; margin: 0; font-size: 2rem; font-weight: 900"
+          >
+            Loading Category...
+          </h1>
+        </div>
 
-      <!-- GRID SẢN PHẨM -->
-      <div id="product-list" class="product-grid">
-        <p class="loading-text" data-i18n="loading_tech" style="grid-column: 1/-1; text-align: center;">Loading top tier technology...</p>
-      </div>
-      
-      <div id="load-more-container" style="grid-column: 1/-1; text-align: center; margin-top: 40px;"></div>
-    </main>
-  </div>
+        <!-- GRID SẢN PHẨM: ĐÂY LÀ CHỖ JS SẼ ĐỔ DATA VÀO, ĐỪNG THÊM GÌ DƯỚI NÀY NỮA -->
+        <div id="product-list" class="product-grid">
+          <p
+            class="loading-text"
+            data-i18n="loading_tech"
+            style="grid-column: 1/-1; text-align: center"
+          >
+            Loading top tier technology...
+          </p>
+        </div>
 
-  <!-- CÁC COMPONENT ẨN (Giữ nguyên như index.html) -->
-  <section id="product-detail-view" class="product-detail-view" style="display: none;">...</section>  
-  <div id="cart-placeholder"></div>
-  <div id="compare-placeholder"></div>
-  <div id="chatbot-placeholder"></div>
-  <div id="footer-placeholder"></div>
+        <!-- NÚT LOAD MORE -->
+        <div
+          id="load-more-container"
+          style="grid-column: 1/-1; text-align: center; margin-top: 40px"
+        ></div>
+      </main>
+    </div>
 
-  <script src="/js/core/translations.js"></script>
-  <script>
-    async function loadComponents() {
-      const components = [
-        { id: 'header-placeholder', url: '/pages/components/header.html' },
-        { id: 'cart-placeholder', url: '/pages/components/cart.html' },
-        { id: 'compare-placeholder', url: '/pages/components/compare.html' },
-        { id: 'chatbot-placeholder', url: '/pages/components/chatbot.html' },
-        { id: 'footer-placeholder', url: '/pages/components/footer.html' }
-      ];
-      try {
-          await Promise.all(components.map(async (cmp) => {
-            const el = document.getElementById(cmp.id);
-            if (el) {
-              const res = await fetch(cmp.url);
-              if (res.ok) el.innerHTML = await res.text();
+    <!-- CÁC COMPONENT ẨN (Chi tiết sản phẩm, giỏ hàng, chat...) -->
+    <!-- (Phần này sẽ được app.js & category.js tái sử dụng để render giao diện chi tiết) -->
+    <section
+      id="product-detail-view"
+      class="product-detail-view"
+      style="display: none"
+    >
+      <!-- Khung Detail rỗng, JS sẽ tự đắp HTML vào đây nếu cần, hoặc bạn copy nguyên thẻ section product-detail-view từ index.html qua đây nếu web của bạn dùng SPA (chuyển view không chuyển trang) -->
+    </section>
+
+    <div id="cart-placeholder"></div>
+    <div id="compare-placeholder"></div>
+    <div id="chatbot-placeholder"></div>
+    <div id="footer-placeholder"></div>
+
+    <!-- HỆ THỐNG SCRIPT TẢI LINH KIỆN & LOGIC -->
+    <script src="/js/core/translations.js"></script>
+    <script>
+      async function loadComponents() {
+        const components = [
+          { id: "header-placeholder", url: "/pages/components/header.html" },
+          { id: "cart-placeholder", url: "/pages/components/cart.html" },
+          { id: "compare-placeholder", url: "/pages/components/compare.html" },
+          { id: "chatbot-placeholder", url: "/pages/components/chatbot.html" },
+          { id: "footer-placeholder", url: "/pages/components/footer.html" },
+        ];
+
+        try {
+          // 1. Tải giao diện HTML (Header, Footer, Cart...)
+          await Promise.all(
+            components.map(async (cmp) => {
+              const el = document.getElementById(cmp.id);
+              if (el) {
+                const res = await fetch(cmp.url);
+                if (res.ok) el.innerHTML = await res.text();
+              }
+            }),
+          );
+
+          // 2. Tải app.js (Chứa các hàm global, giỏ hàng, đa ngôn ngữ...)
+          const appScript = document.createElement("script");
+          appScript.src = "/js/core/app.js";
+
+          // 3. Sau khi app.js tải XONG, mới áp dụng ngôn ngữ và tải tiếp category.js
+          appScript.onload = () => {
+            if (
+              typeof applyLanguage === "function" &&
+              typeof currentLang !== "undefined"
+            ) {
+              applyLanguage(currentLang);
             }
-          }));
-          const script = document.createElement('script');
-          script.src = '/js/core/app.js';
-          script.onload = () => {
-              if (typeof applyLanguage === 'function' && typeof currentLang !== 'undefined') applyLanguage(currentLang);
+
+            // Tải category.js (Chứa logic lấy dữ liệu riêng cho trang danh mục)
+            const catScript = document.createElement("script");
+            catScript.src = "/js/client/category.js";
+            document.body.appendChild(catScript);
           };
-          document.body.appendChild(script);
-      } catch (error) { console.error("Lỗi khi tải hệ thống:", error); }
-    }
-    loadComponents();
-  </script>
-</body>
+
+          document.body.appendChild(appScript);
+        } catch (error) {
+          console.error("Lỗi khi tải hệ thống:", error);
+        }
+      }
+
+      loadComponents();
+    </script>
+  </body>
 </html>

@@ -1,172 +1,240 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Shipper Dashboard | Best Tech</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet"/>
-  
-  <!-- LIÊN KẾT ĐẾN FILE CSS KÍNH MỜ VỪA TẠO -->
-  <link rel="stylesheet" href="/css/client/shipper.css" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Shipper Dashboard | Best Tech</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Leaflet CSS & JS for Map Functionality  -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-</head>
-<body>
+    <!-- LIÊN KẾT ĐẾN FILE CSS KÍNH MỜ VỪA TẠO -->
+    <link rel="stylesheet" href="/css/client/shipper.css" />
 
-  <header class="header">
-    <!-- LOGO BESTTECH MỚI -->
-    <h1 style="display: flex; align-items: center; gap: 12px; margin: 0;">
-        <div style="font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; cursor: default;">
-            <span style="color: var(--primary);">Best</span><span style="color: var(--text-main);">Tech</span>
+    <!-- Leaflet CSS & JS for Map Functionality  -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- LƯU Ý: Hãy chắc chắn đường dẫn này trỏ đúng tới file shipper.js của bạn -->
+    <script src="/js/shipper/shipper.js"></script>
+  </head>
+  <body>
+    <header class="header">
+      <!-- LOGO BESTTECH MỚI -->
+      <h1 style="display: flex; align-items: center; gap: 12px; margin: 0">
+        <div
+          style="
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            cursor: default;
+          "
+        >
+          <span style="color: var(--primary)">Best</span
+          ><span style="color: var(--text-main)">Tech</span>
         </div>
-        <span style="color: #cbd5e1; font-weight: 300; font-size: 1.5rem; line-height: 1;">|</span>
-        <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
-            🚀 <span id="app-logo-text">Shipper</span>
+        <span
+          style="
+            color: #cbd5e1;
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 1;
+          "
+          >|</span
+        >
+        <div
+          style="
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          "
+        >
+          🚀 <span id="app-logo-text">Shipper</span>
         </div>
-    </h1>
-    
-    <!-- CÁC NÚT CHỨC NĂNG BÊN PHẢI (Giữ nguyên) -->
-    <div class="header-actions">
+      </h1>
+
+      <!-- CÁC NÚT CHỨC NĂNG BÊN PHẢI -->
+      <div class="header-actions">
         <button id="lang-toggle" class="btn-lang" onclick="toggleLanguage()">
-            <img id="lang-icon" src="https://flagcdn.com/w20/us.png" width="20" style="border-radius: 2px;"> 
-            <span id="lang-text">EN</span>
+          <img
+            id="lang-icon"
+            src="https://flagcdn.com/w20/us.png"
+            width="20"
+            style="border-radius: 2px"
+          />
+          <span id="lang-text">EN</span>
         </button>
-        <button class="btn-logout" onclick="logout()" id="btn-logout-text">Logout</button>
+        <button class="btn-logout" onclick="logout()" id="btn-logout-text">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <div class="container">
+      <h2 class="page-title" id="page-title-text">My Delivery Tasks</h2>
+
+      <!-- TABS BỘ LỌC ĐƠN HÀNG -->
+      <div class="tabs-container">
+        <button
+          class="tab-btn active"
+          data-status="all"
+          id="tab-all"
+          onclick="setFilter('all')"
+        >
+          All
+        </button>
+        <button
+          class="tab-btn"
+          data-status="shipping"
+          id="tab-shipping"
+          onclick="setFilter('shipping')"
+        >
+          Delivering
+        </button>
+        <button
+          class="tab-btn"
+          data-status="completed"
+          id="tab-completed"
+          onclick="setFilter('completed')"
+        >
+          Completed
+        </button>
+        <button
+          class="tab-btn"
+          data-status="cancelled"
+          id="tab-cancelled"
+          onclick="setFilter('cancelled')"
+        >
+          Cancelled
+        </button>
+      </div>
+
+      <!-- DANH SÁCH ĐƠN HÀNG -->
+      <div id="task-list">
+        <p
+          style="
+            text-align: center;
+            color: #64748b;
+            font-weight: bold;
+            margin-top: 50px;
+          "
+          id="loading-text"
+        >
+          Loading tasks...
+        </p>
+      </div>
     </div>
-  </header>
 
-  <div class="container">
-    <h2 class="page-title" id="page-title-text">My Delivery Tasks</h2>
-    
-    <!-- TABS BỘ LỌC ĐƠN HÀNG -->
-    <div class="tabs-container">
-        <button class="tab-btn active" data-status="all" id="tab-all" onclick="setFilter('all')">All</button>
-        <button class="tab-btn" data-status="shipping" id="tab-shipping" onclick="setFilter('shipping')">Delivering</button>
-        <button class="tab-btn" data-status="completed" id="tab-completed" onclick="setFilter('completed')">Completed</button>
-        <button class="tab-btn" data-status="cancelled" id="tab-cancelled" onclick="setFilter('cancelled')">Cancelled</button>
-    </div>
+    <!-- SCRIPT CHỈ CÒN LẠI LOGIC KẾT NỐI API & GIAO DIỆN -->
+    <script>
+      let currentLang = localStorage.getItem("besttech_lang") || "en";
 
-    <!-- DANH SÁCH ĐƠN HÀNG TRẢ VỀ TỪ JAVASCRIPT -->
-    <div id="task-list">
-      <p style="text-align: center; color: #64748b; font-weight: bold; margin-top: 50px;" id="loading-text">Loading tasks...</p>
-    </div>
-  </div>
-
-  <!-- SCRIPT LOGIC (Giữ nguyên như bản cập nhật trước) -->
-  <script>
-    let currentLang = localStorage.getItem('besttech_lang') || 'en';
-
-    const shipperDict = {
-        en: {
-            app_logo: "Shipper", logout: "Logout", page_title: "My Delivery Tasks",
-            loading: "Loading tasks...", empty_title: "No orders found", empty_desc: "There are no orders matching this filter.",
-            lbl_customer: "Customer Name", lbl_phone: "Phone Number", lbl_address: "Delivery Address",
-            lbl_cod: "Total COD Amount:", btn_delivered: "✓ Delivered", btn_failed: "✕ Failed",
-            confirm_msg: "Confirm changing status of order", alert_login: "Please log in!",
-            err_load: "Error loading tasks.", err_server: "Server connection error.",
-            tab_all: "All", tab_shipping: "Delivering", tab_completed: "Completed", tab_cancelled: "Cancelled",
-            btn_view_map: "🗺️ View Map", btn_close_map: "🗺️ Close Map", err_map_not_found: "❌ Coordinates not found on map."
-        },
-        vi: {
-            app_logo: "Giao Hàng", logout: "Đăng xuất", page_title: "Nhiệm Vụ Của Tôi",
-            loading: "Đang tải dữ liệu...", empty_title: "Trống", empty_desc: "Không có đơn hàng nào trong mục này.",
-            lbl_customer: "Tên khách hàng", lbl_phone: "Số điện thoại", lbl_address: "Địa chỉ giao hàng",
-            lbl_cod: "Tổng tiền thu hộ (COD):", btn_delivered: "✓ Đã giao", btn_failed: "✕ Thất bại",
-            confirm_msg: "Xác nhận chuyển trạng thái đơn", alert_login: "Vui lòng đăng nhập!",
-            err_load: "Lỗi tải danh sách đơn hàng.", err_server: "Lỗi kết nối đến máy chủ.",
-            tab_all: "Tất cả", tab_shipping: "Chưa giao", tab_completed: "Đã giao", tab_cancelled: "Đã hủy",
-            btn_view_map: "🗺️ Xem bản đồ", btn_close_map: "🗺️ Đóng bản đồ", err_map_not_found: "❌ Không tìm thấy tọa độ trên bản đồ.",
-        }
-    };
-
-    function applyLanguage() {
+      function applyLanguage() {
+        // shipperDict đã được khai báo ở file shipper.js
         const t = shipperDict[currentLang];
-        document.getElementById('app-logo-text').innerText = t.app_logo;
-        document.getElementById('btn-logout-text').innerText = t.logout;
-        document.getElementById('page-title-text').innerText = t.page_title;
-        document.getElementById('tab-all').innerText = t.tab_all;
-        document.getElementById('tab-shipping').innerText = t.tab_shipping;
-        document.getElementById('tab-completed').innerText = t.tab_completed;
-        document.getElementById('tab-cancelled').innerText = t.tab_cancelled;
-        if(document.getElementById('loading-text')) document.getElementById('loading-text').innerText = t.loading;
+        document.getElementById("app-logo-text").innerText = t.app_logo;
+        document.getElementById("btn-logout-text").innerText = t.logout;
+        document.getElementById("page-title-text").innerText = t.page_title;
+        document.getElementById("tab-all").innerText = t.tab_all;
+        document.getElementById("tab-shipping").innerText = t.tab_shipping;
+        document.getElementById("tab-completed").innerText = t.tab_completed;
+        document.getElementById("tab-cancelled").innerText = t.tab_cancelled;
 
-        const langIcon = document.getElementById('lang-icon');
-        const langText = document.getElementById('lang-text');
-        if (currentLang === 'vi') {
-            langIcon.src = "https://flagcdn.com/w20/vn.png";
-            langText.innerText = "VI";
-        } else {
-            langIcon.src = "https://flagcdn.com/w20/us.png";
-            langText.innerText = "EN";
+        if (document.getElementById("loading-text")) {
+          document.getElementById("loading-text").innerText = t.loading;
         }
-        renderTasks(); 
-    }
 
-    function toggleLanguage() {
-        currentLang = currentLang === 'en' ? 'vi' : 'en';
-        localStorage.setItem('besttech_lang', currentLang);
+        const langIcon = document.getElementById("lang-icon");
+        const langText = document.getElementById("lang-text");
+        if (currentLang === "vi") {
+          langIcon.src = "https://flagcdn.com/w20/vn.png";
+          langText.innerText = "VI";
+        } else {
+          langIcon.src = "https://flagcdn.com/w20/us.png";
+          langText.innerText = "EN";
+        }
+        renderTasks();
+      }
+
+      function toggleLanguage() {
+        currentLang = currentLang === "en" ? "vi" : "en";
+        localStorage.setItem("besttech_lang", currentLang);
         applyLanguage();
-    }
+      }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
+      const token = localStorage.getItem("token");
+      if (!token) {
         alert(shipperDict[currentLang].alert_login);
         window.location.href = "/pages/user/login.html";
-    }
+      }
 
-    let allOrdersCache = []; 
-    let currentFilter = 'all';
+      let allOrdersCache = [];
+      let currentFilter = "all";
 
-    function logout() {
+      function logout() {
         localStorage.removeItem("token");
         window.location.href = "/pages/user/login.html";
-    }
+      }
 
-    function setFilter(status) {
+      function setFilter(status) {
         currentFilter = status;
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            if (btn.getAttribute('data-status') === status) btn.classList.add('active');
-            else btn.classList.remove('active');
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          if (btn.getAttribute("data-status") === status)
+            btn.classList.add("active");
+          else btn.classList.remove("active");
         });
-        renderTasks(); 
-    }
+        renderTasks();
+      }
 
-    async function fetchTasks() {
+      async function fetchTasks() {
         const t = shipperDict[currentLang];
         try {
-            const res = await fetch("http://localhost:3000/api/shipper/orders", {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error("Failed to load");
-            allOrdersCache = await res.json();
-            renderTasks();
+          const res = await fetch("http://localhost:3000/api/shipper/orders", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!res.ok) throw new Error("Failed to load");
+          allOrdersCache = await res.json();
+          renderTasks();
         } catch (error) {
-            document.getElementById("task-list").innerHTML = `<p style="color: red; text-align: center; font-weight: bold;">${t.err_load}</p>`;
+          document.getElementById("task-list").innerHTML =
+            `<p style="color: red; text-align: center; font-weight: bold;">${t.err_load}</p>`;
         }
-    }
+      }
 
-    function renderTasks() {
+      function renderTasks() {
         const listEl = document.getElementById("task-list");
         const t = shipperDict[currentLang];
 
-        const displayOrders = currentFilter === 'all' 
-            ? allOrdersCache 
-            : allOrdersCache.filter(order => order.status === currentFilter);
+        const displayOrders =
+          currentFilter === "all"
+            ? allOrdersCache
+            : allOrdersCache.filter((order) => order.status === currentFilter);
 
         if (displayOrders.length === 0) {
-            listEl.innerHTML = `
+          listEl.innerHTML = `
             <div style="text-align: center; padding: 50px 20px; background: var(--glass-bg); border-radius: 20px; border: 2px dashed #cbd5e1; box-shadow: var(--glass-shadow);">
                 <span style="font-size: 3.5rem; opacity: 0.5;">📭</span>
                 <h3 style="color: #475569; margin: 15px 0 5px 0;">${t.empty_title}</h3>
                 <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">${t.empty_desc}</p>
             </div>`;
-            return;
+          return;
         }
 
-        listEl.innerHTML = displayOrders.map(order => {
-            const isShipping = order.status === 'shipping';
+        listEl.innerHTML = displayOrders
+          .map((order) => {
+            const isShipping = order.status === "shipping";
             return `
             <div class="task-card">
                 <div class="task-header">
@@ -194,6 +262,7 @@
                             <div class="detail-label">${t.lbl_address}</div>
                             <div class="detail-value">${order.shipping_address}</div>
                             
+                            <!-- Nút View Map gọi hàm toggleMap bên shipper.js -->
                             <button onclick="toggleMap(${order.id}, '${order.shipping_address.replace(/'/g, "\\'")}')" 
                                 style="margin-top: 10px; font-size: 0.85rem; padding: 8px 15px; background: #f8fafc; color: #0046be; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'">
                                 ${t.btn_view_map}
@@ -207,90 +276,52 @@
                     <span>${t.lbl_cod}</span>
                     <strong>$${order.total_amount}</strong>
                 </div>
-                ${isShipping ? `
+                ${
+                  isShipping
+                    ? `
                 <div class="actions">
                     <button class="btn btn-success" onclick="updateStatus(${order.id}, 'completed')">${t.btn_delivered}</button>
                     <button class="btn btn-danger" onclick="updateStatus(${order.id}, 'cancelled')">${t.btn_failed}</button>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
             </div>
             `;
-        }).join('');
-    }
+          })
+          .join("");
+      }
 
-    async function updateStatus(orderId, newStatus) {
+      async function updateStatus(orderId, newStatus) {
         const t = shipperDict[currentLang];
-        if (!confirm(`${t.confirm_msg} #${orderId} ➔ ${newStatus.toUpperCase()}?`)) return;
-        
-        try {
-            const res = await fetch(`http://localhost:3000/api/shipper/orders/${orderId}/status`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify({ status: newStatus })
-            });
-            const data = await res.json();
-            if (res.ok) fetchTasks(); 
-            else alert("Error: " + data.error);
-        } catch (error) { alert(t.err_server); }
-    }
-
-    const mapInstances = {}; 
-
-    async function toggleMap(orderId, address) {
-        const t = shipperDict[currentLang];
-        const mapContainer = document.getElementById(`map-container-${orderId}`);
-        const btn = mapContainer.previousElementSibling.querySelector('button') || mapContainer.previousElementSibling.lastElementChild;
-
-        if (mapContainer.style.height === "220px") {
-            mapContainer.style.height = "0px";
-            mapContainer.style.border = "none";
-            btn.innerHTML = t.btn_view_map;
-            return;
-        }
-
-        mapContainer.style.height = "220px";
-        mapContainer.style.border = "2px solid #cbd5e1";
-        btn.innerHTML = "⏳...";
-
-        if (mapInstances[orderId]) {
-            setTimeout(() => mapInstances[orderId].invalidateSize(), 300); 
-            btn.innerHTML = t.btn_close_map;
-            return;
-        }
+        if (
+          !confirm(`${t.confirm_msg} #${orderId} ➔ ${newStatus.toUpperCase()}?`)
+        )
+          return;
 
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
-            const data = await res.json();
-
-            if (data && data.length > 0) {
-                const lat = data[0].lat;
-                const lon = data[0].lon;
-
-                const map = L.map(`map-container-${orderId}`).setView([lat, lon], 16);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup(`<strong style="color:#0046be;">Giao đến:</strong><br>${address}`).openPopup();
-
-                mapInstances[orderId] = map;
-                btn.innerHTML = t.btn_close_map;
-            } else {
-                mapContainer.style.height = "auto";
-                mapContainer.style.padding = "15px";
-                mapContainer.innerHTML = `<p style='color: #ef4444; font-size: 0.9rem; margin:0; font-weight: bold;'>${t.err_map_not_found}</p>`;
-                btn.innerHTML = t.btn_close_map;
-            }
-        } catch (err) {
-            mapContainer.style.height = "0px";
-            alert(t.err_server);
-            btn.innerHTML = t.btn_view_map;
+          const res = await fetch(
+            `http://localhost:3000/api/shipper/orders/${orderId}/status`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ status: newStatus }),
+            },
+          );
+          const data = await res.json();
+          if (res.ok) fetchTasks();
+          else alert("Error: " + data.error);
+        } catch (error) {
+          alert(t.err_server);
         }
-    }
+      }
 
-    applyLanguage();
-    fetchTasks();
-  </script>
-</body>
+      // Khởi chạy hệ thống sau khi load xong script
+      applyLanguage();
+      fetchTasks();
+    </script>
+  </body>
 </html>
