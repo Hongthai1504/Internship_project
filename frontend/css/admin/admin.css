@@ -1,229 +1,267 @@
 /* ========================================== */
 /* BESTTECH ADMIN DASHBOARD - GLASSMORPHISM   */
 /* ========================================== */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap");
 
 :root {
-    --admin-bg: #f4f7fb;
-    --sidebar-bg: #0f172a; /* Xanh đen sâu thẳm */
-    --primary: #0046be;
-    --accent: #facc15; /* Vàng BestTech */
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.6);
-    --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  --admin-bg: #f4f7fb;
+  --sidebar-bg: #0f172a; /* Xanh đen sâu thẳm */
+  --primary: #0046be;
+  --accent: #facc15; /* Vàng BestTech */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
 }
 
 body {
-    font-family: 'Nunito', sans-serif !important;
-    background: var(--admin-bg) !important;
-    margin: 0;
-    color: var(--text-main);
-    display: flex;
-    min-height: 100vh;
+  font-family: "Nunito", sans-serif !important;
+  background: var(--admin-bg) !important;
+  margin: 0;
+  color: var(--text-main);
+  display: flex;
+  min-height: 100vh;
 }
 
 /* ================== SIDEBAR ================== */
 
-
-
 .sidebar {
-    width: 260px !important;
-    background: linear-gradient(180deg, var(--sidebar-bg) 0%, #020617 100%) !important;
-    padding: 30px 20px !important;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-    color: white;
-    box-sizing: border-box;
+  width: 260px !important;
+  background: linear-gradient(
+    180deg,
+    var(--sidebar-bg) 0%,
+    #020617 100%
+  ) !important;
+  padding: 30px 20px !important;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+  color: white;
+  box-sizing: border-box;
 }
 
-.sidebar h2, nav h2 {
-    margin: 0 0 35px 0 !important;
-    padding-bottom: 20px;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.15); /* Thêm đường gạch ngang mờ phân cách menu */
-    text-align: center;
+.sidebar h2,
+nav h2 {
+  margin: 0 0 35px 0 !important;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15); /* Thêm đường gạch ngang mờ phân cách menu */
+  text-align: center;
 }
 
 /* Dọn dẹp thẻ danh sách (ul, li) */
-.sidebar ul, nav ul {
-    list-style-type: none !important; 
-    padding: 0 !important;            
-    margin: 0 !important;
+.sidebar ul,
+nav ul {
+  list-style-type: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.sidebar li, nav li {
-    padding: 0 !important;
-    margin: 0 !important;
+.sidebar li,
+nav li {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Căn chỉnh nút bấm (thẻ a) */
-.sidebar a, nav a, .sidebar li a, nav li a {
-    display: block !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 14px 20px !important;
-    color: #cbd5e1 !important;
-    text-decoration: none;
-    border-radius: 14px !important;
-    margin-bottom: 8px;
-    font-weight: 700;
-    font-size: 1.05rem;
-    transition: all 0.3s ease !important;
+.sidebar a,
+nav a,
+.sidebar li a,
+nav li a {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 14px 20px !important;
+  color: #cbd5e1 !important;
+  text-decoration: none;
+  border-radius: 14px !important;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: all 0.3s ease !important;
 }
 
-.sidebar a:hover, nav a:hover, .sidebar li a:hover, nav li a:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: white !important;
-    transform: translateX(5px);
+.sidebar a:hover,
+nav a:hover,
+.sidebar li a:hover,
+nav li a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  transform: translateX(5px);
 }
 
-.sidebar a.active, nav a.active, .sidebar li a.active, nav li a.active {
-    background: var(--primary) !important;
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(0, 70, 190, 0.3);
+.sidebar a.active,
+nav a.active,
+.sidebar li a.active,
+nav li a.active {
+  background: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(0, 70, 190, 0.3);
 }
 
 /* ================== MAIN CONTENT ================== */
-.main-content, main {
-    flex: 1;
-    padding: 40px 50px !important;
-    overflow-y: auto;
-    box-sizing: border-box;
+.main-content,
+main {
+  flex: 1;
+  padding: 40px 50px !important;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* Header & Logout Button */
-.main-content h1, .header-title {
-    font-size: 2.2rem !important;
-    font-weight: 900 !important;
-    color: var(--text-main) !important;
-    margin-top: 0;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.main-content h1,
+.header-title {
+  font-size: 2.2rem !important;
+  font-weight: 900 !important;
+  color: var(--text-main) !important;
+  margin-top: 0;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .btn-logout {
-    background: #fee2e2 !important;
-    color: #ef4444 !important;
-    border: none !important;
-    padding: 10px 20px !important;
-    border-radius: 50px !important;
-    font-weight: 800 !important;
-    font-size: 1rem !important;
-    cursor: pointer;
-    transition: all 0.2s !important;
-    text-decoration: none;
+  background: #fee2e2 !important;
+  color: #ef4444 !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 50px !important;
+  font-weight: 800 !important;
+  font-size: 1rem !important;
+  cursor: pointer;
+  transition: all 0.2s !important;
+  text-decoration: none;
 }
 .btn-logout:hover {
-    background: #fecaca !important;
-    transform: translateY(-2px);
+  background: #fecaca !important;
+  transform: translateY(-2px);
 }
 
 /* ================== GLASS CARDS ================== */
-/* Áp dụng cho các Form thêm sản phẩm, Settings, hoặc bọc bảng */
-.admin-card, .form-container, .table-container {
-    background: var(--glass-bg) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border-radius: 24px !important;
-    padding: 35px !important;
-    box-shadow: var(--glass-shadow) !important;
-    border: 1px solid var(--glass-border) !important;
-    margin-bottom: 30px;
+.admin-card,
+.form-container,
+.table-container {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-radius: 24px !important;
+  padding: 35px !important;
+  box-shadow: var(--glass-shadow) !important;
+  border: 1px solid var(--glass-border) !important;
+  margin-bottom: 30px;
 }
 
 /* ================== TABLES ================== */
 table {
-    width: 100% !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    background: transparent !important;
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: transparent !important;
 }
 
 th {
-    background: #f1f5f9 !important;
-    padding: 18px 20px !important;
-    font-weight: 800 !important;
-    color: var(--text-muted) !important;
-    text-transform: uppercase !important;
-    font-size: 0.85rem !important;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  padding: 18px 20px !important;
+  font-weight: 800 !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #cbd5e1 !important;
 }
 
-th:first-child { border-top-left-radius: 14px; border-bottom-left-radius: 14px; }
-th:last-child { border-top-right-radius: 14px; border-bottom-right-radius: 14px; }
+th:first-child {
+  border-top-left-radius: 14px;
+  border-bottom-left-radius: 14px;
+}
+th:last-child {
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
 
 td {
-    padding: 18px 20px !important;
-    border-bottom: 1px dashed #cbd5e1 !important;
-    color: var(--text-main) !important;
-    font-weight: 700 !important;
-    vertical-align: middle;
+  padding: 18px 20px !important;
+  border-bottom: 1px dashed #cbd5e1 !important;
+  color: var(--text-main) !important;
+  font-weight: 700 !important;
+  vertical-align: middle;
 }
 
-tr:hover td { background: rgba(241, 245, 249, 0.5) !important; }
+tr:hover td {
+  background: rgba(241, 245, 249, 0.5) !important;
+}
 
 /* Các ô Select (Dropdown) trong Table */
 td select {
-    padding: 8px 14px !important;
-    border-radius: 8px !important;
-    border: 1px solid #cbd5e1 !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-weight: 800 !important;
-    cursor: pointer;
-    outline: none;
-    transition: 0.2s;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important;
+  font-family: "Nunito", sans-serif !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+  outline: none;
+  transition: 0.2s;
 }
-td select:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(0,70,190,0.1) !important; }
+td select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 70, 190, 0.1) !important;
+}
 
 /* ================== FORMS & INPUTS ================== */
 label {
-    display: block !important;
-    font-weight: 800 !important;
-    margin-bottom: 8px !important;
-    color: var(--text-main) !important;
+  display: block !important;
+  font-weight: 800 !important;
+  margin-bottom: 8px !important;
+  color: var(--text-main) !important;
 }
 
-input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"], select, textarea {
-    width: 100%;
-    padding: 14px 18px !important;
-    border-radius: 12px !important;
-    border: 1px solid #cbd5e1 !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    color: var(--text-main) !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    box-sizing: border-box;
-    transition: all 0.3s !important;
-    outline: none !important;
-    margin-bottom: 20px;
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+select,
+textarea {
+  width: 100%;
+  padding: 14px 18px !important;
+  border-radius: 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  font-family: "Nunito", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: var(--text-main) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-sizing: border-box;
+  transition: all 0.3s !important;
+  outline: none !important;
+  margin-bottom: 20px;
 }
 
-input:focus, select:focus, textarea:focus {
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 4px rgba(0, 70, 190, 0.1) !important;
-    background: #fff !important;
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(0, 70, 190, 0.1) !important;
+  background: #fff !important;
 }
 
 /* ================== BUTTONS ================== */
-button, .btn {
-    font-family: 'Nunito', sans-serif !important;
-    border-radius: 12px !important;
-    font-weight: 800 !important;
-    cursor: pointer !important;
-    transition: all 0.2s !important;
-    border: none !important;
+button,
+.btn {
+  font-family: "Nunito", sans-serif !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  border: none !important;
 }
 
-/* Nút Save/Thêm Sản Phẩm (Màu xanh / Vàng) */
-button[type="submit"], button[onclick*="update"], button[onclick*="save"] {
-    padding: 12px 24px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+button[type="submit"],
+button[onclick*="update"],
+button[onclick*="save"] {
+  padding: 12px 24px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
-button[type="submit"]:hover, button[onclick*="update"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+button[type="submit"]:hover,
+button[onclick*="update"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
 }

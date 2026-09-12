@@ -1,0 +1,208 @@
+<style>
+  /* KHÔI PHỤC GIAO DIỆN CHUẨN BESTTECH */
+  .bb-header {
+    background-color: #0046be !important;
+    width: 100%;
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  .header-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 15px 30px !important;
+    gap: 30px !important;
+  }
+  .logo {
+    color: white !important;
+    font-size: 1.8rem !important;
+    font-weight: 900 !important;
+    text-decoration: none !important;
+    letter-spacing: -0.5px !important;
+  }
+  .search-container {
+    flex: 1 !important;
+    max-width: 650px !important;
+    position: relative !important;
+    display: flex !important;
+  }
+  #search-input {
+    width: 100% !important;
+    padding: 10px 40px 10px 15px !important;
+    border-radius: 4px !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 0.95rem !important;
+  }
+  .search-btn {
+    position: absolute !important;
+    right: 5px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: none !important;
+    border: none !important;
+    color: #0046be !important;
+    cursor: pointer !important;
+  }
+  .nav-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 25px !important;
+  }
+  .nav-item, .cart-trigger {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: white !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+  }
+  /* Căn chỉnh chấm đỏ/vàng nằm ngang với chữ */
+  .badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    min-width: 22px !important;
+    height: 22px !important;
+    font-size: 0.8rem !important;
+    font-weight: 900 !important;
+  }
+  #wishlist-count { background-color: #ef4444 !important; color: white !important; }
+  #cart-count { background-color: #ffe000 !important; color: #000 !important; }
+
+  /* Thanh Menu dưới (Shop, Deals) */
+  .header-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    padding: 12px 30px !important;
+    background-color: #0046be !important;
+  }
+  .menu-pill-container { display: flex !important; gap: 15px !important; }
+  .menu-pill-btn {
+    background: transparent !important;
+    border: 1px solid white !important;
+    color: white !important;
+    padding: 6px 18px !important;
+    border-radius: 20px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: background 0.2s !important;
+  }
+  .menu-pill-btn:hover { background: rgba(255, 255, 255, 0.15) !important; }
+
+  /* ẨN CÁC MENU DROPDOWN MẶC ĐỊNH */
+  .user-dropdown-menu, .dropdown-menu-box, .menu-overlay { display: none; }
+
+  /* Style cho Menu Dropdown */
+  .user-dropdown-menu { position: absolute; top: 100%; right: 0; background: white; color: #333; z-index: 100; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 200px; margin-top: 10px; }
+  .user-dropdown-list { list-style: none; padding: 0; margin: 0; }
+  .user-dropdown-list li { padding: 12px 20px; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+  .user-dropdown-list li:hover { background: #f8fafc; }
+  .dropdown-menu-box { position: absolute; background: white; color: #333; z-index: 99; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 250px; }
+  .dropdown-list { list-style: none; padding: 0; margin: 0; line-height: 2; cursor: pointer; }
+</style>
+
+<header class="bb-header">
+  <div class="header-top">
+    <!-- Logo -->
+    <a href="/index.html" class="logo">BestTech</a>
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-container">
+      <input type="text" id="search-input" data-i18n-placeholder="search_placeholder" placeholder="What are you looking for today?" />
+      <button class="search-btn">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" /></svg>
+      </button>
+      <div id="search-suggestions" class="search-suggestions-box"></div>
+    </div>
+
+    <!-- Cụm Menu Phải -->
+    <div class="nav-actions">
+      <!-- 1. Ngôn ngữ -->
+      <div class="nav-item lang-switch" onclick="toggleLanguage()">
+        <span id="current-lang-icon">🇺🇸 EN</span>
+      </div>
+
+      <!-- 2. Nút Account -->
+      <div class="nav-item" id="account-wrapper" style="position: relative;">
+        <div id="login-trigger" style="display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+          <span id="account-text" data-i18n="nav_account">My Account</span>
+        </div>
+        <div id="user-dropdown" class="user-dropdown-menu">
+          <div class="user-dropdown-header"><p data-i18n="nav_welcome">Welcome back!</p></div>
+          <ul class="user-dropdown-list">
+            <li id="menu-profile"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg><span data-i18n="nav_profile">My Profile</span></li>
+            <li id="menu-logout" style="color: #ef4444; border-top: 1px solid #eee"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" /></svg><span data-i18n="nav_logout">Log Out</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 3. Nút Lịch sử Đơn hàng -->
+      <div class="nav-item" id="order-history-trigger" style="display: none;">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" /></svg>
+        <span data-i18n="nav_orders">Orders</span>
+      </div>
+
+      <!-- 4. Nút Wishlist (Saved) -->
+      <div class="nav-item" id="wishlist-trigger" onclick="window.location.href = '/pages/user/wishlist.html'">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        <span data-i18n="nav_saved">Saved</span>
+        <span class="badge" id="wishlist-count">0</span>
+      </div>
+
+      <!-- NÚT ADMIN PANEL -->
+      <a href="/pages/admin/admin.html" id="admin-quick-link" style="display: none; color: #fff; text-decoration: none; font-weight: 800; background: #ef4444; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; align-items: center; gap: 6px;">
+        ⚙️ Admin Panel
+      </a>
+
+      <!-- 5. Nút Giỏ Hàng (Cart) -->
+      <div class="cart-trigger" id="open-cart">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" /></svg>
+        <span data-i18n="nav_cart">Cart</span>
+        <span class="badge" id="cart-count">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <!-- THANH ĐIỀU HƯỚNG DƯỚI (MENU PILLS) -->
+  <nav class="header-bottom">
+    <div class="menu-pill-container">
+      <button class="menu-pill-btn" data-target="dropdown-shop"><span data-i18n="nav_shop">Shop</span> ▾</button>
+      <button class="menu-pill-btn" data-target="dropdown-deals"><span data-i18n="nav_deals">Deals</span> ▾</button>
+      <button class="menu-pill-btn" data-target="dropdown-support"><span data-i18n="nav_support">Support & Services</span> ▾</button>
+      <button class="menu-pill-btn" data-target="dropdown-discover"><span data-i18n="nav_discover">Discover</span> ▾</button>
+    </div>
+  </nav>
+</header>
+
+<!-- DROPDOWN BOXES -->
+<div id="dropdown-shop" class="dropdown-menu-box">
+  <div class="dropdown-header"><h3>Shop</h3><button class="close-dropdown" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✕</button></div>
+  <ul id="dynamic-main-menu" class="menu-list"></ul>
+</div>
+<div id="dropdown-deals" class="dropdown-menu-box">
+  <div class="dropdown-header"><h3>Deals</h3><button class="close-dropdown" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✕</button></div>
+  <ul class="dropdown-list">
+    <li>Top Deals</li><li>Deal of the Day</li><li>Exclusive Member Deals</li>
+    <li>Outlet Deals</li><li style="border-bottom: none">Clearance Deals</li>
+  </ul>
+</div>
+<div id="dropdown-support" class="dropdown-menu-box">
+  <div class="dropdown-header"><h3>Support & Services</h3><button class="close-dropdown" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✕</button></div>
+  <ul class="dropdown-list"><li style="color: #666; cursor: default; background: white">(Content coming soon)</li></ul>
+</div>
+<div id="dropdown-discover" class="dropdown-menu-box">
+  <div class="dropdown-header"><h3>Discover</h3><button class="close-dropdown" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✕</button></div>
+  <ul class="dropdown-list"><li>All Discover</li><li>Back to School</li><li>Top-Rated Tech</li></ul>
+</div>

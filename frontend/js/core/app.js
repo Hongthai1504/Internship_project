@@ -73,6 +73,388 @@ document.addEventListener("DOMContentLoaded", () => {
   applyLanguage(currentLang);
 });
 
+const menuData = [
+  {
+    id: 1,
+    type: "brand",
+    main: "Shop by Brand",
+    subs: [
+      "Apple",
+      "ASUS",
+      "Beats",
+      "Dell",
+      "GE",
+      "HP",
+      "Lenovo",
+      "LG",
+      "Meta",
+      "Nintendo",
+      "Samsung",
+      "Sony",
+      "All Brands",
+    ],
+  },
+  {
+    id: 2,
+    type: "category",
+    main: "TV & Home Theater",
+    subs: [
+      "Explore TV & Home Theater",
+      "Learn About RGB LED TVs",
+      "TVs by Size",
+      "TVs by Brand",
+      "TVs by Type",
+      "All Sound Bars & Home Audio",
+      "Projectors & Screens",
+      "Blu-ray & DVD Players",
+      "Streaming Devices",
+      "Home Theater Accessories",
+      "Premium TV & Home Theater",
+    ],
+  },
+  {
+    id: 3,
+    type: "category",
+    main: "Computers & Tablets",
+    subs: [
+      "Explore Computers & Tablets",
+      "Laptops & Desktops",
+      "Tablets",
+      "Monitors",
+      "PC Gaming & Virtual Reality",
+      "Computer Components",
+      "Hard Drives, SSD & Storage",
+      "Computer Accessories",
+      "Software",
+      "Printers, Ink & Toner",
+      "Wifi & Networking",
+    ],
+  },
+  {
+    id: 4,
+    type: "category",
+    main: "Appliances",
+    subs: [
+      "Explore Appliances",
+      "Major Kitchen Appliances",
+      "Small Kitchen Appliances",
+      "Luxury Kitchen Appliances",
+      "Washers & Dryers",
+      "Vacuums & Floor Care",
+      "Heating, Cooling & Air Quality",
+      "Appliance Packages",
+      "Shop by Brand",
+      "Small Space Appliances",
+      "Appliance Parts & Accessories",
+    ],
+  },
+  {
+    id: 5,
+    type: "category",
+    main: "Small Kitchen Appliances",
+    subs: [
+      "Explore Small Kitchen Appliances",
+      "Small Kitchen Appliance Deals",
+      "Air Fryers & Deep Fryers",
+      "Bar & Wine",
+      "Blenders & Juicers",
+      "Coffee, Tea & Espresso",
+      "Microwaves",
+      "Mini Fridges",
+      "Mixers",
+      "Pressure Cookers",
+      "Toasters & Toaster Ovens",
+    ],
+  },
+  {
+    id: 6,
+    type: "category",
+    main: "Video Games",
+    subs: [
+      "Explore Video Games",
+      "Nintendo",
+      "Xbox",
+      "PlayStation",
+      "PC Gaming",
+      "Virtual Reality",
+      "Gaming Accessories",
+      "Digital Gaming",
+      "Handheld Gaming",
+      "Retro Gaming & Arcade",
+      "Simulation Racing",
+    ],
+  },
+  {
+    id: 7,
+    type: "category",
+    main: "Cell Phones",
+    subs: [
+      "Explore Cell Phones",
+      "Cell Phone Accessories",
+      "Unlocked Phones",
+      "iPhone",
+      "Samsung Galaxy",
+      "Google Pixel",
+      "Motorola",
+      "Verizon",
+      "AT&T",
+      "Prepaid Phones & Carriers",
+      "SIM Cards",
+    ],
+  },
+  {
+    id: 8,
+    type: "category",
+    main: "Headphones",
+    subs: [
+      "Explore Headphones",
+      "AirPods",
+      "Wireless Headphones",
+      "True Wireless Earbuds",
+      "Open-Ear Headphones",
+      "Over-Ear & On-Ear Headphones",
+      "Earbud & In-Ear Headphones",
+      "Noise-Cancelling Headphones",
+      "Wired Headphones",
+      "Sports Headphones",
+      "Headphone Accessories",
+    ],
+  },
+  {
+    id: 9,
+    type: "category",
+    main: "Home Audio & Speakers",
+    subs: [
+      "Explore Home Audio & Speakers",
+      "Home Audio",
+      "Portable Audio",
+      "Premium Home Audio & Speakers",
+      "Home Audio Accessories",
+      "Audio Packages",
+    ],
+  },
+  {
+    id: 10,
+    type: "category",
+    main: "Music, Movies & TV Shows",
+    subs: ["Explore Music, Movies & TV Shows", "Music", "Movies", "TV Shows"],
+  },
+  {
+    id: 11,
+    type: "category",
+    main: "Cameras, Camcorders & Drones",
+    subs: [
+      "Explore Cameras, Camcorders & Drones",
+      "Cameras & Lenses",
+      "Action Cameras & Camcorders",
+      "Content Creator Gear",
+      "Camera Accessories",
+      "Drones",
+      "Binoculars, Telescopes & Optics",
+      "Shop by Brand",
+    ],
+  },
+  {
+    id: 12,
+    type: "category",
+    main: "Wearable Technology",
+    subs: [
+      "Explore Wearable Technology",
+      "Apple Watch",
+      "Samsung Galaxy Smartwatches",
+      "Smartwatches",
+      "Fitness Trackers & Accessories",
+      "Smart Rings",
+      "Smart & AI Glasses",
+      "Virtual Reality",
+      "Shop by Brand",
+      "Wearable Technology Accessories",
+    ],
+  },
+  {
+    id: 13,
+    type: "category",
+    main: "Fitness, Sports & Outdoors",
+    subs: [
+      "Explore Fitness, Sports & Outdoors",
+      "Exercise & Fitness Equipment",
+      "Water Sports Equipment",
+      "Sports Gear & Equipment",
+      "Kid's Sports & Outdoor Play",
+      "Camping Gear",
+      "Electric Transportation",
+      "Biking",
+      "Game Room",
+      "Yard Games",
+    ],
+  },
+  {
+    id: 14,
+    type: "category",
+    main: "Sports Fan Shop",
+    subs: [
+      "Explore Sports Fan Shop",
+      "College",
+      "NFL",
+      "NBA",
+      "MLB",
+      "NHL",
+      "Soccer",
+      "Golf",
+      "WNBA",
+    ],
+  },
+  {
+    id: 15,
+    type: "category",
+    main: "Health, Wellness & Personal Care",
+    subs: [
+      "Explore Health, Wellness & Personal Care",
+      "Home Health Care",
+      "Personal Care & Beauty",
+      "Workout Recovery",
+      "Eyewear",
+      "Baby",
+      "Contrast Therapy",
+      "Muscle Pain Relief",
+      "Ear Care",
+    ],
+  },
+  {
+    id: 16,
+    type: "category",
+    main: "Home, Furniture & Office",
+    subs: [
+      "Explore Home, Furniture & Office",
+      "Home, Furniture & Decor",
+      "Kitchen & Dining",
+      "Office",
+      "Bathroom",
+      "Household Essentials",
+      "Luggage & Travel",
+      "Tools & Garage",
+      "Storage & Organization",
+      "Holiday Decorations",
+    ],
+  },
+  {
+    id: 17,
+    type: "category",
+    main: "Smart Home, Security & Wifi",
+    subs: [
+      "Explore Smart Home, Security & Wifi",
+      "Wifi & Networking",
+      "Security Cameras & Surveillance",
+      "Smart Doorbells",
+      "Smart Door Locks",
+      "Home Security Systems",
+      "Smart Speakers & Displays",
+      "Smart Lighting",
+      "Smart Thermostats",
+      "Smart Plugs & Outlets",
+      "Smart Devices",
+    ],
+  },
+  {
+    id: 18,
+    type: "category",
+    main: "Outdoor Living",
+    subs: [
+      "Explore Outdoor Living",
+      "Grills & Outdoor Cooking",
+      "Outdoor Kitchens",
+      "Outdoor Heating",
+      "Outdoor Power Equipment",
+      "Outdoor Home Theater",
+      "Outdoor Lighting",
+      "Patio Furniture",
+      "Lawn & Garden",
+      "Generators & Backup Power",
+      "Sheds & Outdoor Storage",
+    ],
+  },
+  {
+    id: 19,
+    type: "category",
+    main: "Electric Transportation",
+    subs: [
+      "Explore Electric Transportation",
+      "Electric Bikes",
+      "Electric Scooters",
+      "Hoverboards",
+      "Electric Car Chargers",
+      "Kid's Scooters & Ride-ons",
+      "Safety Gear & Accessories",
+    ],
+  },
+  {
+    id: 20,
+    type: "category",
+    main: "Car Electronics & GPS",
+    subs: [
+      "Explore Car Electronics & GPS",
+      "Car Audio",
+      "Auto Care & Cleaning",
+      "Auto Tools & Equipment",
+      "Car Security & Convenience",
+      "Back-up & Dash Cameras",
+      "GPS Navigation",
+      "Marine & Powersports",
+      "Installation Parts & Accessories",
+    ],
+  },
+  {
+    id: 21,
+    type: "category",
+    main: "Toys, Games & Crafts",
+    subs: [
+      "Explore Toys, Games & Crafts",
+      "Toys by Type",
+      "Toys by Age",
+      "Games, Puzzles & Cards",
+      "Arts & Crafts",
+      "Crafting Technology",
+      "Collectibles",
+      "Shop by Character",
+    ],
+  },
+];
+
+function renderDynamicMenu() {
+  const menuContainer = document.getElementById("dynamic-main-menu");
+  if (!menuContainer) return;
+
+  let html = "";
+
+  menuData.forEach((cat) => {
+    let mainLink =
+      cat.type === "brand"
+        ? "/pages/shop/search.html?q=brands"
+        : `/pages/shop/category.html?id=${cat.id}&name=${encodeURIComponent(cat.main)}`;
+
+    html += `
+            <li class="has-submenu">
+                <a href="${mainLink}">${cat.main}</a> <span class="right-arrow">▾</span>
+                <ul class="submenu">`;
+
+    cat.subs.forEach((sub) => {
+      let subLink = `/pages/shop/search.html?q=${encodeURIComponent(sub.replace("Explore ", ""))}`;
+
+      if (sub.startsWith("Explore") && cat.type === "category") {
+        subLink = mainLink;
+      }
+
+      html += `<li><a href="${subLink}">${sub}</a></li>`;
+    });
+
+    html += `</ul></li>`;
+  });
+
+  menuContainer.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", renderDynamicMenu);
+
 // SMART SEARCH ALGORITHM
 function isProductMatch(product, searchKeyword) {
   const term = searchKeyword.toLowerCase().trim();
@@ -1963,71 +2345,6 @@ async function initFlashSaleTimer() {
     }, 1000);
   } catch (err) {
     console.error("Lỗi tải Flash Sale:", err);
-  }
-}
-
-// --- SHIPPER MAP LOGIC ---
-const mapInstances = {};
-
-async function toggleMap(orderId, address) {
-  const t = shipperDict[currentLang];
-  const mapContainer = document.getElementById(`map-container-${orderId}`);
-  const btn =
-    mapContainer.previousElementSibling.querySelector("button") ||
-    mapContainer.previousElementSibling.lastElementChild;
-
-  if (mapContainer.style.height === "220px") {
-    mapContainer.style.height = "0px";
-    mapContainer.style.border = "none";
-    btn.innerHTML = t.btn_view_map;
-    return;
-  }
-
-  mapContainer.style.height = "220px";
-  mapContainer.style.border = "2px solid #cbd5e1";
-  btn.innerHTML = "⏳...";
-
-  if (mapInstances[orderId]) {
-    setTimeout(() => mapInstances[orderId].invalidateSize(), 300); // Sửa lỗi bể layout của Leaflet khi nằm trong thẻ ẩn
-    btn.innerHTML = t.btn_close_map;
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
-    );
-    const data = await res.json();
-
-    if (data && data.length > 0) {
-      const lat = data[0].lat;
-      const lon = data[0].lon;
-
-      const map = L.map(`map-container-${orderId}`).setView([lat, lon], 16);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
-      }).addTo(map);
-
-      // Cắm cờ vị trí
-      L.marker([lat, lon])
-        .addTo(map)
-        .bindPopup(
-          `<strong style="color:#0046be;">Giao đến:</strong><br>${address}`,
-        )
-        .openPopup();
-
-      mapInstances[orderId] = map;
-      btn.innerHTML = t.btn_close_map;
-    } else {
-      mapContainer.style.height = "auto";
-      mapContainer.style.padding = "15px";
-      mapContainer.innerHTML = `<p style='color: #ef4444; font-size: 0.9rem; margin:0; font-weight: bold;'>${t.err_map_not_found}</p>`;
-      btn.innerHTML = t.btn_close_map;
-    }
-  } catch (err) {
-    mapContainer.style.height = "0px";
-    alert(t.err_server);
-    btn.innerHTML = t.btn_view_map;
   }
 }
 
