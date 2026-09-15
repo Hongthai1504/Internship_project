@@ -13,7 +13,6 @@
   <body>
     <!-- SIDEBAR  -->
     <aside class="sidebar">
-      <!-- Logo BestTech Admin -->
       <h2
         onclick="window.location.href = '/index.html'"
         style="
@@ -60,14 +59,29 @@
       <nav>
         <ul>
           <li>
-            <a href="/pages/admin/admin.html" class="active"
+            <a
+              href="/pages/admin/admin.html"
+              class="active"
+              data-i18n="menu_add"
               >+ Add New Product</a
             >
           </li>
-          <li><a href="/pages/admin/admin-orders.html">Order Management</a></li>
-          <li><a href="/pages/admin/admin-customers.html">Customer List</a></li>
           <li>
-            <a href="/pages/admin/admin-settings.html">System Settings</a>
+            <a href="/pages/admin/admin-orders.html" data-i18n="menu_orders"
+              >Order Management</a
+            >
+          </li>
+          <li>
+            <a
+              href="/pages/admin/admin-customers.html"
+              data-i18n="menu_customers"
+              >Customer List</a
+            >
+          </li>
+          <li>
+            <a href="/pages/admin/admin-settings.html" data-i18n="menu_settings"
+              >System Settings</a
+            >
           </li>
         </ul>
       </nav>
@@ -76,19 +90,53 @@
     <!-- MAIN CONTENT -->
     <main class="main-content">
       <div class="header-bar">
-        <h1>Add New Product</h1>
-        <button class="logout-btn" onclick="logout()">Log Out</button>
+        <h1 data-i18n="add_title">Add New Product</h1>
+        <div style="display: flex; gap: 15px; align-items: center">
+          <button
+            id="lang-toggle"
+            onclick="toggleAdminLang()"
+            style="
+              background: #e2e8f0;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 12px;
+              font-weight: 800;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              color: #0f172a;
+              transition: 0.2s;
+            "
+            onmouseover="this.style.background = '#cbd5e1'"
+            onmouseout="this.style.background = '#e2e8f0'"
+          >
+            <img
+              id="admin-lang-icon"
+              src="https://flagcdn.com/w20/us.png"
+              width="20"
+              style="border-radius: 2px"
+            />
+            <span id="admin-lang-text">EN</span>
+          </button>
+          <button class="logout-btn" onclick="logout()" data-i18n="logout">
+            Log Out
+          </button>
+        </div>
       </div>
 
       <!-- ADD PRODUCT FORM -->
       <div class="card">
         <form id="add-product-form">
           <div class="form-group">
-            <label>Product Name (including product type) *</label>
+            <label data-i18n="lbl_prod_name"
+              >Product Name (including product type) *</label
+            >
             <input
               type="text"
               id="name"
               required
+              data-i18n-placeholder="ph_name"
               placeholder="Ex: Apple iPhone 15 Pro Max 256GB"
             />
             <small
@@ -98,6 +146,7 @@
                 margin-top: 5px;
                 display: block;
               "
+              data-i18n="tip_prod_name"
             >
               Tip: Include the product type in the name (Ex: <b>iPhone</b>,
               <b>Laptop</b>, <b>TV</b>) to allow the system to automatically
@@ -107,9 +156,11 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label>Main Category *</label>
+              <label data-i18n="lbl_main_cat">Main Category *</label>
               <select id="main_category" required style="height: 40px">
-                <option value="">-- Select main category --</option>
+                <option value="" data-i18n="opt_main_cat">
+                  -- Select main category --
+                </option>
                 <option value="1">Shop by Brand</option>
                 <option value="2">TV & Home Theater</option>
                 <option value="3">Computers & Tablets</option>
@@ -135,9 +186,11 @@
             </div>
 
             <div class="form-group">
-              <label>Sub Category *</label>
+              <label data-i18n="lbl_sub_cat">Sub Category *</label>
               <select id="category_id" required style="height: 40px" disabled>
-                <option value="">Please select the main category first</option>
+                <option value="" data-i18n="opt_sub_cat_first">
+                  Please select the main category first
+                </option>
               </select>
               <small
                 style="
@@ -146,6 +199,7 @@
                   margin-top: 5px;
                   display: block;
                 "
+                data-i18n="tip_sub_cat"
               >
                 The product will be saved directly into this subcategory.
               </small>
@@ -154,11 +208,12 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label>Brand *</label>
+              <label data-i18n="lbl_brand">Brand *</label>
               <input
                 type="text"
                 id="brand"
                 required
+                data-i18n-placeholder="ph_brand"
                 placeholder="Ex: Apple, Samsung, Sony..."
               />
               <small
@@ -168,17 +223,19 @@
                   margin-top: 5px;
                   display: block;
                 "
+                data-i18n="tip_brand"
               >
                 Enter the brand name accurately so the product appears in the
                 "Shop by Brand" menu.
               </small>
             </div>
             <div class="form-group">
-              <label>SKU (Unique) *</label>
+              <label data-i18n="lbl_sku">SKU (Unique) *</label>
               <input
                 type="text"
                 id="sku"
                 required
+                data-i18n-placeholder="ph_sku"
                 placeholder="Ex: APP-IPH15-256"
               />
             </div>
@@ -186,24 +243,19 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label>Selling Price ($) *</label>
-              <input
-                type="number"
-                id="price"
-                step="0.01"
-                required
-                placeholder="999.99"
-              />
+              <label data-i18n="lbl_price">Selling Price ($) *</label>
+              <input type="number" id="price" step="0.01" required />
             </div>
             <div class="form-group">
-              <label>Stock Quantity</label>
+              <label data-i18n="lbl_stock">Stock Quantity</label>
               <input type="number" id="stock" value="10" min="0" />
             </div>
           </div>
 
-          <!-- UPDATED: Product Images (Add Form) -->
           <div class="form-group">
-            <label>Product Images (Select from Media Library)</label>
+            <label data-i18n="lbl_images"
+              >Product Images (Select from Media Library)</label
+            >
             <button
               type="button"
               class="btn-submit"
@@ -214,6 +266,7 @@
                 font-size: 0.95rem;
               "
               onclick="openMediaManager('add')"
+              data-i18n="btn_browse_media"
             >
               Browse Media Library
             </button>
@@ -228,6 +281,7 @@
                   margin: 0;
                   font-style: italic;
                 "
+                data-i18n="txt_no_images"
               >
                 No images selected.
               </p>
@@ -252,9 +306,9 @@
                 padding-bottom: 10px;
                 margin-bottom: 15px;
               "
+              data-i18n="lbl_specs"
               >Technical Specifications (Optional)</label
             >
-
             <div
               id="add-specs-container"
               style="
@@ -264,7 +318,6 @@
                 margin-bottom: 15px;
               "
             ></div>
-
             <button
               type="button"
               class="btn-submit"
@@ -276,10 +329,13 @@
                 font-size: 0.9rem;
               "
               onclick="addSpecRow('add')"
+              data-i18n="btn_add_spec"
             >
               + Add Specification Row
             </button>
-            <small style="display: block; margin-top: 10px; color: #666"
+            <small
+              style="display: block; margin-top: 10px; color: #666"
+              data-i18n="tip_specs"
               >Group (e.g., "Processor"), Name (e.g., "CPU Speed"), Value (e.g.,
               "2.8GHz").</small
             >
@@ -297,9 +353,9 @@
               <label
                 for="description"
                 style="font-weight: 600; color: #1e293b; margin: 0"
+                data-i18n="lbl_desc"
                 >Detailed Description</label
               >
-
               <button
                 type="button"
                 id="btn-ai-generate"
@@ -319,12 +375,13 @@
                   transition: all 0.2s;
                 "
               >
-                ✨ AI Generate
+                <span data-i18n="btn_ai_gen">✨ AI Generate</span>
               </button>
             </div>
             <textarea
               id="description"
               rows="6"
+              data-i18n-placeholder="ph_desc"
               placeholder="Enter product specifications, key features..."
               style="
                 width: 100%;
@@ -338,7 +395,12 @@
             ></textarea>
           </div>
 
-          <button type="submit" class="btn-submit" style="width: 100%">
+          <button
+            type="submit"
+            class="btn-submit"
+            style="width: 100%"
+            data-i18n="btn_add_product"
+          >
             + Add Product to Store
           </button>
         </form>
@@ -348,8 +410,8 @@
       <div
         style="margin-top: 50px; border-top: 2px solid #eee; padding-top: 30px"
       >
-        <h2>Product Management</h2>
-        <p style="color: #666; margin-bottom: 20px">
+        <h2 data-i18n="mng_title">Product Management</h2>
+        <p style="color: #666; margin-bottom: 20px" data-i18n="mng_subtitle">
           List of products currently available on the system.
         </p>
         <div id="admin-product-list"></div>
@@ -397,7 +459,6 @@
         >
           &times;
         </button>
-
         <h2
           style="
             margin-top: 0;
@@ -406,53 +467,50 @@
             padding-bottom: 15px;
             margin-bottom: 25px;
           "
+          data-i18n="edit_title"
         >
           Edit Product
         </h2>
-
         <form id="edit-product-form">
           <input type="hidden" id="edit-product-id" />
-
           <div class="form-group">
-            <label>Product Name *</label>
-            <input type="text" id="edit-name" required />
+            <label data-i18n="lbl_prod_name2">Product Name *</label
+            ><input type="text" id="edit-name" required />
           </div>
-
           <div class="form-row">
             <div class="form-group">
-              <label>Brand *</label>
-              <input type="text" id="edit-brand" required />
+              <label data-i18n="lbl_brand2">Brand *</label
+              ><input type="text" id="edit-brand" required />
             </div>
             <div class="form-group">
-              <label>SKU (Unique) *</label>
-              <input type="text" id="edit-sku" required />
+              <label data-i18n="lbl_sku2">SKU (Unique) *</label
+              ><input type="text" id="edit-sku" required />
             </div>
           </div>
-
           <div class="form-row">
             <div class="form-group">
-              <label>Price ($) *</label>
-              <input type="number" id="edit-price" step="0.01" required />
+              <label data-i18n="lbl_price2">Price ($) *</label
+              ><input type="number" id="edit-price" step="0.01" required />
             </div>
             <div class="form-group">
-              <label>Stock</label>
-              <input type="number" id="edit-stock" min="0" />
+              <label data-i18n="lbl_stock2">Stock</label
+              ><input type="number" id="edit-stock" min="0" />
             </div>
           </div>
-
           <div class="form-group">
-            <label>Sub Category ID (Read-only for quick edits)</label>
-            <input
+            <label data-i18n="lbl_edit_sub_cat"
+              >Sub Category ID (Read-only for quick edits)</label
+            ><input
               type="number"
               id="edit-category-id"
               readonly
               style="background: #f4f6f9; color: #666"
             />
           </div>
-
-          <!-- UPDATED: Product Images (Edit Form) -->
           <div class="form-group">
-            <label>Product Images (Main Image & Gallery)</label>
+            <label data-i18n="lbl_edit_images"
+              >Product Images (Main Image & Gallery)</label
+            >
             <button
               type="button"
               class="btn-submit"
@@ -463,6 +521,7 @@
                 font-size: 0.95rem;
               "
               onclick="openMediaManager('edit')"
+              data-i18n="btn_browse_media"
             >
               Browse Media Library
             </button>
@@ -471,8 +530,6 @@
               style="display: flex; gap: 10px; flex-wrap: wrap"
             ></div>
           </div>
-
-          <!-- DYNAMIC SPECIFICATIONS BUILDER (EDIT FORM) -->
           <div
             class="form-group"
             style="
@@ -491,9 +548,9 @@
                 padding-bottom: 10px;
                 margin-bottom: 15px;
               "
+              data-i18n="lbl_specs"
               >Technical Specifications (Optional)</label
             >
-
             <div
               id="edit-specs-container"
               style="
@@ -503,7 +560,6 @@
                 margin-bottom: 15px;
               "
             ></div>
-
             <button
               type="button"
               class="btn-submit"
@@ -515,20 +571,20 @@
                 font-size: 0.9rem;
               "
               onclick="addSpecRow('edit')"
+              data-i18n="btn_add_spec"
             >
               + Add Specification Row
             </button>
           </div>
-
           <div class="form-group">
-            <label>Description</label>
-            <textarea id="edit-description" rows="4"></textarea>
+            <label data-i18n="lbl_desc2">Description</label
+            ><textarea id="edit-description" rows="4"></textarea>
           </div>
-
           <button
             type="submit"
             class="btn-submit"
             style="width: 100%; background: #eab308; color: #000"
+            data-i18n="btn_save_changes"
           >
             Save Changes
           </button>
@@ -536,7 +592,7 @@
       </div>
     </div>
 
-    <!-- MEDIA LIBRARY MODAL (MODERN UI UPGRADE) -->
+    <!-- MEDIA LIBRARY MODAL -->
     <div
       id="media-library-modal"
       class="modal-overlay"
@@ -571,7 +627,6 @@
           border: 1px solid rgba(255, 255, 255, 0.8);
         "
       >
-        <!-- HEADER -->
         <div
           style="
             padding: 20px 30px;
@@ -598,7 +653,7 @@
                 d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
               />
             </svg>
-            Media Library
+            <span data-i18n="media_title">Media Library</span>
           </h2>
           <button
             id="close-media-modal"
@@ -625,9 +680,7 @@
           </button>
         </div>
 
-        <!-- BODY -->
         <div style="flex: 1; display: flex; overflow: hidden">
-          <!-- SIDEBAR (Folders) -->
           <div
             style="
               width: 280px;
@@ -647,15 +700,15 @@
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
                 "
+                data-i18n="media_docs"
               >
                 Documents
               </h3>
-
-              <!-- Create Folder Input -->
               <div style="display: flex; gap: 8px; margin-bottom: 30px">
                 <input
                   type="text"
                   id="new-folder-name"
+                  data-i18n-placeholder="ph_new_folder"
                   placeholder="New folder..."
                   style="
                     flex: 1;
@@ -687,8 +740,6 @@
                   +
                 </button>
               </div>
-
-              <!-- Folder List -->
               <ul
                 id="media-folder-list"
                 style="
@@ -700,66 +751,11 @@
                   gap: 8px;
                 "
               >
-                <li
-                  class="folder-item active"
-                  style="
-                    padding: 14px 18px;
-                    border-radius: 12px;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    font-weight: 800;
-                    background: #e0e7ff;
-                    color: #0046be;
-                    transition: all 0.2s;
-                  "
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    fill="#f59e0b"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
-                    />
-                  </svg>
-                  All Media
-                </li>
-                <li
-                  class="folder-item"
-                  style="
-                    padding: 14px 18px;
-                    border-radius: 12px;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    font-weight: 600;
-                    color: #475569;
-                    transition: all 0.2s;
-                  "
-                  onmouseover="this.style.background = '#f1f5f9'"
-                  onmouseout="this.style.background = 'transparent'"
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    fill="#f59e0b"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
-                    />
-                  </svg>
-                  Unassigned
-                </li>
+                <!-- Danh sách thư mục sẽ được render bằng JS -->
               </ul>
             </div>
           </div>
 
-          <!-- MAIN MEDIA AREA -->
           <div
             style="
               flex: 1;
@@ -768,7 +764,6 @@
               background: #ffffff;
             "
           >
-            <!-- Toolbar -->
             <div
               style="
                 padding: 25px 30px;
@@ -791,8 +786,6 @@
               >
                 All Media
               </h3>
-
-              <!-- Search Bar -->
               <div style="flex: 1; position: relative; max-width: 450px">
                 <svg
                   width="18"
@@ -813,6 +806,7 @@
                 <input
                   type="text"
                   id="media-search-input"
+                  data-i18n-placeholder="media_search_placeholder"
                   placeholder="Search image by name..."
                   style="
                     width: 100%;
@@ -831,8 +825,6 @@
                   "
                 />
               </div>
-
-              <!-- Custom File Upload Button -->
               <div style="display: flex; align-items: center; gap: 15px">
                 <input
                   type="file"
@@ -841,7 +833,6 @@
                   accept="image/*"
                   style="display: none"
                 />
-
                 <label
                   for="media-file-input"
                   style="
@@ -871,9 +862,8 @@
                   >
                     <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                   </svg>
-                  Choose Files
+                  <span data-i18n="media_choose_files">Choose Files</span>
                 </label>
-
                 <span
                   id="file-chosen-text"
                   style="
@@ -885,9 +875,9 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                   "
+                  data-i18n="media_no_files"
                   >No files</span
                 >
-
                 <button
                   id="btn-upload-media"
                   style="
@@ -904,13 +894,12 @@
                   "
                   onmouseover="this.style.transform = 'translateY(-2px)'"
                   onmouseout="this.style.transform = 'none'"
+                  data-i18n="media_upload"
                 >
                   Upload
                 </button>
               </div>
             </div>
-
-            <!-- Grid Area / Empty State -->
             <div
               id="media-grid"
               style="
@@ -922,37 +911,7 @@
                 justify-content: center;
                 align-items: center;
               "
-            >
-              <!-- Empty State -->
-              <div style="text-align: center; color: #94a3b8">
-                <svg
-                  width="100"
-                  height="100"
-                  fill="#cbd5e1"
-                  viewBox="0 0 24 24"
-                  style="margin-bottom: 20px"
-                >
-                  <path
-                    d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
-                  />
-                </svg>
-                <h3
-                  style="
-                    margin: 0 0 8px 0;
-                    color: #475569;
-                    font-size: 1.4rem;
-                    font-weight: 800;
-                  "
-                >
-                  This folder is empty.
-                </h3>
-                <p style="margin: 0; font-size: 1.05rem">
-                  Select files and click upload to get started.
-                </p>
-              </div>
-            </div>
-
-            <!-- Footer -->
+            ></div>
             <div
               style="
                 padding: 25px 30px;
@@ -969,7 +928,9 @@
                   style="color: #0f172a; font-weight: 900; font-size: 1.2rem"
                   >0</span
                 >
-                images selected</span
+                <span data-i18n="media_img_selected"
+                  >images selected</span
+                ></span
               >
               <button
                 id="btn-confirm-media"
@@ -987,6 +948,7 @@
                 "
                 onmouseover="this.style.transform = 'translateY(-2px)'"
                 onmouseout="this.style.transform = 'none'"
+                data-i18n="media_btn_confirm"
               >
                 Confirm Selection
               </button>
@@ -996,7 +958,7 @@
       </div>
     </div>
 
-    <!-- logic JS -->
+    <script src="/js/admin/translate_admin.js?v=2"></script>
     <script src="/js/admin/admin.js"></script>
   </body>
 </html>

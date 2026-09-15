@@ -3,7 +3,7 @@
 // ==========================================
 console.log("Shipper.js is loading...");
 
-// 1. Khai báo TỪ ĐIỂN ĐẦY ĐỦ cho Shipper (Đã gộp cả UI và Map)
+// 1. Khai báo TỪ ĐIỂN
 const shipperDict = {
   en: {
     app_logo: "Shipper",
@@ -61,7 +61,6 @@ const mapInstances = {};
 
 // 2. Logic xử lý bản đồ
 async function toggleMap(orderId, address) {
-  // Lấy ngôn ngữ hiện tại từ LocalStorage
   const currentLang = localStorage.getItem("besttech_lang") || "en";
   const t = shipperDict[currentLang];
 
@@ -82,24 +81,26 @@ async function toggleMap(orderId, address) {
   btn.innerHTML = "⏳...";
 
   if (mapInstances[orderId]) {
-    setTimeout(() => mapInstances[orderId].invalidateSize(), 300); // Khắc phục lỗi bể layout Leaflet
+    setTimeout(() => mapInstances[orderId].invalidateSize(), 1000);
     btn.innerHTML = t.btn_close_map;
     return;
   }
 
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(address)}&limit=1`,
     );
+    if (!res.ok) throw new Error("API bị chặn");
     const data = await res.json();
 
-    if (data && data.length > 0) {
-      const lat = data[0].lat;
-      const lon = data[0].lon;
+    if (data && data.features && data.features.length > 0) {
+      const lat = data.features[0].geometry.coordinates[1];
+      const lon = data.features[0].geometry.coordinates[0];
 
       const map = L.map(`map-container-${orderId}`).setView([lat, lon], 16);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
+      L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        attribution: "© Google Maps",
+        maxZoom: 20,
       }).addTo(map);
 
       L.marker([lat, lon])
@@ -111,6 +112,10 @@ async function toggleMap(orderId, address) {
 
       mapInstances[orderId] = map;
       btn.innerHTML = t.btn_close_map;
+
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 1000);
     } else {
       mapContainer.style.height = "auto";
       mapContainer.style.padding = "15px";
@@ -118,6 +123,7 @@ async function toggleMap(orderId, address) {
       btn.innerHTML = t.btn_close_map;
     }
   } catch (err) {
+    console.error("Lỗi bản đồ Shipper:", err);
     mapContainer.style.height = "0px";
     alert(t.err_server);
     btn.innerHTML = t.btn_view_map;

@@ -339,3 +339,20 @@ INSERT IGNORE INTO Products (category_id, name, sku, brand, price, stock, descri
 (19, 'NIU KQi3 Pro Electric Kick Scooter', 'NIU-KQI3-PRO', 'NIU', 799.00, 25, 'Maximum comfort and stability for urban commuting.', '[{"group":"Performance","name":"Top Speed","value":"20 mph"},{"group":"Battery","name":"Range","value":"31 Miles"}]'),
 (19, 'Razor Hovertrax Prizma Hoverboard', 'RAZ-HOV-PRI', 'Razor', 179.99, 50, 'LED light show and auto-balancing technology.', '[{"group":"Performance","name":"Max Speed","value":"9 mph"},{"group":"General","name":"Rider Weight","value":"Up to 176 lbs"}]')
 ;
+
+USE internship_project;
+
+CREATE TABLE IF NOT EXISTS stores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL,
+    lat DECIMAL(10, 8) NOT NULL,
+    lon DECIMAL(11, 8) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE orders 
+ADD COLUMN pickup_store_id INT DEFAULT NULL;
+
+ALTER TABLE orders
+ADD CONSTRAINT fk_pickup_store FOREIGN KEY (pickup_store_id) REFERENCES stores(id) ON DELETE SET NULL;

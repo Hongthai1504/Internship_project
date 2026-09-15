@@ -483,153 +483,52 @@ if (addProductionForm) {
 }
 
 // ADMIN DASHBOARD PANELS
-const adminOrderList = document.getElementById("admin-order-list");
-
-let globalShippers = [];
-
-async function fetchAdminOrders() {
-  try {
-    const shipperRes = await fetch("http://localhost:3000/api/admin/shippers", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (shipperRes.ok) {
-      globalShippers = await shipperRes.json();
-    }
-
-    const res = await fetch("http://localhost:3000/api/admin/orders", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) throw new Error("Unable to load order data.");
-    const orders = await res.json();
-
-    if (orders.length === 0) {
-      adminOrderList.innerHTML =
-        "<p>There are no orders in the system yet.</p>";
-      return;
-    }
-
-    let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                        <th style="padding: 15px;">Order ID</th>
-                        <th style="padding: 15px;">Customer</th>
-                        <th style="padding: 15px;">Total payment</th>
-                        <th style="padding: 15px;">Status</th>
-                        <th style="padding: 15px;">Assign Shipper</th>
-                        <th style="padding: 15px;">Action</th>
-                    </tr>`;
-
-    orders.forEach((o) => {
-      const statuses = ["pending", "shipping", "completed", "cancelled"];
-
-      const getStatusBgColor = (status) => {
-        switch (status.toLowerCase()) {
-          case "completed":
-            return "#d1fae5";
-          case "pending":
-            return "#fef08a";
-          case "shipping":
-            return "#dbeafe";
-          case "cancelled":
-            return "#fee2e2";
-          default:
-            return "#f3f4f6";
-        }
-      };
-
-      let statusSelect = `<select id="status-${o.id}" style="padding: 6px; border-radius: 4px; font-weight: bold; border: 1px solid #c8c8c8; outline: none; background-color: ${getStatusBgColor(o.status)};">`;
-      statuses.forEach((s) => {
-        const isSelected = o.status === s ? "selected" : "";
-        statusSelect += `<option value="${s}" ${isSelected} style="background: #fff;">${s.toUpperCase()}</option>`;
-      });
-      statusSelect += `</select>`;
-      let shipperSelect = `<select id="shipper-${o.id}" style="padding: 6px; border-radius: 4px; border: 1px solid #c8c8c8; outline: none; width: 100%;">
-          <option value="">-- Unassigned --</option>`;
-      globalShippers.forEach((s) => {
-        const isSelected = o.shipper_id === s.id ? "selected" : "";
-        shipperSelect += `<option value="${s.id}" ${isSelected}>${s.full_name}</option>`;
-      });
-      shipperSelect += `</select>`;
-
-      html += `<tr style="border-bottom: 1px solid #eee; transition: background 0.2s;">
-                  <td style="padding: 15px; font-weight: bold;">#${o.id}</td>
-                  <td style="padding: 15px;">${o.full_name}<br><small style="color: #666;">${o.phone}</small></td>
-                  <td style="padding: 15px; font-weight: 900; color: #0046be;">$${o.total_amount}</td>
-                  <td style="padding: 15px;">${statusSelect}</td>
-                  <td style="padding: 15px;">${shipperSelect}</td>
-                  <td style="padding: 15px;">
-                      <button onclick="saveOrderUpdates(${o.id})" style="background: #0046be; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer;">Save</button>
-                  </td>
-               </tr>`;
-    });
-    html += `</table>`;
-    adminOrderList.innerHTML = html;
-  } catch (error) {
-    adminOrderList.innerHTML = `<p style="color: red;">Data loading error: ${error.message}</p>`;
-  }
-}
-
+const adminOrdersContainer = document.getElementById("admin-orders-container");
 const adminCustomerList = document.getElementById("admin-customer-list");
 
 if (adminCustomerList) {
   async function fetchAdminCustomers() {
+    const t = adminDict[currentAdminLang];
     try {
       const res = await fetch("http://localhost:3000/api/admin/customers", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!res.ok) throw new Error("Unable to load the customer list.");
       const customers = await res.json();
 
       let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
-                            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
-                                <th style="padding: 15px;">ID</th>
-                                <th style="padding: 15px;">Full Name</th>
-                                <th style="padding: 15px;">Email</th>
-                                <th style="padding: 15px;">Phone Number</th>
-                                <th style="padding: 15px;">Role</th>
-                                <th style="padding: 15px; text-align: center;">Action</th>
-                            </tr>`;
+            <tr style="background: #f0f2f4; border-bottom: 2px solid #c8c8c8;">
+                <th style="padding: 15px;">${t.th_id}</th><th style="padding: 15px;">${t.th_fullname}</th>
+                <th style="padding: 15px;">${t.th_email}</th><th style="padding: 15px;">${t.th_phone}</th>
+                <th style="padding: 15px;">${t.th_role}</th><th style="padding: 15px; text-align: center;">${t.th_action}</th>
+            </tr>`;
 
       customers.forEach((c) => {
-        const getRoleBgColor = (role) => {
-          switch (role.toLowerCase()) {
-            case "admin":
-              return "#bfdbfe"; // Xanh nhạt
-            case "shipper":
-              return "#fef08a"; // Vàng nhạt
-            default:
-              return "#f1f5f9"; // Xám nhạt (User)
-          }
-        };
-
-        const roles = ["user", "shipper", "admin"];
+        const getRoleBgColor = (role) =>
+          role === "admin"
+            ? "#bfdbfe"
+            : role === "shipper"
+              ? "#fef08a"
+              : "#f1f5f9";
         let roleDropdown = `<select id="role-${c.id}" style="padding: 8px 12px; border-radius: 6px; font-weight: bold; border: 1px solid #cbd5e1; outline: none; background-color: ${getRoleBgColor(c.role)}; cursor: pointer;">`;
-
-        roles.forEach((r) => {
-          const isSelected = c.role.toLowerCase() === r ? "selected" : "";
-          roleDropdown += `<option value="${r}" ${isSelected} style="background: #fff; color: #0f172a;">${r.toUpperCase()}</option>`;
+        ["user", "shipper", "admin"].forEach((r) => {
+          roleDropdown += `<option value="${r}" ${c.role.toLowerCase() === r ? "selected" : ""} style="background: #fff; color: #0f172a;">${r.toUpperCase()}</option>`;
         });
         roleDropdown += `</select>`;
 
         html += `<tr style="border-bottom: 1px solid #e2e8f0; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-                    <td style="padding: 15px; font-weight: bold; color: #64748b;">#${c.id}</td>
-                    <td style="padding: 15px; font-weight: 800; color: #0f172a;">${c.full_name}</td>
-                    <td style="padding: 15px; color: #475569;">${c.email}</td>
-                    <td style="padding: 15px; color: #475569; font-weight: 600;">${c.phone || "Not yet updated"}</td>
-                    <td style="padding: 15px;">
-                        ${roleDropdown}
-                    </td>
-                    <td style="padding: 15px; text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center;">
-                        <button onclick="updateUserRole(${c.id})" style="background: #0046be; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,70,190,0.2);" onmouseover="this.style.background='#003699'" onmouseout="this.style.background='#0046be'" title="Lưu Quyền">Save</button>
-                        <button onclick="deleteUserAccount(${c.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(239,68,68,0.2);" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'" title="Xóa Tài khoản">Delete</button>
-                    </td>
-                 </tr>`;
+            <td style="padding: 15px; font-weight: bold; color: #64748b;">#${c.id}</td>
+            <td style="padding: 15px; font-weight: 800; color: #0f172a;">${c.full_name}</td>
+            <td style="padding: 15px; color: #475569;">${c.email}</td><td style="padding: 15px; color: #475569; font-weight: 600;">${c.phone || "-"}</td>
+            <td style="padding: 15px;">${roleDropdown}</td>
+            <td style="padding: 15px; text-align: center; display: flex; gap: 8px; justify-content: center;">
+                <button onclick="updateUserRole(${c.id})" style="background: #0046be; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">${t.btn_save_role}</button>
+                <button onclick="deleteUserAccount(${c.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">${t.btn_delete_user}</button>
+            </td></tr>`;
       });
       html += `</table>`;
       adminCustomerList.innerHTML = html;
     } catch (error) {
-      adminCustomerList.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">Data loading error: ${error.message}</p>`;
+      adminCustomerList.innerHTML = `<p style="color: red;">Lỗi tải dữ liệu!</p>`;
     }
   }
 
@@ -674,41 +573,6 @@ async function updateUserRole(userId) {
     }
   } catch (error) {
     alert("❌ Lỗi kết nối đến máy chủ.");
-  }
-}
-
-async function saveOrderUpdates(orderId) {
-  const status = document.getElementById(`status-${orderId}`).value;
-  const shipper_id = document.getElementById(`shipper-${orderId}`).value;
-
-  if (status === "shipping" && !shipper_id) {
-    alert("Please assign a Shipper before changing status to SHIPPING!");
-    return;
-  }
-
-  if (!confirm(`Update Order #${orderId}?`)) return;
-
-  try {
-    const res = await fetch(
-      `http://localhost:3000/api/admin/orders/${orderId}/status`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: status, shipper_id: shipper_id }),
-      },
-    );
-    const data = await res.json();
-    if (res.ok) {
-      alert("Order updated successfully!");
-      fetchAdminOrders();
-    } else {
-      alert("Error: " + data.error);
-    }
-  } catch (error) {
-    alert("Server error.");
   }
 }
 
@@ -1044,9 +908,71 @@ async function updateFlashSaleTime() {
   }
 }
 
+// SHIPPING SETTINGS LOGIC
+async function loadShippingSettings() {
+  try {
+    const res = await fetch("http://localhost:3000/api/settings/shipping");
+    const data = await res.json();
+
+    if (data) {
+      const baseInput = document.getElementById("admin-ship-base");
+      const freeInput = document.getElementById("admin-ship-free");
+      if (baseInput) baseInput.value = data.base_fee || 0;
+      if (freeInput) freeInput.value = data.free_threshold || 0;
+    }
+  } catch (e) {
+    console.error("Lỗi tải thông số giao hàng:", e);
+  }
+}
+
+async function updateShippingSettings() {
+  const baseInput = document.getElementById("admin-ship-base");
+  const freeInput = document.getElementById("admin-ship-free");
+
+  if (!baseInput || !freeInput) return;
+
+  const base_fee = parseFloat(baseInput.value) || 0;
+  const free_threshold = parseFloat(freeInput.value) || 0;
+  const token = localStorage.getItem("token");
+
+  try {
+    const btnSave = document.querySelector(
+      "button[onclick='updateShippingSettings()']",
+    );
+    if (btnSave) btnSave.innerText = "Saving...";
+
+    const res = await fetch(
+      "http://localhost:3000/api/admin/settings/shipping",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ base_fee, free_threshold }),
+      },
+    );
+
+    const data = await res.json();
+    if (res.ok) alert("✅ Cấu hình phí giao hàng đã được cập nhật thành công!");
+    else alert("❌ Lỗi: " + data.error);
+
+    if (btnSave) {
+      const currentLang = localStorage.getItem("besttech_admin_lang") || "en";
+      btnSave.innerText =
+        currentLang === "vi" ? "Lưu Thay Đổi" : "Save Changes";
+    }
+  } catch (e) {
+    alert("❌ Lỗi kết nối tới máy chủ Database!");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("admin-flash-sale-time")) {
     loadFlashSaleSettings();
+  }
+  if (document.getElementById("admin-ship-base")) {
+    loadShippingSettings();
   }
 });
 
@@ -1166,7 +1092,254 @@ function toggleAccordion(headerElement) {
   }
 }
 
-if (adminOrderList) {
+// ADMIN DASHBOARD PANELS (ORDER MANAGEMENT)
+let globalShippers = [];
+
+async function fetchAdminOrders() {
+  try {
+    const shipperRes = await fetch("http://localhost:3000/api/admin/shippers", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (shipperRes.ok) {
+      globalShippers = await shipperRes.json();
+    }
+
+    const res = await fetch("http://localhost:3000/api/admin/orders", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("Unable to load order data.");
+    const orders = await res.json();
+
+    renderAdminOrders(orders);
+  } catch (error) {
+    console.error(error);
+    alert("Lỗi tải dữ liệu đơn hàng: " + error.message);
+  }
+}
+
+function renderAdminOrders(allOrders) {
+  const t = adminDict[currentAdminLang];
+  const statuses = ["pending", "shipping", "completed", "cancelled"];
+
+  statuses.forEach((status) => {
+    const filteredOrders = allOrders.filter((order) => order.status === status);
+    const count = filteredOrders.length;
+    const tbodyEl = document.getElementById(`list-${status}`);
+    if (!tbodyEl) return;
+
+    const sectionEl = tbodyEl.closest(".order-section");
+    if (sectionEl) {
+      const h3 = sectionEl.querySelector(".section-title");
+      const badgeHtml = `<span id="badge-${status}" class="count-badge ${count > 0 ? "badge-red" : "badge-green"}">${count}</span>`;
+      if (status === "pending")
+        h3.innerHTML = `${t.title_pending} ${badgeHtml}`;
+      if (status === "shipping")
+        h3.innerHTML = `${t.title_shipping} ${badgeHtml}`;
+      if (status === "completed")
+        h3.innerHTML = `${t.title_completed} ${badgeHtml}`;
+      if (status === "cancelled")
+        h3.innerHTML = `${t.title_cancelled} ${badgeHtml}`;
+    }
+
+    const theadEl = tbodyEl.parentElement.querySelector("thead");
+    if (theadEl) {
+      theadEl.innerHTML = `<tr>
+            <th>${t.th_order_id}</th><th>${t.th_customer}</th><th>${t.th_total}</th>
+            ${status === "pending" ? `<th>${t.th_store}</th>` : ""} <!-- THÊM CỘT STORE -->
+            <th>${status === "pending" ? t.th_assign : t.th_status}</th>
+            ${status === "pending" || status === "shipping" ? `<th>${t.th_action}</th>` : ""}
+        </tr>`;
+    }
+
+    if (count === 0) {
+      const colSpan = status === "pending" || status === "shipping" ? 5 : 4;
+      tbodyEl.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding: 30px;">${t.empty_orders}</td></tr>`;
+    } else {
+      tbodyEl.innerHTML = filteredOrders
+        .map((order) => {
+          let rowHtml = `<tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+            <td style="font-weight: 800; color: #0046be;">#${order.id}</td>
+            <td><div style="font-weight: bold; color: #0f172a;">${order.full_name || "Khách hàng"}</div><div style="font-size: 0.85rem; color: #64748b;">${order.phone}</div></td>
+            <td style="font-weight: bold;">$${order.total_amount}</td>`;
+
+          if (status === "pending") {
+            let storeSelect = `<select id="store-${order.id}" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;"><option value="">-- Chọn Kho --</option>`;
+            globalStores.forEach(
+              (st) =>
+                (storeSelect += `<option value="${st.id}">${st.name}</option>`),
+            );
+            storeSelect += `</select>`;
+
+            let shipperSelect = `<select id="shipper-${order.id}" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;"><option value="">-- Chọn Shipper --</option>`;
+            globalShippers.forEach(
+              (s) =>
+                (shipperSelect += `<option value="${s.id}">${s.full_name}</option>`),
+            );
+            shipperSelect += `</select>`;
+
+            rowHtml += `<td>${storeSelect}</td><td>${shipperSelect}</td><td><button onclick="saveOrderUpdates(${order.id}, 'shipping')" style="background: #0046be; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">${t.btn_save}</button></td>`;
+          } else if (status === "shipping") {
+            rowHtml += `<td><span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">SHIPPING</span></td>
+            <td><button onclick="saveOrderUpdates(${order.id}, 'cancelled')" style="background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">${t.btn_cancel}</button></td>`;
+          } else {
+            const statusBg = status === "completed" ? "#dcfce7" : "#fee2e2";
+            const statusColor = status === "completed" ? "#166534" : "#991b1b";
+            rowHtml += `<td><span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">${status}</span></td>`;
+          }
+          rowHtml += `</tr>`;
+          return rowHtml;
+        })
+        .join("");
+    }
+  });
+}
+
+async function saveOrderUpdates(orderId, newStatus) {
+  let shipper_id = null;
+  let pickup_store_id = null;
+
+  if (newStatus === "shipping") {
+    shipper_id = document.getElementById(`shipper-${orderId}`)?.value;
+    pickup_store_id = document.getElementById(`store-${orderId}`)?.value;
+
+    if (!pickup_store_id)
+      return alert("Vui lòng gán (Assign) Cửa hàng xuất kho trước!");
+    if (!shipper_id)
+      return alert("Vui lòng gán (Assign) Shipper trước khi Giao đơn!");
+  }
+
+  if (
+    !confirm(
+      `Xác nhận cập nhật trạng thái đơn #${orderId} thành ${newStatus.toUpperCase()}?`,
+    )
+  )
+    return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:3000/api/admin/orders/${orderId}/status`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          shipper_id: shipper_id,
+          pickup_store_id: pickup_store_id,
+        }),
+      },
+    );
+    const data = await res.json();
+
+    if (res.ok) {
+      fetchAdminOrders(); // Reload lại 4 bảng
+    } else {
+      alert("Error: " + data.error);
+    }
+  } catch (error) {
+    alert("Server error.");
+  }
+}
+
+let globalStores = [];
+
+async function loadStores() {
+  try {
+    const res = await fetch("http://localhost:3000/api/admin/stores", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      globalStores = await res.json();
+      renderStoresList();
+    }
+  } catch (e) {
+    console.error("Lỗi tải danh sách cửa hàng", e);
+  }
+}
+
+function renderStoresList() {
+  const listEl = document.getElementById("admin-store-list");
+  if (!listEl) return;
+
+  if (globalStores.length === 0) {
+    listEl.innerHTML = `<p style="text-align:center; color:#94a3b8; font-size:0.85rem; margin:10px 0;">Chưa có cửa hàng nào.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = globalStores
+    .map(
+      (st) => `
+    <div style="background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: 800; color: #0f172a; font-size: 0.9rem;">${st.name}</div>
+        <div style="font-size: 0.8rem; color: #64748b;">${st.address}</div>
+        <div style="font-size: 0.75rem; color: #10b981; font-weight: bold;">📍 Lat: ${st.lat} | Lon: ${st.lon}</div>
+      </div>
+    </div>
+  `,
+    )
+    .join("");
+}
+
+async function addNewStore() {
+  const name = document.getElementById("admin-store-name").value.trim();
+  const address = document.getElementById("admin-store-address").value.trim();
+
+  if (!name || !address) return alert("Vui lòng nhập đủ Tên và Địa chỉ!");
+
+  const btn = document.querySelector("button[onclick='addNewStore()']");
+  const originalText = btn.innerText;
+  btn.innerText = "⏳ Đang quét tọa độ...";
+  btn.disabled = true;
+
+  try {
+    const geoRes = await fetch(
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(address)}&limit=1`,
+    );
+    const geoData = await geoRes.json();
+
+    if (!geoData || !geoData.features || geoData.features.length === 0) {
+      throw new Error(
+        "Không thể định vị được địa chỉ này trên bản đồ. Vui lòng ghi rõ Quận/Huyện, Thành Phố.",
+      );
+    }
+
+    const lat = geoData.features[0].geometry.coordinates[1];
+    const lon = geoData.features[0].geometry.coordinates[0];
+
+    const res = await fetch("http://localhost:3000/api/admin/stores", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name, address, lat, lon }),
+    });
+
+    if (res.ok) {
+      document.getElementById("admin-store-name").value = "";
+      document.getElementById("admin-store-address").value = "";
+      loadStores();
+    } else {
+      const err = await res.json();
+      alert("Lỗi server: " + err.error);
+    }
+  } catch (error) {
+    alert("❌ Lỗi: " + error.message);
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("admin-store-list")) loadStores();
+});
+
+if (adminOrdersContainer) {
   fetchAdminOrders();
 }
 fetchAdminProducts();
