@@ -7,174 +7,64 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>Shipper Dashboard | Best Tech</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- LIÊN KẾT ĐẾN FILE CSS KÍNH MỜ VỪA TẠO -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/client/shipper.css" />
 
-    <!-- Leaflet CSS & JS for Map Functionality  -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <!-- Leaflet Core -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- LƯU Ý: Hãy chắc chắn đường dẫn này trỏ đúng tới file shipper.js của bạn -->
-    <script src="/js/shipper/shipper.js"></script>
+    <!-- Leaflet Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
   </head>
   <body>
     <header class="header">
-      <!-- LOGO BESTTECH MỚI -->
       <h1 style="display: flex; align-items: center; gap: 12px; margin: 0">
-        <div
-          style="
-            font-size: 1.5rem;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            cursor: default;
-          "
-        >
-          <span style="color: var(--primary)">Best</span
-          ><span style="color: var(--text-main)">Tech</span>
+        <div style="font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; cursor: default;">
+          <span style="color: var(--primary)">Best</span><span style="color: var(--text-main)">Tech</span>
         </div>
-        <span
-          style="
-            color: #cbd5e1;
-            font-weight: 300;
-            font-size: 1.5rem;
-            line-height: 1;
-          "
-          >|</span
-        >
-        <div
-          style="
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-          "
-        >
+        <span style="color: #cbd5e1; font-weight: 300; font-size: 1.5rem; line-height: 1;">|</span>
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
           🚀 <span id="app-logo-text">Shipper</span>
         </div>
       </h1>
 
-      <!-- CÁC NÚT CHỨC NĂNG BÊN PHẢI -->
       <div class="header-actions">
         <button id="lang-toggle" class="btn-lang" onclick="toggleLanguage()">
-          <img
-            id="lang-icon"
-            src="https://flagcdn.com/w20/us.png"
-            width="20"
-            style="border-radius: 2px"
-          />
+          <img id="lang-icon" src="https://flagcdn.com/w20/us.png" width="20" style="border-radius: 2px" />
           <span id="lang-text">EN</span>
         </button>
-        <button class="btn-logout" onclick="logout()" id="btn-logout-text">
-          Logout
-        </button>
+        <button class="btn-logout" onclick="logout()" id="btn-logout-text">Logout</button>
       </div>
     </header>
 
     <div class="container">
       <h2 class="page-title" id="page-title-text">My Delivery Tasks</h2>
 
-      <!-- TABS BỘ LỌC ĐƠN HÀNG -->
       <div class="tabs-container">
-        <button
-          class="tab-btn active"
-          data-status="all"
-          id="tab-all"
-          onclick="setFilter('all')"
-        >
-          All
-        </button>
-        <button
-          class="tab-btn"
-          data-status="shipping"
-          id="tab-shipping"
-          onclick="setFilter('shipping')"
-        >
-          Delivering
-        </button>
-        <button
-          class="tab-btn"
-          data-status="completed"
-          id="tab-completed"
-          onclick="setFilter('completed')"
-        >
-          Completed
-        </button>
-        <button
-          class="tab-btn"
-          data-status="cancelled"
-          id="tab-cancelled"
-          onclick="setFilter('cancelled')"
-        >
-          Cancelled
-        </button>
+        <button class="tab-btn active" data-status="all" id="tab-all" onclick="setFilter('all')">All</button>
+        <button class="tab-btn" data-status="shipping" id="tab-shipping" onclick="setFilter('shipping')">Delivering</button>
+        <button class="tab-btn" data-status="completed" id="tab-completed" onclick="setFilter('completed')">Completed</button>
+        <button class="tab-btn" data-status="cancelled" id="tab-cancelled" onclick="setFilter('cancelled')">Cancelled</button>
       </div>
 
-      <!-- DANH SÁCH ĐƠN HÀNG -->
       <div id="task-list">
-        <p
-          style="
-            text-align: center;
-            color: #64748b;
-            font-weight: bold;
-            margin-top: 50px;
-          "
-          id="loading-text"
-        >
+        <p style="text-align: center; color: #64748b; font-weight: bold; margin-top: 50px;" id="loading-text">
           Loading tasks...
         </p>
       </div>
     </div>
 
-    <!-- SCRIPT CHỈ CÒN LẠI LOGIC KẾT NỐI API & GIAO DIỆN -->
+    <div id="shipper-map" style="width: 100%; height: 500px; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 20px;"></div>
+
+    <!-- KHAI BÁO CÁC FILE SCRIPT Ở CUỐI BODY -->
+    <script src="/js/shipper/translate_shipper.js"></script>
+    <script src="/js/shipper/shipper.js"></script>
+
     <script>
-      let currentLang = localStorage.getItem("besttech_lang") || "en";
-
-      function applyLanguage() {
-        // shipperDict đã được khai báo ở file shipper.js
-        const t = shipperDict[currentLang];
-        document.getElementById("app-logo-text").innerText = t.app_logo;
-        document.getElementById("btn-logout-text").innerText = t.logout;
-        document.getElementById("page-title-text").innerText = t.page_title;
-        document.getElementById("tab-all").innerText = t.tab_all;
-        document.getElementById("tab-shipping").innerText = t.tab_shipping;
-        document.getElementById("tab-completed").innerText = t.tab_completed;
-        document.getElementById("tab-cancelled").innerText = t.tab_cancelled;
-
-        if (document.getElementById("loading-text")) {
-          document.getElementById("loading-text").innerText = t.loading;
-        }
-
-        const langIcon = document.getElementById("lang-icon");
-        const langText = document.getElementById("lang-text");
-        if (currentLang === "vi") {
-          langIcon.src = "https://flagcdn.com/w20/vn.png";
-          langText.innerText = "VI";
-        } else {
-          langIcon.src = "https://flagcdn.com/w20/us.png";
-          langText.innerText = "EN";
-        }
-        renderTasks();
-      }
-
-      function toggleLanguage() {
-        currentLang = currentLang === "en" ? "vi" : "en";
-        localStorage.setItem("besttech_lang", currentLang);
-        applyLanguage();
-      }
-
       const token = localStorage.getItem("token");
+      // Dùng hàm từ điển toàn cục thay vì gọi cục bộ
       if (!token) {
         alert(shipperDict[currentLang].alert_login);
         window.location.href = "/pages/user/login.html";
@@ -217,8 +107,7 @@
         const listEl = document.getElementById("task-list");
         const t = shipperDict[currentLang];
 
-        const displayOrders =
-          currentFilter === "all"
+        const displayOrders = currentFilter === "all"
             ? allOrdersCache
             : allOrdersCache.filter((order) => order.status === currentFilter);
 
@@ -232,8 +121,7 @@
           return;
         }
 
-        listEl.innerHTML = displayOrders
-          .map((order) => {
+        listEl.innerHTML = displayOrders.map((order) => {
             const isShipping = order.status === "shipping";
             return `
             <div class="task-card">
@@ -262,7 +150,6 @@
                             <div class="detail-label">${t.lbl_address}</div>
                             <div class="detail-value">${order.shipping_address}</div>
                             
-                            <!-- Nút View Map gọi hàm toggleMap bên shipper.js -->
                             <button onclick="toggleMap(${order.id}, '${order.shipping_address.replace(/'/g, "\\'")}')" 
                                 style="margin-top: 10px; font-size: 0.85rem; padding: 8px 15px; background: #f8fafc; color: #0046be; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;" onmouseover="this.style.background='#e2e8f0'">
                                 ${t.btn_view_map}
@@ -276,41 +163,30 @@
                     <span>${t.lbl_cod}</span>
                     <strong>$${order.total_amount}</strong>
                 </div>
-                ${
-                  isShipping
-                    ? `
+                ${isShipping ? `
                 <div class="actions">
                     <button class="btn btn-success" onclick="updateStatus(${order.id}, 'completed')">${t.btn_delivered}</button>
                     <button class="btn btn-danger" onclick="updateStatus(${order.id}, 'cancelled')">${t.btn_failed}</button>
                 </div>
-                `
-                    : ""
-                }
+                ` : ""}
             </div>
             `;
-          })
-          .join("");
+          }).join("");
       }
 
       async function updateStatus(orderId, newStatus) {
         const t = shipperDict[currentLang];
-        if (
-          !confirm(`${t.confirm_msg} #${orderId} ➔ ${newStatus.toUpperCase()}?`)
-        )
-          return;
+        if (!confirm(`${t.confirm_msg} #${orderId} ➔ ${newStatus.toUpperCase()}?`)) return;
 
         try {
-          const res = await fetch(
-            `http://localhost:3000/api/shipper/orders/${orderId}/status`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ status: newStatus }),
+          const res = await fetch(`http://localhost:3000/api/shipper/orders/${orderId}/status`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
-          );
+            body: JSON.stringify({ status: newStatus }),
+          });
           const data = await res.json();
           if (res.ok) fetchTasks();
           else alert("Error: " + data.error);
@@ -319,8 +195,6 @@
         }
       }
 
-      // Khởi chạy hệ thống sau khi load xong script
-      applyLanguage();
       fetchTasks();
     </script>
   </body>
