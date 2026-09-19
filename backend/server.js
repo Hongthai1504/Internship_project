@@ -671,27 +671,9 @@ app.post("/api/products/:id/reviews", authenticateToken, upload.single('image'),
     });
 });
 
-app.post("/api/products/:id/reviews", authenticateToken, (req, res) => {
-    const productId = req.params.id;
-    const userId = req.user.id; 
-    const { rating, comment } = req.body;
-
-    if (!rating) return res.status(400).json({ error: "Please select a star rating." });
-
-    const sql = `INSERT INTO Reviews (product_id, user_id, rating, comment) VALUES (?, ?, ?, ?)`;
-    
-    db.query(sql, [productId, userId, rating, comment], (err, result) => {
-        if (err) {
-            console.error("Submit Review Error:", err);
-            return res.status(500).json({ error: "Failed to submit your review." });
-        }
-        res.status(201).json({ message: "Thank you for your review!" });
-    });
-});
-
 // API: SHIPPING & LOGISTICS LOGIC
 app.get("/api/admin/shippers", authenticateToken, isAdmin, (req, res) => {
-    db.query("SELECT id, full_name, phone FROM Users WHERE role = 'shipper'", (err, results) => {
+    db.query("SELECT sid, full_name, phone FROM Users WHERE role = 'shipper'", (err, results) => {
         if (err) return res.status(500).json({ error: "Failed to fetch shippers." });
         res.json(results);
     });
@@ -1096,6 +1078,83 @@ app.delete("/api/admin/customers/:id", authenticateToken, isAdmin, (req, res) =>
 
         res.json({ message: "Đã xóa vĩnh viễn tài khoản khỏi hệ thống!" });
     });
+});
+
+// API for Admin: Manage Stores
+app.get('/api/admin/stores', (req, res) => {
+    const sql = "SELECT * FROM stores ORDER BY created_at DESC";
+    
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ khi lấy danh sách kho." });
+        }
+        res.json(results);
+    });
+});
+
+app.post('/api/admin/stores', (req, res) => {
+    const { name, address, lat, lon } = req.body;
+    
+    if (!name || !address || !lat || !lon) {
+        return res.status(400).json({ error: "Thiếu thông tin (Tên, Địa chỉ, hoặc Tọa độ)." });
+    }
+
+    const sql = "INSERT INTO stores (name, address, lat, lon) VALUES (?, ?, ?, ?)";
+    
+    db.query(sql, [name, address, lat, lon], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi cơ sở dữ liệu khi lưu kho." });
+        }
+        res.status(200).json({ 
+            message: "Thêm kho thành công!", 
+            id: result.insertId 
+        });
+    });
+});
+
+// API for Admin: Get Bank Account Settings
+app.get('/api/settings/bank', async (req, res) => {
+    try {
+        db.query("SELECT * FROM settings WHERE setting_key = 'bank_account'", (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            if (results.length > 0) {
+                const bankInfo = JSON.parse(results[0].setting_value);
+                res.json(bankInfo);
+            } else {
+                res.json({});
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.put('/api/admin/settings/bank', authenticateToken, async (req, res) => {
+    const { bank_id, account_number, account_name } = req.body;
+
+    const bankDataString = JSON.stringify({ bank_id, account_number, account_name });
+
+    try {
+        db.query("SELECT * FROM settings WHERE setting_key = 'bank_account'", (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            if (results.length > 0) {
+                db.query("UPDATE settings SET setting_value = ? WHERE setting_key = 'bank_account'", [bankDataString], (updateErr) => {
+                    if (updateErr) return res.status(500).json({ error: updateErr.message });
+                    res.json({ success: true, message: "Cập nhật thành công!" });
+                });
+            } else {
+                db.query("INSERT INTO settings (setting_key, setting_value) VALUES ('bank_account', ?)", [bankDataString], (insertErr) => {
+                    if (insertErr) return res.status(500).json({ error: insertErr.message });
+                    res.json({ success: true, message: "Lưu mới thành công!" });
+                });
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Start the server on port 3000

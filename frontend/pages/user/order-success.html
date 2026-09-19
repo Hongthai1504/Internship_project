@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Success | Best Tech</title>
+    <!-- Sử dụng chung file style.css -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/client/style.css" />
+  </head>
+  <body>
+    <!-- HEADER CÓ NÚT CHUYỂN ĐỔI NGÔN NGỮ -->
+    <header style="padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #ffe000; background: #fff;">
+      <a href="/index.html" style="text-decoration: none; color: #0f172a; font-size: 2rem; font-weight: 900;">
+        Best<span style="color: #0046be">Tech</span>
+        <span id="header-subtitle" style="font-size: 1rem; font-weight: normal; color: #64748b;">| Order Confirmation</span>
+      </a>
+      <button id="lang-toggle" onclick="toggleLanguage()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 800; font-family: 'Nunito', sans-serif;">
+        <img id="lang-icon" src="https://flagcdn.com/w20/us.png" width="20" alt="lang" style="border-radius: 2px" />
+        <span id="lang-text">EN</span>
+      </button>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <div class="success-container">
+      <div class="success-icon">✓</div>
+      
+      <h1 id="success-title" style="margin: 0; font-size: 2rem; font-weight: 900; color: #0f172a;">Order Placed Successfully!</h1>
+      <p id="success-desc" style="color: #64748b; font-size: 1.05rem; margin-top: 10px; line-height: 1.5;">
+        Thank you for shopping at BestTech. Your order has been recorded and is being processed.
+      </p>
+
+      <div>
+        <span id="lbl-order-id" style="color: #64748b; font-size: 0.9rem; font-weight: 700; display: block;">YOUR ORDER ID</span>
+        <div class="order-id-badge" id="display-order-id">#Loading...</div>
+      </div>
+
+      <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: left; margin-top: 10px;">
+        <div id="shipping-info-title" style="font-weight: 800; color: #0f172a; margin-bottom: 8px;">📦 Shipping Information:</div>
+        <div id="shipping-info-desc" style="color: #475569; font-size: 0.95rem; line-height: 1.4;">
+          The store will prepare your items and hand them over to the shipper as soon as possible. You can track your order status anytime.
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <a href="/index.html" id="btn-home" class="btn-action btn-outline-shop">
+          🏠 Home Page
+        </a>
+        <a href="/index.html" id="btn-continue" class="btn-action btn-primary-home">
+          🛍️ Continue Shopping
+        </a>
+      </div>
+    </div>
+
+    <script>
+      const successDict = {
+        en: {
+          subtitle: "| Order Confirmation",
+          title: "Order Placed Successfully!",
+          desc: "Thank you for shopping at BestTech. Your order has been recorded and is being processed.",
+          lbl_id: "YOUR ORDER ID",
+          shipping_title: "📦 Shipping Information:",
+          shipping_desc: "The store will prepare your items and hand them over to the shipper as soon as possible. You can track your order status anytime.",
+          btn_home: "🏠 Home Page",
+          btn_continue: "🛍️ Continue Shopping"
+        },
+        vi: {
+          subtitle: "| Xác nhận đơn hàng",
+          title: "Đặt hàng thành công!",
+          desc: "Cảm ơn bạn đã mua sắm tại BestTech. Đơn hàng của bạn đã được ghi nhận và đang được xử lý hệ thống.",
+          lbl_id: "MÃ ĐƠN HÀNG CỦA BẢN",
+          shipping_title: "📦 Thông tin vận chuyển:",
+          shipping_desc: "Cửa hàng sẽ tiến hành chuẩn bị hàng và bàn giao cho Shipper trong thời gian sớm nhất. Bạn có thể kiểm tra trạng thái đơn hàng bất cứ lúc nào.",
+          btn_home: "🏠 Về Trang Chủ",
+          btn_continue: "🛍️ Tiếp Tục Mua Sắm"
+        }
+      };
+
+      let currentLang = localStorage.getItem("besttech_lang") || "en";
+
+      function applySuccessLanguage() {
+        const t = successDict[currentLang];
+        
+        document.getElementById("header-subtitle").innerText = t.subtitle;
+        document.getElementById("success-title").innerText = t.title;
+        document.getElementById("success-desc").innerText = t.desc;
+        document.getElementById("lbl-order-id").innerText = t.lbl_id;
+        document.getElementById("shipping-info-title").innerText = t.shipping_title;
+        document.getElementById("shipping-info-desc").innerText = t.shipping_desc;
+        document.getElementById("btn-home").innerText = t.btn_home;
+        document.getElementById("btn-continue").innerText = t.btn_continue;
+
+        const langIcon = document.getElementById("lang-icon");
+        const langText = document.getElementById("lang-text");
+        if (langIcon && langText) {
+          langIcon.src = currentLang === "vi" ? "https://flagcdn.com/w20/vn.png" : "https://flagcdn.com/w20/us.png";
+          langText.innerText = currentLang === "vi" ? "VI" : "EN";
+        }
+      }
+
+      function toggleLanguage() {
+        currentLang = currentLang === "en" ? "vi" : "en";
+        localStorage.setItem("besttech_lang", currentLang);
+        applySuccessLanguage();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        applySuccessLanguage();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get("id");
+        if (orderId) {
+          document.getElementById("display-order-id").innerText = `#${orderId}`;
+        } else {
+          document.getElementById("display-order-id").innerText = `#ORD-SUCCESS`;
+        }
+      });
+    </script>
+  </body>
+</html>

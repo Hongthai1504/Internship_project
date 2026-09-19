@@ -356,3 +356,9 @@ ADD COLUMN pickup_store_id INT DEFAULT NULL;
 
 ALTER TABLE orders
 ADD CONSTRAINT fk_pickup_store FOREIGN KEY (pickup_store_id) REFERENCES stores(id) ON DELETE SET NULL;
+
+ALTER TABLE orders
+ADD COLUMN pickup_image VARCHAR(255) DEFAULT NULL,
+ADD COLUMN delivery_image VARCHAR(255) DEFAULT NULL,
+ADD COLUMN cancellation_reason TEXT DEFAULT NULL,
+ADD COLUMN delivery_note TEXT DEFAULT NULL;

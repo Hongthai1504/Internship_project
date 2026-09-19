@@ -1,54 +1,72 @@
 const shipperDict = {
   en: {
-    app_logo: "Shipper",
-    logout: "Logout",
-    page_title: "My Delivery Tasks",
-    loading: "Loading tasks...",
-    empty_title: "No orders found",
-    empty_desc: "There are no orders matching this filter.",
-    lbl_customer: "Customer Name",
-    lbl_phone: "Phone Number",
-    lbl_address: "Delivery Address",
+    app_logo: "Shipper", logout: "Logout", page_title: "My Delivery Tasks",
+    loading: "Loading tasks...", empty: "No tasks available.",
+    lbl_customer: "Customer Name", lbl_phone: "Phone Number", lbl_address: "Delivery Address",
     lbl_cod: "Total COD Amount:",
-    btn_delivered: "✓ Delivered",
-    btn_failed: "✕ Failed",
-    confirm_msg: "Confirm changing status of order",
-    alert_login: "Please log in!",
-    err_load: "Error loading tasks.",
+    tab_all: "All", tab_shipping: "Delivering", tab_completed: "Completed", tab_cancelled: "Cancelled",
+    
+    btn_load_map: "🗺️ Load Map Now",
+    btn_start_gps: "🚀 Start GPS Routing",
+    gps_connecting: "⏳ Connecting to Satellite...",
+    gps_routing: "📡 Routing in progress...",
+    gps_error: "❌ GPS Error: Please enable Location!",
+    gps_not_found: "❌ Error: Cannot geocode address!",
     err_server: "Server connection error.",
-    tab_all: "All",
-    tab_shipping: "Delivering",
-    tab_completed: "Completed",
-    tab_cancelled: "Cancelled",
-    btn_view_map: "🗺️ View Map",
-    btn_close_map: "🗺️ Close Map",
-    err_map_not_found: "❌ Coordinates not found on map.",
+
+    step_1: "🏬 STEP 1: PICKUP AT STORE",
+    step_2: "🏠 STEP 2: DELIVER TO CUSTOMER",
+    status_waiting: "Status: WAITING PICKUP",
+    target_point: "📍 Target",
+    
+    btn_pickup: "📦 CONFIRM PICKUP (PHOTO)",
+    btn_deliver: "✓ DELIVERY SUCCESS (PHOTO)",
+    btn_failed: "✕ Failed",
+    msg_pickup_confirm: "Confirm you have picked up the package?",
+    err_distance: "⛔ DENIED! Distance is ",
+    
+    pod_title_pickup: "📦 Photo Proof of Pickup",
+    pod_title_deliver: "✅ Photo Proof of Delivery",
+    pod_title_fail: "❌ Confirm Cancellation",
+    pod_lbl_img: "📷 Photo Proof (*):",
+    pod_lbl_note: "📝 Notes / Reason:",
+    pod_btn_cancel: "Cancel",
+    pod_btn_submit: "Confirm & Submit"
   },
   vi: {
-    app_logo: "Giao Hàng",
-    logout: "Đăng xuất",
-    page_title: "Nhiệm Vụ Của Tôi",
-    loading: "Đang tải dữ liệu...",
-    empty_title: "Trống",
-    empty_desc: "Không có đơn hàng nào trong mục này.",
-    lbl_customer: "Tên khách hàng",
-    lbl_phone: "Số điện thoại",
-    lbl_address: "Địa chỉ giao hàng",
+    app_logo: "Giao Hàng", logout: "Đăng xuất", page_title: "Nhiệm Vụ Của Tôi",
+    loading: "Đang tải dữ liệu...", empty: "Chưa có đơn hàng nào.",
+    lbl_customer: "Tên khách hàng", lbl_phone: "Số điện thoại", lbl_address: "Địa chỉ giao hàng",
     lbl_cod: "Tổng tiền thu hộ (COD):",
-    btn_delivered: "✓ Đã giao",
-    btn_failed: "✕ Thất bại",
-    confirm_msg: "Xác nhận chuyển trạng thái đơn",
-    alert_login: "Vui lòng đăng nhập!",
-    err_load: "Lỗi tải danh sách đơn hàng.",
+    tab_all: "Tất cả", tab_shipping: "Chưa giao", tab_completed: "Đã giao", tab_cancelled: "Đã hủy",
+    
+    btn_load_map: "🗺️ Tải Bản Đồ Ngay",
+    btn_start_gps: "🚀 Bật GPS Chỉ Đường",
+    gps_connecting: "⏳ Đang kết nối vệ tinh...",
+    gps_routing: "📡 Đang theo dõi lộ trình...",
+    gps_error: "❌ Lỗi GPS: Vui lòng bật Vị trí (Location)!",
+    gps_not_found: "❌ Lỗi định vị địa chỉ!",
     err_server: "Lỗi kết nối đến máy chủ.",
-    tab_all: "Tất cả",
-    tab_shipping: "Chưa giao",
-    tab_completed: "Đã giao",
-    tab_cancelled: "Đã hủy",
-    btn_view_map: "🗺️ Xem bản đồ",
-    btn_close_map: "🗺️ Đóng bản đồ",
-    err_map_not_found: "❌ Không tìm thấy tọa độ trên bản đồ.",
-  },
+
+    step_1: "🏬 BƯỚC 1: LẤY HÀNG TẠI KHO",
+    step_2: "🏠 BƯỚC 2: GIAO CHO KHÁCH",
+    status_waiting: "Trạng thái: CHỜ LẤY HÀNG",
+    target_point: "📍 Điểm đến",
+    
+    btn_pickup: "📦 ĐÃ LẤY HÀNG (CHỤP ẢNH)",
+    btn_deliver: "✓ GIAO THÀNH CÔNG (CHỤP ẢNH)",
+    btn_failed: "Thất bại",
+    msg_pickup_confirm: "Bạn xác nhận đã nhận hàng từ kho thành công?",
+    err_distance: "⛔ TỪ CHỐI! Khoảng cách hiện tại: ",
+    
+    pod_title_pickup: "📦 Chụp ảnh lấy hàng tại kho",
+    pod_title_deliver: "✅ Chụp ảnh giao hàng thành công",
+    pod_title_fail: "❌ Xác nhận Hủy giao hàng",
+    pod_lbl_img: "📷 Ảnh minh chứng (*):",
+    pod_lbl_note: "📝 Ghi chú / Lý do:",
+    pod_btn_cancel: "Hủy",
+    pod_btn_submit: "Xác nhận & Gửi"
+  }
 };
 
 let currentLang = localStorage.getItem("besttech_lang") || "en";
@@ -71,6 +89,7 @@ function applyLanguage() {
     const el = document.getElementById(id);
     if (el) el.innerText = text;
   }
+  
   const langIcon = document.getElementById("lang-icon");
   const langText = document.getElementById("lang-text");
   if (langIcon && langText) {
@@ -78,6 +97,7 @@ function applyLanguage() {
     langText.innerText = currentLang === "vi" ? "VI" : "EN";
   }
 
+  // Reload giao diện nếu hàm renderTasks đã tồn tại
   if (typeof renderTasks === "function") {
     renderTasks();
   }

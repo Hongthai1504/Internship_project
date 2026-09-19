@@ -4,54 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard | Best Tech</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/admin/admin.css" />
   </head>
   <body>
     <!-- SIDEBAR  -->
     <aside class="sidebar">
-      <!-- Logo BestTech Admin -->
-      <h2
-        onclick="window.location.href = '/index.html'"
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          cursor: pointer;
-        "
-        title="Quay về Trang chủ"
-      >
-        <div
-          style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px"
-        >
-          <span style="color: #3b82f6">Best</span
-          ><span style="color: #ffffff">Tech</span>
+      <h2 onclick="window.location.href = '/index.html'" style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;" title="Quay về Trang chủ">
+        <div style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px">
+          <span style="color: #3b82f6">Best</span><span style="color: #ffffff">Tech</span>
         </div>
-        <span
-          style="
-            color: #475569;
-            font-weight: 300;
-            font-size: 1.5rem;
-            line-height: 1;
-          "
-          >|</span
-        >
-        <div
-          style="
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-          "
-        >
+        <span style="color: #475569; font-weight: 300; font-size: 1.5rem; line-height: 1;">|</span>
+        <div style="font-size: 0.95rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
           👑 Admin
         </div>
       </h2>
@@ -60,15 +24,9 @@
       <nav>
         <ul>
           <li><a href="/pages/admin/admin.html">+ Add New Product</a></li>
-          <li>
-            <a href="/pages/admin/admin-orders.html" class="active"
-              >Order Management</a
-            >
-          </li>
+          <li><a href="/pages/admin/admin-orders.html" class="active">Order Management</a></li>
           <li><a href="/pages/admin/admin-customers.html">Customer List</a></li>
-          <li>
-            <a href="/pages/admin/admin-settings.html">System Settings</a>
-          </li>
+          <li><a href="/pages/admin/admin-settings.html">System Settings</a></li>
         </ul>
       </nav>
     </aside>
@@ -78,37 +36,16 @@
       <div class="header-bar">
         <h1>Order Management</h1>
         <div style="display: flex; gap: 15px; align-items: center">
-          <button
-            id="lang-toggle"
-            onclick="toggleAdminLang()"
-            style="
-              background: #e2e8f0;
-              border: none;
-              padding: 8px 15px;
-              border-radius: 12px;
-              font-weight: 800;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              color: #0f172a;
-              transition: 0.2s;
-            "
-            onmouseover="this.style.background = '#cbd5e1'"
-            onmouseout="this.style.background = '#e2e8f0'"
-          >
-            <img
-              id="admin-lang-icon"
-              src="https://flagcdn.com/w20/us.png"
-              width="20"
-              style="border-radius: 2px"
-            />
+          <button id="lang-toggle" onclick="toggleAdminLang()" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #0f172a; transition: 0.2s;" onmouseover="this.style.background = '#cbd5e1'" onmouseout="this.style.background = '#e2e8f0'">
+            <img id="admin-lang-icon" src="https://flagcdn.com/w20/us.png" width="20" style="border-radius: 2px" />
             <span id="admin-lang-text">EN</span>
           </button>
         </div>
       </div>
 
       <div id="admin-orders-container">
+        
+        <!-- PENDING ORDERS SECTION -->
         <div class="order-section">
           <h3 class="section-title">
             ⏳ Pending Orders
@@ -116,18 +53,13 @@
           </h3>
           <table class="admin-table">
             <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Total Payment</th>
-                <th>Assign Shipper</th>
-                <th>Action</th>
-              </tr>
+              <!-- JS Sẽ ghi đè chính xác 6 cột ở đây -->
             </thead>
             <tbody id="list-pending"></tbody>
           </table>
         </div>
 
+        <!-- SHIPPING ORDERS SECTION -->
         <div class="order-section">
           <h3 class="section-title">
             🚀 Shipping Orders
@@ -135,18 +67,13 @@
           </h3>
           <table class="admin-table">
             <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Total Payment</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
+              <!-- JS Sẽ ghi đè chính xác 5 cột ở đây -->
             </thead>
             <tbody id="list-shipping"></tbody>
           </table>
         </div>
 
+        <!-- COMPLETED ORDERS SECTION -->
         <div class="order-section" style="opacity: 0.85">
           <h3 class="section-title">
             ✅ Completed Orders
@@ -154,17 +81,13 @@
           </h3>
           <table class="admin-table">
             <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Total Payment</th>
-                <th>Status</th>
-              </tr>
+              <!-- JS Sẽ ghi đè chính xác 4 cột ở đây -->
             </thead>
             <tbody id="list-completed"></tbody>
           </table>
         </div>
 
+        <!-- CANCELLED ORDERS SECTION -->
         <div class="order-section" style="opacity: 0.85">
           <h3 class="section-title">
             ❌ Cancelled Orders
@@ -172,16 +95,12 @@
           </h3>
           <table class="admin-table">
             <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Total Payment</th>
-                <th>Status</th>
-              </tr>
+              <!-- JS Sẽ ghi đè chính xác 4 cột ở đây -->
             </thead>
             <tbody id="list-cancelled"></tbody>
           </table>
         </div>
+
       </div>
     </main>
 

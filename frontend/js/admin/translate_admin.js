@@ -121,6 +121,14 @@ const adminDict = {
     ph_store_address: "Full Address (Ex: 144 Xuan Thuy, Hanoi)",
     btn_add_store: "+ Add New Store",
     th_store: "Pickup Store",
+
+    // 8. TRANG CÀI ĐẶT SHIPPER (SHIPPER MANAGEMENT)
+    set_shipper_title: "Shipper Management",
+    set_shipper_desc:
+      "Manage and assign shippers to different store locations.",
+    opt_select_store: "-- Select Store --",
+    opt_select_shipper: "-- Select Shipper --",
+    txt_default_cus: "Customer",
   },
 
   vi: {
@@ -239,6 +247,14 @@ const adminDict = {
     ph_store_address: "Địa Chỉ Đầy Đủ (Ví dụ: 144 Xuan Thuy, Hà Nội)",
     btn_add_store: "+ Thêm Cửa Hàng Mới",
     th_store: "Cửa Hàng Xuất Kho",
+
+    // 8. TRANG CÀI ĐẶT SHIPPER (SHIPPER MANAGEMENT)
+    set_shipper_title: "Quản Lý Shipper",
+    set_shipper_desc:
+      "Quản lý và phân công shipper đến các chi nhánh khác nhau.", 
+    opt_select_store: "-- Chọn Cửa Hàng --",
+    opt_select_shipper: "-- Chọn Shipper --",
+    txt_default_cus: "Khách Hàng",
   },
 };
 

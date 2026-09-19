@@ -1094,27 +1094,44 @@ function toggleAccordion(headerElement) {
 
 // ADMIN DASHBOARD PANELS (ORDER MANAGEMENT)
 let globalShippers = [];
+let globalStores = []; // Khai báo rõ ràng để tránh lỗi ReferenceError
 
 async function fetchAdminOrders() {
   try {
-    const shipperRes = await fetch("http://localhost:3000/api/admin/shippers", {
+    // 1. TẢI DANH SÁCH SHIPPER AN TOÀN (Lọc từ danh sách Customer)
+    const customerRes = await fetch("http://localhost:3000/api/admin/customers", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (shipperRes.ok) {
-      globalShippers = await shipperRes.json();
+    if (customerRes.ok) {
+      const customersData = await customerRes.json();
+      const customerList = customersData.data || customersData;
+      if (Array.isArray(customerList)) {
+         globalShippers = customerList.filter(user => user.role === 'shipper');
+      }
     }
 
+    // 2. TẢI DANH SÁCH CỬA HÀNG ĐẢM BẢO CHUẨN MẢNG
+    const storeRes = await fetch("http://localhost:3000/api/admin/stores", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (storeRes.ok) {
+      const storesData = await storeRes.json();
+      globalStores = storesData.data || storesData;
+      if (!Array.isArray(globalStores)) globalStores = [];
+    }
+
+    // 3. TẢI VÀ RENDER ĐƠN HÀNG
     const res = await fetch("http://localhost:3000/api/admin/orders", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) throw new Error("Unable to load order data.");
-    const orders = await res.json();
+    const ordersData = await res.json();
+    const orders = ordersData.data || ordersData;
 
     renderAdminOrders(orders);
   } catch (error) {
-    console.error(error);
-    alert("Lỗi tải dữ liệu đơn hàng: " + error.message);
+    console.error("Lỗi hệ thống quản lý đơn hàng:", error);
   }
 }
 
@@ -1122,8 +1139,10 @@ function renderAdminOrders(allOrders) {
   const t = adminDict[currentAdminLang];
   const statuses = ["pending", "shipping", "completed", "cancelled"];
 
+  const safeOrders = Array.isArray(allOrders) ? allOrders : [];
+
   statuses.forEach((status) => {
-    const filteredOrders = allOrders.filter((order) => order.status === status);
+    const filteredOrders = safeOrders.filter((order) => order.status === status);
     const count = filteredOrders.length;
     const tbodyEl = document.getElementById(`list-${status}`);
     if (!tbodyEl) return;
@@ -1132,50 +1151,51 @@ function renderAdminOrders(allOrders) {
     if (sectionEl) {
       const h3 = sectionEl.querySelector(".section-title");
       const badgeHtml = `<span id="badge-${status}" class="count-badge ${count > 0 ? "badge-red" : "badge-green"}">${count}</span>`;
-      if (status === "pending")
-        h3.innerHTML = `${t.title_pending} ${badgeHtml}`;
-      if (status === "shipping")
-        h3.innerHTML = `${t.title_shipping} ${badgeHtml}`;
-      if (status === "completed")
-        h3.innerHTML = `${t.title_completed} ${badgeHtml}`;
-      if (status === "cancelled")
-        h3.innerHTML = `${t.title_cancelled} ${badgeHtml}`;
+      if (status === "pending") h3.innerHTML = `${t.title_pending} ${badgeHtml}`;
+      if (status === "shipping") h3.innerHTML = `${t.title_shipping} ${badgeHtml}`;
+      if (status === "completed") h3.innerHTML = `${t.title_completed} ${badgeHtml}`;
+      if (status === "cancelled") h3.innerHTML = `${t.title_cancelled} ${badgeHtml}`;
     }
 
     const theadEl = tbodyEl.parentElement.querySelector("thead");
     if (theadEl) {
       theadEl.innerHTML = `<tr>
             <th>${t.th_order_id}</th><th>${t.th_customer}</th><th>${t.th_total}</th>
-            ${status === "pending" ? `<th>${t.th_store}</th>` : ""} <!-- THÊM CỘT STORE -->
+            ${status === "pending" ? `<th>${t.th_store}</th>` : ""}
             <th>${status === "pending" ? t.th_assign : t.th_status}</th>
             ${status === "pending" || status === "shipping" ? `<th>${t.th_action}</th>` : ""}
         </tr>`;
     }
 
     if (count === 0) {
-      const colSpan = status === "pending" || status === "shipping" ? 5 : 4;
+      const colSpan = status === "pending" || status === "shipping" ? 6 : 4;
       tbodyEl.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#94a3b8; padding: 30px;">${t.empty_orders}</td></tr>`;
     } else {
       tbodyEl.innerHTML = filteredOrders
         .map((order) => {
+          // FIX LỖI THIẾU THẺ </td> GÂY VỠ BẢNG
           let rowHtml = `<tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
             <td style="font-weight: 800; color: #0046be;">#${order.id}</td>
-            <td><div style="font-weight: bold; color: #0f172a;">${order.full_name || "Khách hàng"}</div><div style="font-size: 0.85rem; color: #64748b;">${order.phone}</div></td>
+            <td><div style="font-weight: bold; color: #0f172a;">${order.full_name || t.txt_default_cus}</div></td>
             <td style="font-weight: bold;">$${order.total_amount}</td>`;
 
           if (status === "pending") {
-            let storeSelect = `<select id="store-${order.id}" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;"><option value="">-- Chọn Kho --</option>`;
-            globalStores.forEach(
-              (st) =>
-                (storeSelect += `<option value="${st.id}">${st.name}</option>`),
-            );
+            // Đổ Store an toàn
+            let storeSelect = `<select id="store-${order.id}" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;"><option value="">${t.opt_select_store}</option>`;
+            if (globalStores.length > 0) {
+                globalStores.forEach((st) => (storeSelect += `<option value="${st.id}">${st.name}</option>`));
+            } else {
+                storeSelect += `<option value="" disabled>-- No Stores --</option>`;
+            }
             storeSelect += `</select>`;
 
-            let shipperSelect = `<select id="shipper-${order.id}" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;"><option value="">-- Chọn Shipper --</option>`;
-            globalShippers.forEach(
-              (s) =>
-                (shipperSelect += `<option value="${s.id}">${s.full_name}</option>`),
-            );
+            // Đổ Shipper an toàn
+            let shipperSelect = `<select id="shipper-${order.id}" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; width: 100%;"><option value="">${t.opt_select_shipper}</option>`;
+            if (globalShippers.length > 0) {
+                globalShippers.forEach((s) => (shipperSelect += `<option value="${s.id}">${s.full_name}</option>`));
+            } else {
+                shipperSelect += `<option value="" disabled>-- No Shippers --</option>`;
+            }
             shipperSelect += `</select>`;
 
             rowHtml += `<td>${storeSelect}</td><td>${shipperSelect}</td><td><button onclick="saveOrderUpdates(${order.id}, 'shipping')" style="background: #0046be; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer;">${t.btn_save}</button></td>`;
@@ -1187,6 +1207,7 @@ function renderAdminOrders(allOrders) {
             const statusColor = status === "completed" ? "#166534" : "#991b1b";
             rowHtml += `<td><span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;">${status}</span></td>`;
           }
+          
           rowHtml += `</tr>`;
           return rowHtml;
         })
@@ -1203,23 +1224,14 @@ async function saveOrderUpdates(orderId, newStatus) {
     shipper_id = document.getElementById(`shipper-${orderId}`)?.value;
     pickup_store_id = document.getElementById(`store-${orderId}`)?.value;
 
-    if (!pickup_store_id)
-      return alert("Vui lòng gán (Assign) Cửa hàng xuất kho trước!");
-    if (!shipper_id)
-      return alert("Vui lòng gán (Assign) Shipper trước khi Giao đơn!");
+    if (!pickup_store_id) return alert("Vui lòng gán (Assign) Cửa hàng xuất kho trước!");
+    if (!shipper_id) return alert("Vui lòng gán (Assign) Shipper trước khi Giao đơn!");
   }
 
-  if (
-    !confirm(
-      `Xác nhận cập nhật trạng thái đơn #${orderId} thành ${newStatus.toUpperCase()}?`,
-    )
-  )
-    return;
+  if (!confirm(`Xác nhận cập nhật trạng thái đơn #${orderId} thành ${newStatus.toUpperCase()}?`)) return;
 
   try {
-    const res = await fetch(
-      `http://localhost:3000/api/admin/orders/${orderId}/status`,
-      {
+    const res = await fetch(`http://localhost:3000/api/admin/orders/${orderId}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -1230,12 +1242,12 @@ async function saveOrderUpdates(orderId, newStatus) {
           shipper_id: shipper_id,
           pickup_store_id: pickup_store_id,
         }),
-      },
+      }
     );
     const data = await res.json();
 
     if (res.ok) {
-      fetchAdminOrders(); // Reload lại 4 bảng
+      fetchAdminOrders();
     } else {
       alert("Error: " + data.error);
     }
@@ -1243,8 +1255,6 @@ async function saveOrderUpdates(orderId, newStatus) {
     alert("Server error.");
   }
 }
-
-let globalStores = [];
 
 async function loadStores() {
   try {
@@ -1335,8 +1345,45 @@ async function addNewStore() {
   }
 }
 
+// BANK SETTINGS LOGIC
+async function loadBankSettings() {
+  try {
+    const res = await fetch("http://localhost:3000/api/settings/bank");
+    const data = await res.json();
+    if (data) {
+      document.getElementById("admin-bank-id").value = data.bank_id || "";
+      document.getElementById("admin-bank-acc").value = data.account_number || "";
+      document.getElementById("admin-bank-name").value = data.account_name || "";
+    }
+  } catch (e) {
+    console.error("Lỗi tải thông tin ngân hàng", e);
+  }
+}
+
+async function updateBankSettings() {
+  const bank_id = document.getElementById("admin-bank-id").value.trim();
+  const account_number = document.getElementById("admin-bank-acc").value.trim();
+  const account_name = document.getElementById("admin-bank-name").value.trim();
+  
+  if(!bank_id || !account_number) return alert("Vui lòng nhập Mã ngân hàng và Số tài khoản!");
+
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch("http://localhost:3000/api/admin/settings/bank", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ bank_id, account_number, account_name })
+    });
+    if (res.ok) alert("✅ Lưu thông tin tài khoản thành công!");
+    else alert("❌ Lỗi cập nhật!");
+  } catch (e) {
+    alert("❌ Lỗi kết nối Server!");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("admin-store-list")) loadStores();
+  if(document.getElementById("admin-bank-id")) loadBankSettings();
 });
 
 if (adminOrdersContainer) {

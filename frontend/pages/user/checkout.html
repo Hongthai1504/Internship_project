@@ -4,743 +4,132 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout | Best Tech</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/client/style.css" />
-    <style>
-      .checkout-container {
-        max-width: 1200px;
-        margin: 60px auto;
-        padding: 0 20px;
-        display: flex;
-        gap: 50px;
-        align-items: flex-start;
-        font-family: "Inter", "Roboto", sans-serif;
-        color: #0f172a;
-      }
-      .checkout-form {
-        flex: 2;
-        background: #fff;
-        padding: 50px;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 70, 190, 0.05);
-        border: none;
-      }
-      .order-summary {
-        flex: 1;
-        background: #f8fafc;
-        padding: 40px;
-        border-radius: 20px;
-        border: none;
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02);
-        position: sticky;
-        top: 30px;
-      }
-
-      .form-group {
-        margin-bottom: 25px;
-      }
-      .form-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #0f172a;
-      }
-
-      .payment-method {
-        border: 2px solid transparent;
-        padding: 20px;
-        border-radius: 16px;
-        margin-bottom: 15px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        background: #fff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-        transition: all 0.2s ease;
-      }
-      .payment-method:hover {
-        box-shadow: 0 8px 20px rgba(0, 70, 190, 0.08);
-        transform: translateY(-2px);
-      }
-
-      .summary-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 18px;
-        font-size: 1.05rem;
-        font-weight: 500;
-      }
-      .summary-total {
-        display: flex;
-        justify-content: space-between;
-        font-size: 1.8rem;
-        font-weight: 900;
-        color: #0046be;
-        margin-top: 25px;
-        border-top: 2px solid #e2e8f0;
-        padding-top: 25px;
-      }
-
-      .btn-place-order {
-        width: 100%;
-        background: #ffe000;
-        color: #000;
-        font-weight: 800;
-        font-size: 1.15rem;
-        padding: 18px;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        margin-top: 25px;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 15px rgba(255, 224, 0, 0.3);
-      }
-      .btn-place-order:hover {
-        background: #fcd500;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 224, 0, 0.4);
-      }
-      .btn-place-order:disabled {
-        opacity: 0.7;
-        transform: none;
-        cursor: not-allowed;
-      }
-    </style>
-
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
-  <body style="background-color: #f8f9fa">
-    <header
-      class="bb-header"
-      style="
-        padding: 20px 0;
-        text-align: center;
-        border-bottom: 4px solid #ffe000;
-      "
-    >
-      <a
-        href="/index.html"
-        style="
-          text-decoration: none;
-          color: white;
-          font-size: 2.5rem;
-          font-weight: 900;
-        "
-        >BestTech
-        <span style="font-size: 1.2rem; font-weight: normal"
-          >| Secure Checkout</span
-        ></a
-      >
+  <body>
+    <!-- HEADER CÓ NÚT ĐỔI NGÔN NGỮ -->
+    <header class="bb-header" style="padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #ffe000; background: #0046be;">
+      <a href="/index.html" style="text-decoration: none; color: white; font-size: 2rem; font-weight: 900;">
+        BestTech <span id="header-subtitle" style="font-size: 1.1rem; font-weight: normal">| Secure Checkout</span>
+      </a>
+      <div style="display: flex; gap: 10px;">
+        <button id="lang-toggle" onclick="toggleLanguage()" style="background: #fff; border: none; padding: 6px 14px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 800; font-family: 'Nunito', sans-serif;">
+          <img id="lang-icon" src="https://flagcdn.com/w20/us.png" width="20" alt="lang" style="border-radius: 2px" />
+          <span id="lang-text">EN</span>
+        </button>
+      </div>
     </header>
 
     <div class="checkout-container">
       <!-- LEFT: FORM -->
       <div class="checkout-form">
-        <h2
-          style="
-            margin-top: 0;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            color: #040c13;
-          "
-        >
+        <h2 id="title-shipping" style="margin-top: 0; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #040c13; font-weight: 900;">
           1. Shipping Information
         </h2>
 
         <div class="form-group">
-          <label style="font-size: 1.1rem; margin-bottom: 15px"
-            >Select Delivery Address</label
-          >
-          <!-- Container chứa danh sách địa chỉ dạng thẻ -->
+          <label id="label-select-address" style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 800;">Select Delivery Address</label>
           <div id="checkout-address-container">
-            <p style="color: #666; font-style: italic">
-              Loading your addresses...
-            </p>
+            <p style="color: #666; font-style: italic">Loading your addresses...</p>
           </div>
         </div>
 
         <div style="margin-bottom: 35px; text-align: right">
-          <a
-            href="#"
-            onclick="
-              openAddressModal();
-              return false;
-            "
-            style="
-              color: #0046be;
-              font-weight: bold;
-              text-decoration: none;
-              font-size: 0.9rem;
-            "
-          >
+          <a href="#" onclick="openAddressModal(); return false;" id="link-manage-address" style="color: #0046be; font-weight: bold; text-decoration: none; font-size: 0.9rem;">
             + Manage Addresses In Profile
           </a>
         </div>
 
-        <h2
-          style="
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            color: #040c13;
-          "
-        >
-          2. Payment Method
-        </h2>
+        <!-- 2. PAYMENT METHOD -->
+        <h2 id="title-payment" style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 15px;">2. Payment Method</h2>
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px;">
+            
+            <label style="border: 2px solid #0046be; border-radius: 12px; padding: 20px; display: flex; align-items: flex-start; gap: 15px; cursor: pointer; transition: 0.2s; background: #f0f4fc;" id="label-cod">
+                <input type="radio" name="payment_method" value="cod" checked style="transform: scale(1.3); margin-top: 5px;">
+                <div>
+                    <div id="cod-title" style="font-weight: 800; color: #0f172a; font-size: 1.05rem;">Thanh toán khi nhận hàng (COD)</div>
+                    <div id="cod-desc" style="font-size: 0.9rem; color: #64748b; margin-top: 4px;">Thanh toán bằng tiền mặt khi Shipper giao hàng tới tay bạn.</div>
+                </div>
+            </label>
 
-        <label
-          class="payment-method"
-          style="background: #f9fafb"
-          onmouseover="
-            this.style.boxShadow = '0 8px 20px rgba(0, 70, 190, 0.08)';
-            this.style.transform = 'translateY(-2px)';
-          "
-          onmouseout="
-            this.style.boxShadow = '0 2px 10px rgba(0,0,0,0.02)';
-            this.style.transform = 'none';
-          "
-        >
-          <input
-            type="radio"
-            name="payment"
-            value="vnpay"
-            checked
-            style="margin-top: 2px; transform: scale(1.2)"
-          />
-          <div style="flex: 1">
-            <strong
-              style="display: block; font-size: 1.05rem; margin-bottom: 4px"
-              >VNPAY / Digital Wallets</strong
-            >
-            <span style="font-size: 0.85rem; color: #666"
-              >Scan QR code or use ATM/Credit card.</span
-            >
-          </div>
-        </label>
+            <label style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; display: flex; align-items: flex-start; gap: 15px; cursor: pointer; transition: 0.2s; background: #fff;" id="label-transfer">
+                <input type="radio" name="payment_method" value="transfer" style="transform: scale(1.3); margin-top: 5px;">
+                <div>
+                    <div id="transfer-title" style="font-weight: 800; color: #0f172a; font-size: 1.05rem;">Chuyển khoản Ngân hàng (Mã QR)</div>
+                    <div id="transfer-desc" style="font-size: 0.9rem; color: #64748b; margin-top: 4px;">Quét mã VietQR tự động. Hệ thống sẽ xác nhận đơn hàng sau khi nhận được tiền.</div>
+                </div>
+            </label>
+        </div>
       </div>
 
+      <!-- RIGHT: ORDER SUMMARY -->
       <div class="order-summary">
-        <h2 style="margin-top: 0; margin-bottom: 25px; color: #040c13">
+        <h2 id="title-summary" style="margin-top: 0; margin-bottom: 25px; color: #040c13; font-size: 1.4rem; font-weight: 900;">
           Order Summary
         </h2>
-        <div id="checkout-items" style="margin-bottom: 15px"></div>
+        
+        <!-- KHUNG CHỨA SẢN PHẨM GIỎ HÀNG -->
+        <div id="checkout-items" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">
+          <p style="color: #666; font-style: italic;">Loading items...</p>
+        </div>
 
-        <div class="summary-item" style="margin-top: 20px">
-          <span style="color: #555">Subtotal</span>
-          <span id="summary-subtotal" style="font-weight: bold; color: #040c13"
-            >$0.00</span
-          >
+        <div class="summary-item">
+          <span id="lbl-subtotal">Subtotal</span>
+          <span id="summary-subtotal" style="font-weight: 700;">$0.00</span>
         </div>
         <div class="summary-item">
-          <span style="color: #555">Shipping</span>
-          <span style="color: #059669; font-weight: bold">FREE</span>
+          <span id="lbl-shipping">Shipping</span>
+          <span style="color: #10b981; font-weight: 700;" id="lbl-free">FREE</span>
         </div>
-
         <div class="summary-total">
-          <span>Total</span>
+          <span id="lbl-total">Total</span>
           <span id="summary-total">$0.00</span>
         </div>
 
-        <button class="btn-place-order" onclick="placeOrder()">
+        <button class="btn-place-order" id="btn-place-order" onclick="handlePlaceOrder()">
           Place Order
         </button>
       </div>
     </div>
 
-    <script>
-      const token = localStorage.getItem("token");
-      if (!token) window.location.href = "/index.html";
+    <!-- POPUP MODAL QR CODE -->
+    <div id="qr-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: #fff; width: 90%; max-width: 400px; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+            <h3 id="qr-modal-title" style="margin-top: 0; color: #0f172a; font-weight: 900; font-size: 1.3rem;">Quét Mã Thanh Toán</h3>
+            <p id="qr-modal-desc" style="color: #64748b; font-size: 0.95rem; margin-bottom: 20px;">Vui lòng sử dụng App ngân hàng để quét mã QR bên dưới.</p>
+            
+            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <img id="vietqr-img" src="" alt="QR Code" style="max-width: 100%; border-radius: 8px;">
+                <div style="font-weight: 900; color: #0046be; font-size: 1.5rem; margin-top: 15px;" id="qr-amount">$0.00</div>
+            </div>
 
-      let cartData = [];
-      let totalAmount = 0;
-
-      function loadCheckoutCart() {
-        try {
-          const saved = localStorage.getItem("cart");
-          if (saved) cartData = JSON.parse(saved);
-        } catch (e) {}
-
-        if (cartData.length === 0) {
-          alert("Cart is empty.");
-          window.location.href = "/index.html";
-          return;
-        }
-
-        const itemsContainer = document.getElementById("checkout-items");
-        let itemsHtml = "";
-        totalAmount = 0;
-
-        cartData.forEach((item) => {
-          const itemTotal = item.price * item.quantity;
-          totalAmount += itemTotal;
-          const imgSrc = item.image_url || "https://via.placeholder.com/60";
-
-          itemsHtml += `
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #e0e6ef;">
-                        <img src="${imgSrc}" style="width: 60px; height: 60px; object-fit: contain; border: 1px solid #e0e6ef; border-radius: 8px; padding: 4px; background: #fff;">
-                        <div style="flex: 1; overflow: hidden;">
-                            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #040c13; font-size: 0.95rem;">${item.name}</div>
-                            <div style="color: #666; font-size: 0.85rem; margin-top: 5px;">Qty: ${item.quantity}</div>
-                        </div>
-                        <span style="font-weight: 900; color: #0046be; font-size: 1.1rem;">$${itemTotal.toFixed(2)}</span>
-                    </div>
-                `;
-        });
-
-        itemsContainer.innerHTML = itemsHtml;
-        document.getElementById("summary-subtotal").innerText =
-          `$${totalAmount.toFixed(2)}`;
-        document.getElementById("summary-total").innerText =
-          `$${totalAmount.toFixed(2)}`;
-      }
-
-      async function loadAddresses() {
-        try {
-          const res = await fetch(
-            "http://localhost:3000/api/profile/addresses",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
-          const addresses = await res.json();
-
-          const container = document.getElementById(
-            "checkout-address-container",
-          );
-
-          if (addresses.length === 0) {
-            container.innerHTML = `
-                        <div style="padding: 20px; border: 1px dashed #ef4444; border-radius: 8px; text-align: center; background: #fff;">
-                            <p style="color: #ef4444; font-weight: bold; margin-bottom: 15px;">No delivery address found!</p>
-                            <a href="profile.html" style="background: #0046be; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block;">+ Add Address Now</a>
-                        </div>`;
-            return;
-          }
-
-          container.innerHTML = addresses
-            .map((addr, index) => {
-              const isChecked = addr.is_default
-                ? "checked"
-                : index === 0
-                  ? "checked"
-                  : "";
-              const defaultBadge = addr.is_default
-                ? `<span style="background: #ffe000; color: #000; font-size: 0.7rem; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-left: 10px; letter-spacing: 0.5px;">DEFAULT</span>`
-                : "";
-              const borderStyle = addr.is_default
-                ? "border: 2px solid #0046be; background: #f8faff; box-shadow: 0 4px 15px rgba(0, 70, 190, 0.1);"
-                : "border: 1px solid #e2e8f0; background: #fff;";
-
-              return `
-                    <label style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; border-radius: 16px; margin-bottom: 15px; cursor: pointer; transition: all 0.2s; ${borderStyle}" onmouseover="if(!this.querySelector('input').checked) { this.style.borderColor='#cbd5e1'; this.style.transform='translateY(-2px)'; }" onmouseout="if(!this.querySelector('input').checked) { this.style.borderColor='#e2e8f0'; this.style.transform='none'; }">
-                        <input type="radio" name="shipping_address" value="${addr.address}" ${isChecked} style="margin-top: 5px; cursor: pointer; transform: scale(1.2);">
-                        <div style="flex: 1; line-height: 1.5;">
-                            <div style="display: flex; align-items: center; color: #040c13;">
-                                <strong style="font-size: 1.05rem;">📍 Delivery Address</strong> ${defaultBadge}
-                            </div>
-                            <div style="color: #555; margin-top: 8px; font-size: 0.95rem;">${addr.address}</div>
-                        </div>
-                    </label>
-                    `;
-            })
-            .join("");
-
-          document
-            .querySelectorAll('input[name="shipping_address"]')
-            .forEach((radio) => {
-              radio.addEventListener("change", function () {
-                document
-                  .querySelectorAll("#checkout-address-container label")
-                  .forEach((lbl) => {
-                    lbl.style.border = "1px solid #e0e6ef";
-                    lbl.style.background = "#fff";
-                  });
-                this.closest("label").style.border = "2px solid #0046be";
-                this.closest("label").style.background = "#f8faff";
-              });
-            });
-        } catch (err) {
-          console.error("Error loading addresses");
-        }
-      }
-
-      async function placeOrder() {
-        const selectedAddressEl = document.querySelector(
-          'input[name="shipping_address"]:checked',
-        );
-        const address = selectedAddressEl ? selectedAddressEl.value : null;
-
-        if (!address) {
-          alert("Please select or add a delivery address.");
-          return;
-        }
-
-        const btn = document.querySelector(".btn-place-order");
-        btn.innerText = "Processing...";
-        btn.disabled = true;
-
-        const payload = {
-          shipping_address: address,
-          total_amount: totalAmount,
-          cartItems: cartData,
-        };
-
-        try {
-          const res = await fetch("http://localhost:3000/api/orders", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-          });
-          const data = await res.json();
-
-          if (res.ok) {
-            localStorage.removeItem("cart");
-
-            const paymentMethod = document.querySelector(
-              'input[name="payment"]:checked',
-            ).value;
-
-            if (paymentMethod === "vnpay") {
-              const vnpRes = await fetch(
-                "http://localhost:3000/api/create_payment_url",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    order_id: data.order_id,
-                    amount: totalAmount,
-                  }),
-                },
-              );
-              const vnpData = await vnpRes.json();
-              window.location.href = vnpData.paymentUrl;
-            } else {
-              alert("Order placed successfully! Order ID: #" + data.order_id);
-              window.location.href = "/index.html";
-            }
-          } else {
-            alert("Failed to place order: " + data.error);
-          }
-        } catch (err) {
-          alert("Server error during checkout.");
-        } finally {
-          btn.innerText = "Place Order";
-          btn.disabled = false;
-        }
-      }
-
-      loadCheckoutCart();
-      loadAddresses();
-    </script>
-
-    <!-- POP-UP QUẢN LÝ ĐỊA CHỈ TRỰC TIẾP (OVERLAY) -->
-    <div
-      id="checkout-address-modal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(5px);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-      "
-    >
-      <div
-        style="
-          background: #ffffff;
-          width: 90%;
-          max-width: 600px;
-          padding: 30px;
-          border-radius: 20px;
-          position: relative;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        "
-      >
-        <!-- Nút Đóng Pop-up -->
-        <button
-          onclick="closeAddressModal()"
-          style="
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #f1f5f9;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-weight: 900;
-            cursor: pointer;
-            color: #64748b;
-            transition: 0.2s;
-          "
-          onmouseover="
-            this.style.background = '#fee2e2';
-            this.style.color = '#ef4444';
-          "
-        >
-          &times;
-        </button>
-
-        <h3
-          style="
-            margin-top: 0;
-            color: #0f172a;
-            font-size: 1.4rem;
-            border-bottom: 2px dashed #e2e8f0;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-          "
-        >
-          📍 Thêm địa chỉ nhận hàng
-        </h3>
-
-        <!-- 1. Thanh tìm kiếm -->
-        <div style="display: flex; gap: 10px; margin-bottom: 15px">
-          <input
-            type="text"
-            id="modal-map-search"
-            placeholder="Nhập địa chỉ (VD: 144 Xuân Thủy...)"
-            style="
-              flex: 1;
-              padding: 12px 15px;
-              border-radius: 10px;
-              border: 1px solid #cbd5e1;
-              outline: none;
-              font-family: inherit;
-            "
-          />
-          <button
-            type="button"
-            id="btn-modal-find"
-            style="
-              background: #facc15;
-              color: #000;
-              border: none;
-              padding: 0 20px;
-              border-radius: 10px;
-              font-weight: 900;
-              cursor: pointer;
-            "
-          >
-            🔍 Tìm
-          </button>
+            <button id="qr-modal-btn" onclick="finishOrder()" style="width: 100%; background: #10b981; color: white; padding: 16px; border-radius: 50px; border: none; font-weight: 900; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); font-family: 'Nunito', sans-serif;">
+                Tôi đã chuyển khoản
+            </button>
         </div>
+    </div>
 
-        <!-- 2. Bản đồ hiển thị -->
-        <div
-          id="modal-map-container"
-          style="
-            height: 220px;
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 15px;
-            z-index: 1;
-          "
-        ></div>
-
-        <!-- 3. Ô kết quả và Nút Lưu -->
+    <!-- POP-UP QUẢN LÝ ĐỊA CHỈ TRỰC TIẾP -->
+    <div id="checkout-address-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
+      <div style="background: #ffffff; width: 90%; max-width: 600px; padding: 30px; border-radius: 20px; position: relative; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);">
+        <button onclick="closeAddressModal()" style="position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; cursor: pointer; color: #64748b;">&times;</button>
+        <h3 style="margin-top: 0; color: #0f172a; font-size: 1.4rem; border-bottom: 2px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">📍 Thêm địa chỉ nhận hàng</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px">
+          <input type="text" id="modal-map-search" placeholder="Nhập địa chỉ..." style="flex: 1; padding: 12px 15px; border-radius: 10px; border: 1px solid #cbd5e1; outline: none; font-family: inherit;" />
+          <button type="button" id="btn-modal-find" style="background: #facc15; color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: 900; cursor: pointer;">🔍 Tìm</button>
+        </div>
+        <div id="modal-map-container" style="height: 220px; width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; z-index: 1;"></div>
         <div style="display: flex; gap: 10px">
-          <input
-            type="text"
-            id="modal-final-address"
-            readonly
-            placeholder="Kéo thả ghim trên bản đồ để xác thực..."
-            style="
-              flex: 1;
-              padding: 12px 15px;
-              border-radius: 10px;
-              border: 2px solid #10b981;
-              background: #ecfdf5;
-              color: #065f46;
-              font-weight: bold;
-              outline: none;
-            "
-          />
-          <button
-            type="button"
-            id="btn-modal-save"
-            style="
-              background: #0046be;
-              color: white;
-              border: none;
-              padding: 0 25px;
-              border-radius: 10px;
-              font-weight: 900;
-              cursor: pointer;
-              box-shadow: 0 4px 10px rgba(0, 70, 190, 0.2);
-            "
-          >
-            LƯU
-          </button>
+          <input type="text" id="modal-final-address" readonly placeholder="Kéo thả ghim..." style="flex: 1; padding: 12px 15px; border-radius: 10px; border: 2px solid #10b981; background: #ecfdf5; color: #065f46; font-weight: bold; outline: none;" />
+          <button type="button" id="btn-modal-save" style="background: #0046be; color: white; border: none; padding: 0 25px; border-radius: 10px; font-weight: 900; cursor: pointer;">LƯU</button>
         </div>
       </div>
     </div>
 
-    <div
-      id="checkout-address-modal"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(5px);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-      "
-    >
-      <div
-        style="
-          background: #ffffff;
-          width: 90%;
-          max-width: 600px;
-          padding: 30px;
-          border-radius: 20px;
-          position: relative;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        "
-      >
-        <button
-          onclick="closeAddressModal()"
-          style="
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #f1f5f9;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-weight: 900;
-            cursor: pointer;
-            color: #64748b;
-            transition: 0.2s;
-          "
-          onmouseover="
-            this.style.background = '#fee2e2';
-            this.style.color = '#ef4444';
-          "
-        >
-          &times;
-        </button>
-
-        <h3
-          style="
-            margin-top: 0;
-            color: #0f172a;
-            font-size: 1.4rem;
-            border-bottom: 2px dashed #e2e8f0;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-          "
-        >
-          📍 Thêm địa chỉ nhận hàng
-        </h3>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 15px">
-          <input
-            type="text"
-            id="modal-map-search"
-            placeholder="Nhập địa chỉ (VD: 144 Xuân Thủy...)"
-            style="
-              flex: 1;
-              padding: 12px 15px;
-              border-radius: 10px;
-              border: 1px solid #cbd5e1;
-              outline: none;
-              font-family: inherit;
-            "
-          />
-          <button
-            type="button"
-            id="btn-modal-find"
-            style="
-              background: #facc15;
-              color: #000;
-              border: none;
-              padding: 0 20px;
-              border-radius: 10px;
-              font-weight: 900;
-              cursor: pointer;
-            "
-          >
-            🔍 Tìm
-          </button>
-        </div>
-
-        <div
-          id="modal-map-container"
-          style="
-            height: 220px;
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 15px;
-            z-index: 1;
-          "
-        ></div>
-
-        <div style="display: flex; gap: 10px">
-          <input
-            type="text"
-            id="modal-final-address"
-            readonly
-            placeholder="Kéo thả ghim trên bản đồ để xác thực..."
-            style="
-              flex: 1;
-              padding: 12px 15px;
-              border-radius: 10px;
-              border: 2px solid #10b981;
-              background: #ecfdf5;
-              color: #065f46;
-              font-weight: bold;
-              outline: none;
-            "
-          />
-          <button
-            type="button"
-            id="btn-modal-save"
-            style="
-              background: #0046be;
-              color: white;
-              border: none;
-              padding: 0 25px;
-              border-radius: 10px;
-              font-weight: 900;
-              cursor: pointer;
-              box-shadow: 0 4px 10px rgba(0, 70, 190, 0.2);
-            "
-          >
-            LƯU
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <script src="/js/client/checkout.js?v=1"></script>
+    <!-- Gọi đúng file checkout.js -->
+    <script src="/js/client/checkout.js"></script>
   </body>
 </html>
